@@ -1,0 +1,3142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Management System</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --primary-blue: #2563eb;
+      --primary-dark: #1d4ed8;
+      --accent-orange: #f59e0b;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --warning-yellow: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+    }
+    
+    /* Header */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    
+    /* Edit Mode Styles */
+    .edit-mode-active {
+      background: var(--accent-orange) !important;
+      color: var(--white) !important;
+    }
+    
+    .field-readonly {
+      background: var(--gray-50) !important;
+      color: var(--gray-700) !important;
+      cursor: default !important;
+      pointer-events: none !important;
+    }
+    
+    .field-readonly:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* System Mode Styles */
+    .system-mode-active {
+      background: var(--accent-orange) !important;
+      color: var(--white) !important;
+    }
+    
+    .github-sync-active {
+      background: var(--primary-blue) !important;
+      color: var(--white) !important;
+    }
+    
+    /* Hide Support Coordination mode by default */
+    .support-coord-mode {
+      display: none !important;
+    }
+    
+    /* Show Support Coordination mode only when active */
+    .support-coord-mode.active {
+      display: block !important;
+    }
+    
+    /* Hide Service Department mode by default */
+    .service-dept-mode {
+      display: none !important;
+    }
+    
+    /* Show Service Department mode only when active */
+    .service-dept-mode.active {
+      display: block !important;
+    }
+    
+    /* Todo List Styles */
+    .todo-section {
+      border-top: 1px solid var(--gray-200);
+      background: var(--white);
+    }
+    
+    .todo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      cursor: pointer;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      transition: background-color 0.2s;
+    }
+    
+    .todo-header:hover {
+      background: var(--gray-100);
+    }
+    
+    .todo-title {
+      font-weight: 500;
+      color: var(--gray-700);
+      font-size: 0.875rem;
+    }
+    
+    .todo-toggle {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      transition: transform 0.2s;
+    }
+    
+    .todo-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    
+    .todo-content.expanded {
+      max-height: 400px;
+    }
+    
+    .todo-input-container {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .todo-input {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+    
+    .todo-input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+    
+    .todo-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      transition: background-color 0.2s;
+    }
+    
+    .todo-item:hover {
+      background: var(--gray-50);
+    }
+    
+    .todo-item.completed {
+      opacity: 0.6;
+    }
+    
+    .todo-item.completed .todo-text {
+      text-decoration: line-through;
+      color: var(--gray-500);
+    }
+    
+    .todo-checkbox {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
+    .todo-text {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--gray-700);
+      word-break: break-word;
+    }
+    
+    .todo-delete {
+      background: none;
+      border: none;
+      color: var(--gray-400);
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 2px;
+      transition: color 0.2s;
+    }
+    
+    .todo-delete:hover {
+      color: var(--red-500);
+    }
+    
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      min-height: calc(100vh - 64px);
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background: var(--white);
+      border-right: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .search-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .search-input:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+    }
+    
+    .filter-tabs {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .filter-tab {
+      flex: 1;
+      padding: 6px 12px;
+      border: 1px solid var(--gray-300);
+      background: var(--white);
+      color: var(--gray-600);
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-tab.active {
+      background: var(--primary-blue);
+      color: var(--white);
+      border-color: var(--primary-blue);
+    }
+    
+    .client-list {
+      flex: 1;
+      padding: 16px 0;
+    }
+    
+    .client-item {
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      border-left: 3px solid transparent;
+      position: relative;
+    }
+    
+    .client-item:hover {
+      background: var(--gray-50);
+    }
+    
+    .client-item.active {
+      background: var(--primary-blue);
+      color: var(--white);
+      border-left-color: var(--accent-orange);
+    }
+    
+    .client-item-actions {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;
+      gap: 4px;
+    }
+    
+    .client-item:hover .client-item-actions {
+      display: flex;
+    }
+    
+    .client-item.active .client-item-actions {
+      display: flex;
+    }
+    
+    .client-item-actions .btn {
+      padding: 4px 6px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    
+    .client-item-actions .btn:hover {
+      opacity: 1;
+    }
+    
+    .client-name {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .client-info {
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--gray-50);
+    }
+    
+    .content-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 20px 32px;
+    }
+    
+    .content-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .content-subtitle {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+    
+    .content-subtitle kbd {
+      background: var(--gray-200);
+      border: 1px solid var(--gray-300);
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: var(--gray-700);
+    }
+    
+    /* Tabs */
+    .tabs {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 32px;
+    }
+    
+    .tab-list {
+      display: flex;
+      gap: 0;
+    }
+    
+    .tab-item {
+      padding: 16px 24px;
+      border-bottom: 2px solid transparent;
+      color: var(--gray-600);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab-item.active {
+      color: var(--primary-blue);
+      border-bottom-color: var(--primary-blue);
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      flex: 1;
+      padding: 32px;
+    }
+    
+    .tab-pane {
+      display: none;
+    }
+    
+    .tab-pane.active {
+      display: block;
+    }
+    
+    /* Forms */
+    .form-section {
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      background: var(--gray-50);
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--gray-200);
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    .section-content {
+      padding: 24px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    /* Fix alignment for funding fields */
+    .form-grid .form-group {
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    
+    .form-grid .form-group label {
+      margin-bottom: 6px;
+    }
+    
+    .form-grid .form-group input,
+    .form-grid .form-group select {
+      flex: 1;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+      padding: 8px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    }
+    
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-primary {
+      background: var(--primary-blue);
+      color: var(--white);
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--gray-200);
+    }
+    
+    .btn-success {
+      background: var(--success-green);
+      color: var(--white);
+    }
+    
+    .btn-danger {
+      background: var(--danger-red);
+      color: var(--white);
+    }
+    
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+    }
+    
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .badge-ndis {
+      background: rgb(37 99 235 / 0.1);
+      color: var(--primary-blue);
+    }
+    
+    /* NDIS badge on active client item */
+    .client-item.active .badge-ndis {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--white);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .badge-icare {
+      background: rgb(245 158 11 / 0.1);
+      color: var(--accent-orange);
+    }
+    
+    /* iCare badge on active client item */
+    .client-item.active .badge-icare {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--white);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .badge-no-funding {
+      background: rgb(107 114 128 / 0.1);
+      color: var(--gray-600);
+    }
+    
+    /* No Funding badge on active client item */
+    .client-item.active .badge-no-funding {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--white);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Checklist */
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+    
+    .checklist-item label {
+      flex: 1;
+      margin: 0;
+    }
+    
+    .checklist-item input[type="date"] {
+      margin-left: auto;
+      width: 150px;
+    }
+    
+    /* Reminder styles */
+    .reminder-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      background: var(--white);
+      transition: all 0.2s ease;
+    }
+    
+    .reminder-item:hover {
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .reminder-item.urgent {
+      border-left: 4px solid var(--danger-red);
+      background: rgb(239 68 68 / 0.05);
+    }
+    
+    .reminder-item.today {
+      border-left: 4px solid var(--warning-yellow);
+      background: rgb(245 158 11 / 0.05);
+    }
+    
+    .reminder-item.upcoming {
+      border-left: 4px solid var(--primary-blue);
+      background: rgb(37 99 235 / 0.05);
+    }
+    
+    .reminder-content {
+      flex: 1;
+    }
+    
+    .reminder-title {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+    
+    .reminder-details {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+    
+    .reminder-date {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+    
+    .reminder-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .reminder-status {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .status-urgent {
+      background: rgb(239 68 68 / 0.1);
+      color: var(--danger-red);
+    }
+    
+    .status-today {
+      background: rgb(245 158 11 / 0.1);
+      color: var(--warning-yellow);
+    }
+    
+    .status-upcoming {
+      background: rgb(37 99 235 / 0.1);
+      color: var(--primary-blue);
+    }
+    
+    /* Coordinator Cards */
+    .coordinator-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .no-data {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .coordinator-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .coordinator-card:hover {
+      border-color: var(--primary-blue);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .coordinator-card.active {
+      border-color: var(--primary-blue);
+      background: rgb(37 99 235 / 0.05);
+    }
+    
+    .coordinator-name {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+      font-size: 1rem;
+    }
+    
+    .coordinator-profession {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+      margin-bottom: 8px;
+    }
+    
+    .coordinator-details {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--gray-200);
+    }
+    
+    .coordinator-card.active .coordinator-details {
+      display: block;
+    }
+    
+    .coordinator-detail-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+    }
+    
+    .coordinator-detail-label {
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+    
+    .coordinator-detail-value {
+      color: var(--gray-900);
+    }
+    
+    .coordinator-actions {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: none;
+      gap: 4px;
+    }
+    
+    .coordinator-card:hover .coordinator-actions {
+      display: flex;
+    }
+    
+    .coordinator-actions .btn {
+      padding: 4px 6px;
+      font-size: 0.75rem;
+    }
+    
+    .add-coordinator-card {
+      background: var(--gray-50);
+      border: 2px dashed var(--gray-300);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--gray-600);
+    }
+    
+    .add-coordinator-card:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background: rgb(37 99 235 / 0.05);
+    }
+    
+    .add-coordinator-card .icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 280px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: 200px;
+      }
+      
+      .tab-list {
+        overflow-x: auto;
+      }
+      
+      .coordinator-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title" id="system-title">Service Management System</div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" id="system-mode-btn" onclick="toggleSystemMode()">
+        <span id="system-mode-icon">🔄</span>
+        <span id="system-mode-text">Switch to Support Coordination</span>
+      </button>
+      <button class="btn btn-secondary" id="github-sync-btn" onclick="toggleGitHubSync()">
+        <span id="github-sync-icon">☁️</span>
+        <span id="github-sync-text">GitHub Sync</span>
+      </button>
+      <button class="btn btn-secondary" id="edit-mode-btn" onclick="toggleEditMode()">
+        <span id="edit-mode-icon">✏️</span>
+        <span id="edit-mode-text">Edit Mode</span>
+      </button>
+      <button class="btn btn-primary" id="add-client-btn">
+        <span>+</span>
+        Add New Client
+      </button>
+    </div>
+  </div>
+  
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" placeholder="Search clients..." id="search-input">
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="ndis">NDIS</button>
+          <button class="filter-tab" data-filter="icare">iCare</button>
+        </div>
+      </div>
+      <div class="client-list" id="client-list">
+        <!-- Client items will be rendered here -->
+      </div>
+      
+      <!-- Todo List Section -->
+      <div class="todo-section">
+        <div class="todo-header" onclick="toggleTodoSection()">
+          <span class="todo-title">📝 Quick Tasks</span>
+          <span class="todo-toggle" id="todo-toggle">▼</span>
+        </div>
+        <div class="todo-content" id="todo-content">
+          <div class="todo-input-container">
+            <input type="text" class="todo-input" id="todo-input" placeholder="Add a quick task..." maxlength="100">
+            <button class="btn btn-sm btn-primary" onclick="addTodo()">Add</button>
+          </div>
+          <div class="todo-list" id="todo-list">
+            <!-- Todo items will be rendered here -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content service-dept-mode active">
+      <div class="content-header">
+        <div class="content-title">Client Details</div>
+        <div class="content-subtitle">Manage client information and support needs</div>
+      </div>
+      
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab-list">
+          <div class="tab-item active" data-tab="basic">Basic Information</div>
+          <div class="tab-item" data-tab="support">Support Needs</div>
+          <div class="tab-item" data-tab="service">Coordinators & Stakeholders</div>
+          <div class="tab-item" data-tab="family">Family & Primary Contact</div>
+          <div class="tab-item" data-tab="documents">Documents</div>
+          <div class="tab-item" data-tab="notes">Notes</div>
+        </div>
+      </div>
+      
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Basic Information Tab -->
+        <div class="tab-pane active" id="basic-tab">
+          <div class="form-section">
+            <div class="section-header">Personal Information</div>
+            <div class="section-content">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">First Name</label>
+                  <input type="text" class="form-input" id="firstName" placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" class="form-input" id="lastName" placeholder="Enter last name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Date of Birth</label>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="date" class="form-input" id="dob" style="flex: 1;">
+                    <div id="age-display" style="font-size: 0.875rem; color: var(--gray-600); white-space: nowrap; display: none;"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Gender</label>
+                  <select class="form-select" id="gender">
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Primary Language</label>
+                  <input type="text" class="form-input" id="primaryLanguage" placeholder="e.g., English">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Interpreter Required</label>
+                  <select class="form-select" id="interpreter">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <div class="section-header">Funding Information</div>
+            <div class="section-content">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Funding Type</label>
+                  <select class="form-select" id="fundingType">
+                    <option value="">Select funding type</option>
+                    <option value="NDIS">NDIS</option>
+                    <option value="iCare">iCare</option>
+                  </select>
+                </div>
+                <div class="form-group" id="ndis-number-group">
+                  <label class="form-label">Participant Number</label>
+                  <input type="text" class="form-input" id="ndisNumber" placeholder="Enter participant number">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Plan Start Date</label>
+                  <input type="date" class="form-input" id="planStartDate">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Plan End Date</label>
+                  <input type="date" class="form-input" id="planEndDate">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+                    <div class="form-section">
+            <div class="section-header">Upcoming Schedules & Reminders</div>
+            <div class="section-content">
+              <div class="reminder-controls" style="margin-bottom: 16px;">
+                <button class="btn btn-primary btn-sm" id="add-reminder-btn">Add Reminder</button>
+                <button class="btn btn-secondary btn-sm" id="view-all-reminders-btn" style="margin-left: 8px;">View All</button>
+              </div>
+              <div id="upcoming-reminders">
+                <!-- Upcoming reminders will be rendered here -->
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <div class="section-header">Caregiver Contacts</div>
+            <div class="section-content">
+              <div class="coordinator-cards" id="caregiver-cards">
+                <!-- Caregiver cards will be rendered here -->
+              </div>
+              <div class="add-coordinator-card" id="add-caregiver-card" onclick="addCaregiver()">
+                <span class="icon">+</span>
+                <div>Add Caregiver</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Support Needs Tab -->
+        <div class="tab-pane" id="support-tab">
+          <div class="form-section">
+            <div class="section-header">Disability & Support Needs</div>
+            <div class="section-content">
+              <div class="form-group">
+                <label class="form-label">Primary Disability</label>
+                <textarea class="form-textarea" id="primaryDisability" placeholder="Describe primary disability and support needs..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Support Needs Assessment</label>
+                <textarea class="form-textarea" id="supportNeeds" placeholder="Detailed assessment of support needs..."></textarea>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        
+        <!-- Service Planning Tab -->
+        <div class="tab-pane" id="service-tab">
+          <div class="form-section">
+            <div class="section-header">Coordinators & Stakeholders</div>
+            <div class="section-content">
+              <div class="coordinator-cards" id="coordinator-cards">
+                <!-- Coordinator cards will be rendered here -->
+              </div>
+              <div class="add-coordinator-card" id="add-coordinator-card" onclick="addCoordinator()">
+                <span class="icon">+</span>
+                <div>Add Coordinator/Stakeholder</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <div class="section-header">Service Goals</div>
+            <div class="section-content">
+              <div class="form-group">
+                <label class="form-label">Short-term Goals</label>
+                <textarea class="form-textarea" id="shortTermGoals" placeholder="Short-term service goals..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Long-term Goals</label>
+                <textarea class="form-textarea" id="longTermGoals" placeholder="Long-term service goals..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Family & Primary Contact Tab -->
+        <div class="tab-pane" id="family-tab">
+          <div class="form-section">
+            <div class="section-header">Family Contacts</div>
+            <div class="section-content">
+              <div class="coordinator-cards" id="family-contacts-cards">
+                <!-- Family contact cards will be rendered here -->
+              </div>
+              <div class="add-coordinator-card" id="add-family-card" onclick="addFamilyContact()">
+                <span class="icon">+</span>
+                <div>Add Family Contact</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Documents Tab -->
+        <div class="tab-pane" id="documents-tab">
+          <div class="form-section">
+            <div class="section-header">Required Documents</div>
+            <div class="section-content">
+              <div class="checklist-item">
+                <input type="checkbox" id="doc1" data-doc="CCA Service Agreement">
+                <label for="doc1">CCA Service Agreement</label>
+                <input type="date" class="form-input" id="doc1-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc2" data-doc="CCA Schedule of Support">
+                <label for="doc2">CCA Schedule of Support</label>
+                <input type="date" class="form-input" id="doc2-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc3" data-doc="Workplace Risk Assessment">
+                <label for="doc3">Workplace Risk Assessment</label>
+                <input type="date" class="form-input" id="doc3-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc4" data-doc="Individual Risk Assessment">
+                <label for="doc4">Individual Risk Assessment</label>
+                <input type="date" class="form-input" id="doc4-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc5" data-doc="Personal Training Needs">
+                <label for="doc5">Personal Training Needs</label>
+                <input type="date" class="form-input" id="doc5-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc6" data-doc="Fire Plan">
+                <label for="doc6">Fire Plan</label>
+                <input type="date" class="form-input" id="doc6-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc7" data-doc="Personal Emergency Evacuation Form">
+                <label for="doc7">Personal Emergency Evacuation Form</label>
+                <input type="date" class="form-input" id="doc7-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc8" data-doc="Personal Support Form">
+                <label for="doc8">Personal Support Form</label>
+                <input type="date" class="form-input" id="doc8-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc9" data-doc="Consent to Collect and Share Form">
+                <label for="doc9">Consent to Collect and Share Form</label>
+                <input type="date" class="form-input" id="doc9-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+              <div class="checklist-item">
+                <input type="checkbox" id="doc10" data-doc="Consent to Release Information Form">
+                <label for="doc10">Consent to Release Information Form</label>
+                <input type="date" class="form-input" id="doc10-date" placeholder="Completion date" style="margin-left: auto; width: 150px;">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Notes Tab -->
+        <div class="tab-pane" id="notes-tab">
+          <div class="form-section">
+            <div class="section-header">Notes & History</div>
+            <div class="section-content">
+              <div class="form-group">
+                <label class="form-label">General Notes</label>
+                <textarea class="form-textarea" id="generalNotes" placeholder="General notes about the client..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Progress Notes</label>
+                <textarea class="form-textarea" id="progressNotes" placeholder="Progress updates and observations..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Important Alerts</label>
+                <textarea class="form-textarea" id="alerts" placeholder="Important alerts and warnings..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Support Coordination Mode -->
+    <div class="main-content support-coord-mode">
+      <div class="content-header">
+        <div class="content-title">Support Coordination - Client Details</div>
+        <div class="content-subtitle">Manage NDIS client coordination and support</div>
+      </div>
+      
+      <!-- Support Coordination Tab Navigation -->
+      <div class="tab-navigation">
+        <div class="tab-item active" data-tab="basic-coord">Basic Information</div>
+        <div class="tab-item" data-tab="stakeholders-coord">Stakeholders</div>
+        <div class="tab-item" data-tab="family-coord">Family Contacts</div>
+        <div class="tab-item" data-tab="notes-coord">Notes</div>
+      </div>
+      
+      <!-- Support Coordination Tab Content -->
+      <div class="tab-content">
+        <!-- Basic Information Tab -->
+        <div class="tab-pane active" id="basic-coord-tab">
+          <div class="form-section">
+            <div class="section-header">Client Information</div>
+            <div class="section-content">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">First Name</label>
+                  <input type="text" class="form-input" id="coordFirstName">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" class="form-input" id="coordLastName">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">NDIS Number</label>
+                  <input type="text" class="form-input" id="coordNdisNumber" placeholder="e.g., 123456789">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Funding Type</label>
+                  <select class="form-select" id="coordFundingType">
+                    <option value="">Select funding type</option>
+                    <option value="Agency Managed">Agency Managed</option>
+                    <option value="Plan Managed">Plan Managed</option>
+                    <option value="Self Managed">Self Managed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Plan Manager Information (only for Plan Managed) -->
+          <div class="form-section" id="plan-manager-section" style="display: none;">
+            <div class="section-header">Plan Manager Information</div>
+            <div class="section-content">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Plan Manager</label>
+                  <input type="text" class="form-input" id="coordPlanManager" placeholder="e.g., Plan Partners, NDSP">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Plan Manager Contact</label>
+                  <input type="text" class="form-input" id="coordPlanManagerContact" placeholder="Phone or email">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Stakeholders Tab -->
+        <div class="tab-pane" id="stakeholders-coord-tab">
+          <div class="form-section">
+            <div class="section-header">Stakeholders (OT, Physio, etc.)</div>
+            <div class="section-content">
+              <div class="coordinator-cards" id="coord-stakeholder-cards">
+                <!-- Stakeholder cards will be rendered here -->
+              </div>
+              <div class="add-coordinator-card" id="add-coord-stakeholder-card" onclick="addCoordStakeholder()">
+                <span class="icon">+</span>
+                <div>Add Stakeholder</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Family Contacts Tab -->
+        <div class="tab-pane" id="family-coord-tab">
+          <div class="form-section">
+            <div class="section-header">Family Contacts</div>
+            <div class="section-content">
+              <div class="coordinator-cards" id="coord-family-cards">
+                <!-- Family contact cards will be rendered here -->
+              </div>
+              <div class="add-coordinator-card" id="add-coord-family-card" onclick="addCoordFamilyContact()">
+                <span class="icon">+</span>
+                <div>Add Family Contact</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Notes Tab -->
+        <div class="tab-pane" id="notes-coord-tab">
+          <div class="form-section">
+            <div class="section-header">General Notes</div>
+            <div class="section-content">
+              <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea class="form-textarea" id="coordGeneralNotes" rows="10" placeholder="General notes about the client..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="github-sync.js"></script>
+  <script>
+    // Global state
+    let serviceClients = [];  // Service Department clients
+    let coordClients = [];    // Support Coordination clients
+    let selectedClientIndex = null;
+    let currentClient = null;
+    let filterFunding = 'all';
+    let searchQuery = '';
+    let editField = {};
+    let isEditMode = false;
+    let todos = [];
+    let isTodoExpanded = false;
+    let isSupportCoordMode = false;
+    
+    // Helper function to get current client list based on mode
+    function getCurrentClientList() {
+      return isSupportCoordMode ? coordClients : serviceClients;
+    }
+    
+    // Helper function to get current client list name for localStorage
+    function getCurrentClientListKey() {
+      return isSupportCoordMode ? 'coordClients' : 'serviceClients';
+    }
+    
+    // Load data from GitHub or localStorage
+    async function loadAllData() {
+      // Debug: Check githubSync status
+      console.log('GitHub sync object available:', !!window.githubSync);
+      if (window.githubSync) {
+        console.log('GitHub sync enabled:', window.githubSync.isSyncEnabled());
+        console.log('GitHub sync status:', window.githubSync.getStatus());
+      }
+      
+      // Try to load from GitHub first
+      if (window.githubSync && window.githubSync.isSyncEnabled()) {
+        console.log('Attempting to load data from GitHub...');
+        const githubData = await window.githubSync.loadData();
+        if (githubData) {
+          serviceClients = githubData.serviceClients || [];
+          coordClients = githubData.coordClients || [];
+          todos = githubData.todos || [];
+          console.log('Data loaded from GitHub:', { serviceClients: serviceClients.length, coordClients: coordClients.length, todos: todos.length });
+        } else {
+          console.log('No data found on GitHub, loading from localStorage...');
+          loadFromLocalStorage();
+        }
+      } else {
+        console.log('GitHub sync disabled, loading from localStorage...');
+        loadFromLocalStorage();
+      }
+      
+      // Normalize data
+      normalizeClientData();
+    }
+    
+    // Load data from localStorage
+    function loadFromLocalStorage() {
+      // Load Service Department clients from localStorage
+      if (localStorage.getItem('serviceClients')) {
+        try {
+          serviceClients = JSON.parse(localStorage.getItem('serviceClients')) || [];
+          console.log('Loaded service clients from localStorage:', serviceClients.length);
+        } catch (e) {
+          console.error('Error loading service clients:', e);
+          serviceClients = [];
+        }
+      }
+      
+      // Load Support Coordination clients from localStorage
+      if (localStorage.getItem('coordClients')) {
+        try {
+          coordClients = JSON.parse(localStorage.getItem('coordClients')) || [];
+          console.log('Loaded coordination clients from localStorage:', coordClients.length);
+        } catch (e) {
+          console.error('Error loading coordination clients:', e);
+          coordClients = [];
+        }
+      }
+      
+      // Load todos from localStorage
+      if (localStorage.getItem('todos')) {
+        try {
+          todos = JSON.parse(localStorage.getItem('todos')) || [];
+          console.log('Loaded todos from localStorage:', todos.length);
+        } catch (e) {
+          console.error('Error loading todos:', e);
+          todos = [];
+        }
+      }
+    }
+    
+    // Normalize client data
+    function normalizeClientData() {
+      // Normalize dates and initialize arrays for service clients
+      serviceClients.forEach((client, index) => {
+        if (client.planStartDate && typeof client.planStartDate === 'string') {
+          client.planStartDate = client.planStartDate.split('T')[0];
+        }
+        if (client.planEndDate && typeof client.planEndDate === 'string') {
+          client.planEndDate = client.planEndDate.split('T')[0];
+        }
+        if (client.dob && typeof client.dob === 'string') {
+          client.dob = client.dob.split('T')[0];
+        }
+        
+        // Initialize arrays for existing service clients
+        if (!client.coordinators) client.coordinators = [];
+        if (!client.familyContacts) client.familyContacts = [];
+        if (!client.caregivers) client.caregivers = [];
+      });
+      
+      // Initialize arrays for existing coordination clients
+      coordClients.forEach((client, index) => {
+        if (!client.coordStakeholders) client.coordStakeholders = [];
+        if (!client.coordFamilyContacts) client.coordFamilyContacts = [];
+      });
+    }
+    
+    // Save all data to GitHub and localStorage
+    async function saveAllData() {
+      const data = {
+        serviceClients: serviceClients,
+        coordClients: coordClients,
+        todos: todos,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      // Save to localStorage
+      localStorage.setItem('serviceClients', JSON.stringify(serviceClients));
+      localStorage.setItem('coordClients', JSON.stringify(coordClients));
+      localStorage.setItem('todos', JSON.stringify(todos));
+      
+      // Save to GitHub if enabled
+      if (window.githubSync && window.githubSync.isSyncEnabled()) {
+        console.log('Saving data to GitHub...');
+        const success = await window.githubSync.saveData(data);
+        if (success) {
+          console.log('Data saved to GitHub successfully');
+        } else {
+          console.log('Failed to save data to GitHub');
+        }
+      }
+    }
+    
+    // Initialize data loading
+    loadAllData();
+    
+    // Migration: Move old 'clients' data to 'serviceClients' if it exists
+    if (localStorage.getItem('clients') && serviceClients.length === 0) {
+      try {
+        const oldClients = JSON.parse(localStorage.getItem('clients')) || [];
+        serviceClients = oldClients;
+        localStorage.setItem('serviceClients', JSON.stringify(serviceClients));
+        localStorage.removeItem('clients'); // Remove old key
+        console.log('Migrated old clients data to serviceClients');
+      } catch (e) {
+        console.error('Error migrating old clients data:', e);
+      }
+    }
+    
+    // Load todos from localStorage
+    if (localStorage.getItem('todos')) {
+      try {
+        todos = JSON.parse(localStorage.getItem('todos')) || [];
+        console.log('Loaded todos from localStorage:', todos.length);
+      } catch (e) {
+        console.error('Error loading todos:', e);
+        todos = [];
+      }
+    }
+    
+    // Utility functions
+    function escapeHTML(str) {
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]));
+    }
+    
+    function formatDate(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      if (isNaN(d)) return '';
+      // Handle timezone issues by using local date methods
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    
+    function calculateAge(birthDate) {
+      if (!birthDate) return null;
+      
+      const today = new Date();
+      const birth = new Date(birthDate);
+      
+      if (isNaN(birth)) return null;
+      
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      
+      return age;
+    }
+    
+    function updateAgeDisplay() {
+      const dobInput = document.getElementById('dob');
+      const ageDisplay = document.getElementById('age-display');
+      
+      if (!dobInput || !ageDisplay) return;
+      
+      const age = calculateAge(dobInput.value);
+      
+      if (age !== null && age >= 0) {
+        ageDisplay.textContent = `Age: ${age} year${age !== 1 ? 's' : ''}`;
+        ageDisplay.style.display = 'block';
+      } else {
+        ageDisplay.style.display = 'none';
+      }
+    }
+    
+    function getEmptyClient() {
+      return {
+        firstName: '',
+        lastName: '',
+        dob: '',
+        gender: '',
+        primaryLanguage: '',
+        interpreter: '',
+        fundingType: '',
+        ndisNumber: '',
+        icareParticipant: '',
+        planStartDate: '',
+        planEndDate: '',
+        primaryDisability: '',
+        supportNeeds: '',
+        riskAssessment: '',
+        supportCoordinator: '',
+        coordinatorPhone: '',
+        coordinatorEmail: '',
+        shortTermGoals: '',
+        longTermGoals: '',
+        familyContacts: [],
+        caregivers: [],
+        coordinators: [],
+        documents: {},
+        reminders: [],
+        generalNotes: '',
+        progressNotes: '',
+        alerts: ''
+      };
+    }
+    
+    // Render functions
+    function renderClientList() {
+      const clientList = document.getElementById('client-list');
+      const currentClients = getCurrentClientList();
+      const modeText = isSupportCoordMode ? 'coordination' : 'service';
+      
+      console.log(`Rendering ${modeText} client list with filter:`, filterFunding, 'and search:', searchQuery);
+      console.log(`All ${modeText} clients:`, currentClients.map(c => ({ name: c.firstName + ' ' + c.lastName, funding: c.fundingType })));
+      
+      let filtered = currentClients.filter(c => {
+        let match = true;
+        if (filterFunding !== 'all') {
+          // Handle case-insensitive comparison for funding types
+          const clientFunding = (c.fundingType || '').toLowerCase();
+          const filterFundingLower = filterFunding.toLowerCase();
+          match = clientFunding === filterFundingLower;
+          console.log(`Client ${c.firstName} ${c.lastName}: funding="${c.fundingType}" (${clientFunding}) vs filter="${filterFunding}" (${filterFundingLower}) = ${match}`);
+        }
+        if (searchQuery) match = match && ((c.firstName + ' ' + c.lastName).toLowerCase().includes(searchQuery.toLowerCase()));
+        return match;
+      });
+      
+      console.log(`Filtered ${modeText} clients:`, filtered.length);
+      
+      if (!filtered.length) {
+        clientList.innerHTML = `
+          <div style="padding: 24px; text-align: center; color: var(--gray-500);">
+            No ${modeText} clients found. Add your first client to get started.
+          </div>
+        `;
+        return;
+      }
+      
+      clientList.innerHTML = filtered.map((c, i) => `
+        <div class="client-item ${selectedClientIndex === currentClients.indexOf(c) ? 'active' : ''}" 
+             onclick="selectClient(${currentClients.indexOf(c)})">
+          <div class="client-name">${escapeHTML(c.firstName)} ${escapeHTML(c.lastName)}</div>
+          <div class="client-info">
+            <span class="badge ${c.fundingType==='NDIS'?'badge-ndis':c.fundingType==='iCare'?'badge-icare':'badge-no-funding'}">${c.fundingType || 'No Funding'}</span>
+            ${c.planStartDate ? `• ${formatDate(c.planStartDate)}` : ''}
+          </div>
+          <div class="client-item-actions">
+            <button class="btn btn-danger btn-sm" onclick="deleteClient(${currentClients.indexOf(c)}); event.stopPropagation();" title="Delete client (or press Delete key when selected)">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // System Mode Functions
+    function toggleSystemMode() {
+      isSupportCoordMode = !isSupportCoordMode;
+      updateSystemModeUI();
+      updateSystemModeContent();
+    }
+    
+    function updateSystemModeUI() {
+      const systemBtn = document.getElementById('system-mode-btn');
+      const systemIcon = document.getElementById('system-mode-icon');
+      const systemText = document.getElementById('system-mode-text');
+      const systemTitle = document.getElementById('system-title');
+      
+      if (isSupportCoordMode) {
+        systemBtn.classList.add('system-mode-active');
+        systemIcon.textContent = '🏢';
+        systemText.textContent = 'Switch to Service Department';
+        systemTitle.textContent = 'Support Coordination System';
+      } else {
+        systemBtn.classList.remove('system-mode-active');
+        systemIcon.textContent = '🔄';
+        systemText.textContent = 'Switch to Support Coordination';
+        systemTitle.textContent = 'Service Management System';
+      }
+    }
+    
+    function updateSystemModeContent() {
+      const serviceMode = document.querySelector('.service-dept-mode');
+      const coordMode = document.querySelector('.support-coord-mode');
+      
+      // Clear current selection when switching modes
+      selectedClientIndex = null;
+      currentClient = null;
+      clearClientForm();
+      
+      if (isSupportCoordMode) {
+        // Switch to Support Coordination mode
+        serviceMode.classList.remove('active');
+        coordMode.classList.add('active');
+        console.log('Switched to Support Coordination mode');
+      } else {
+        // Switch to Service Department mode
+        serviceMode.classList.add('active');
+        coordMode.classList.remove('active');
+        console.log('Switched to Service Department mode');
+      }
+      
+      // Re-render client list for the new mode
+      renderClientList();
+    }
+    
+    // GitHub Sync Functions
+    function toggleGitHubSync() {
+      // Ensure githubSync is available
+      if (!window.githubSync) {
+        alert('GitHub sync module not loaded. Please refresh the page and try again.');
+        return;
+      }
+      
+      if (window.githubSync.isSyncEnabled()) {
+        // Disable GitHub sync
+        window.githubSync.removeToken();
+        updateGitHubSyncUI();
+        alert('GitHub sync disabled. Data will only be saved locally.');
+      } else {
+        // Enable GitHub sync - prompt for token
+        const token = prompt('Enter your GitHub Personal Access Token:\n\nTo create a token:\n1. Go to GitHub.com → Settings → Developer settings → Personal access tokens\n2. Click "Generate new token"\n3. Select "repo" scope\n4. Copy the token and paste it here');
+        
+        if (token && token.trim()) {
+          window.githubSync.setToken(token.trim());
+          updateGitHubSyncUI();
+          
+          // Test the token by trying to save data
+          saveAllData().then(() => {
+            alert('GitHub sync enabled! Your data will now be automatically synced across all devices.');
+          }).catch(() => {
+            alert('GitHub sync setup failed. Please check your token and try again.');
+            window.githubSync.removeToken();
+            updateGitHubSyncUI();
+          });
+        }
+      }
+    }
+    
+    function updateGitHubSyncUI() {
+      const syncBtn = document.getElementById('github-sync-btn');
+      const syncIcon = document.getElementById('github-sync-icon');
+      const syncText = document.getElementById('github-sync-text');
+      
+      if (window.githubSync && window.githubSync.isSyncEnabled()) {
+        syncBtn.classList.add('github-sync-active');
+        syncIcon.textContent = '☁️';
+        syncText.textContent = 'GitHub Sync ON';
+        console.log('GitHub sync UI updated: ON');
+      } else {
+        syncBtn.classList.remove('github-sync-active');
+        syncIcon.textContent = '📁';
+        syncText.textContent = 'GitHub Sync';
+        console.log('GitHub sync UI updated: OFF');
+      }
+    }
+    
+    // Edit Mode Functions
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      updateEditModeUI();
+      updateFieldEditability();
+    }
+    
+    function updateEditModeUI() {
+      const editBtn = document.getElementById('edit-mode-btn');
+      const editIcon = document.getElementById('edit-mode-icon');
+      const editText = document.getElementById('edit-mode-text');
+      
+      if (isEditMode) {
+        editBtn.classList.add('edit-mode-active');
+        editIcon.textContent = '🔒';
+        editText.textContent = 'Lock Mode';
+      } else {
+        editBtn.classList.remove('edit-mode-active');
+        editIcon.textContent = '✏️';
+        editText.textContent = 'Edit Mode';
+      }
+    }
+    
+    function updateFieldEditability() {
+      // Get all input fields, textareas, and select elements
+      const editableFields = document.querySelectorAll('input, textarea, select');
+      
+      editableFields.forEach(field => {
+        // Skip todo-related fields - they should always be editable
+        if (field.id === 'todo-input' || field.classList.contains('todo-checkbox')) {
+          return;
+        }
+        
+        if (isEditMode) {
+          // Enable editing
+          field.classList.remove('field-readonly');
+          field.readOnly = false;
+          field.disabled = false;
+        } else {
+          // Disable editing
+          field.classList.add('field-readonly');
+          field.readOnly = true;
+          field.disabled = false; // Keep disabled false to maintain styling
+        }
+      });
+    }
+    
+    // Support Coordination Functions
+    function loadCoordClientData() {
+      if (!currentClient) return;
+      
+      // Load basic information
+      document.getElementById('coordFirstName').value = currentClient.firstName || '';
+      document.getElementById('coordLastName').value = currentClient.lastName || '';
+      document.getElementById('coordNdisNumber').value = currentClient.ndisNumber || '';
+      document.getElementById('coordFundingType').value = currentClient.fundingType || '';
+      document.getElementById('coordPlanManager').value = currentClient.planManager || '';
+      document.getElementById('coordPlanManagerContact').value = currentClient.planManagerContact || '';
+      document.getElementById('coordGeneralNotes').value = currentClient.generalNotes || '';
+      
+      // Show/hide plan manager section based on funding type
+      updatePlanManagerSection();
+      
+      // Render stakeholders and family contacts
+      renderCoordStakeholders();
+      renderCoordFamilyContacts();
+    }
+    
+    function saveCoordClientData() {
+      if (!currentClient) return;
+      
+      // Save basic information
+      currentClient.firstName = document.getElementById('coordFirstName').value;
+      currentClient.lastName = document.getElementById('coordLastName').value;
+      currentClient.ndisNumber = document.getElementById('coordNdisNumber').value;
+      currentClient.fundingType = document.getElementById('coordFundingType').value;
+      currentClient.planManager = document.getElementById('coordPlanManager').value;
+      currentClient.planManagerContact = document.getElementById('coordPlanManagerContact').value;
+      currentClient.generalNotes = document.getElementById('coordGeneralNotes').value;
+      
+      // Update clients array and save
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+    }
+    
+    function updatePlanManagerSection() {
+      const fundingType = document.getElementById('coordFundingType').value;
+      const planManagerSection = document.getElementById('plan-manager-section');
+      
+      if (fundingType === 'Plan Managed') {
+        planManagerSection.style.display = 'block';
+      } else {
+        planManagerSection.style.display = 'none';
+      }
+    }
+    
+    function renderCoordStakeholders() {
+      const container = document.getElementById('coord-stakeholder-cards');
+      if (!container) return;
+      
+      if (!currentClient) {
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      
+      if (!currentClient.coordStakeholders) {
+        currentClient.coordStakeholders = [];
+      }
+      
+      container.innerHTML = currentClient.coordStakeholders.map((stakeholder, index) => `
+        <div class="coordinator-card" onclick="toggleCoordStakeholderDetails(${index})">
+          <div class="coordinator-name">${escapeHTML(stakeholder.name || 'Unnamed Stakeholder')}</div>
+          <div class="coordinator-profession">${escapeHTML(stakeholder.profession || 'No profession specified')}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Name:</span>
+              <span class="coordinator-detail-value">${escapeHTML(stakeholder.name || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Profession:</span>
+              <span class="coordinator-detail-value">${escapeHTML(stakeholder.profession || 'Not specified')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Phone:</span>
+              <span class="coordinator-detail-value">${escapeHTML(stakeholder.phone || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Email:</span>
+              <span class="coordinator-detail-value">${escapeHTML(stakeholder.email || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-actions">
+              <button class="btn btn-danger btn-sm" onclick="removeCoordStakeholder(${index}); event.stopPropagation();" title="Remove stakeholder">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function addCoordStakeholder() {
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
+      }
+      
+      if (!currentClient.coordStakeholders) {
+        currentClient.coordStakeholders = [];
+      }
+      
+      const name = prompt('Enter stakeholder name:');
+      if (!name || name.trim() === '') return;
+      
+      const profession = prompt('Enter profession (e.g., OT, Physio, Speech Therapist):') || '';
+      const phone = prompt('Enter phone number (optional):') || '';
+      const email = prompt('Enter email address (optional):') || '';
+      
+      const newStakeholder = {
+        name: name.trim(),
+        profession: profession.trim(),
+        phone: phone.trim(),
+        email: email.trim()
+      };
+      
+      currentClient.coordStakeholders.push(newStakeholder);
+      
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      
+      renderCoordStakeholders();
+    }
+    
+    function toggleCoordStakeholderDetails(index) {
+      const cards = document.querySelectorAll('#coord-stakeholder-cards .coordinator-card');
+      if (cards[index]) {
+        cards[index].classList.toggle('active');
+      }
+    }
+    
+    function removeCoordStakeholder(index) {
+      if (currentClient.coordStakeholders && currentClient.coordStakeholders[index]) {
+        const stakeholder = currentClient.coordStakeholders[index];
+        if (confirm(`Are you sure you want to remove "${stakeholder.name}"?`)) {
+          currentClient.coordStakeholders.splice(index, 1);
+          if (selectedClientIndex !== null) {
+            clients[selectedClientIndex] = { ...currentClient };
+            localStorage.setItem('clients', JSON.stringify(clients));
+          }
+          renderCoordStakeholders();
+        }
+      }
+    }
+    
+    function renderCoordFamilyContacts() {
+      const container = document.getElementById('coord-family-cards');
+      if (!container) return;
+      
+      if (!currentClient) {
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      
+      if (!currentClient.coordFamilyContacts) {
+        currentClient.coordFamilyContacts = [];
+      }
+      
+      container.innerHTML = currentClient.coordFamilyContacts.map((contact, index) => `
+        <div class="coordinator-card" onclick="toggleCoordFamilyContactDetails(${index})">
+          <div class="coordinator-name">${escapeHTML(contact.name || 'Unnamed Family Member')}</div>
+          <div class="coordinator-profession">${escapeHTML(contact.relationship || 'Relationship Not Specified')}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Name:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.name || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Relationship:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.relationship || 'Not specified')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Phone:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.phone || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Email:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.email || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-actions">
+              <button class="btn btn-danger btn-sm" onclick="removeCoordFamilyContact(${index}); event.stopPropagation();" title="Remove family contact">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function addCoordFamilyContact() {
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
+      }
+      
+      if (!currentClient.coordFamilyContacts) {
+        currentClient.coordFamilyContacts = [];
+      }
+      
+      const name = prompt('Enter family member name:');
+      if (!name || name.trim() === '') return;
+      
+      const relationship = prompt('Enter relationship (e.g., Mother, Father, Sister):') || '';
+      const phone = prompt('Enter phone number (optional):') || '';
+      const email = prompt('Enter email address (optional):') || '';
+      
+      const newContact = {
+        name: name.trim(),
+        relationship: relationship.trim(),
+        phone: phone.trim(),
+        email: email.trim()
+      };
+      
+      currentClient.coordFamilyContacts.push(newContact);
+      
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      
+      renderCoordFamilyContacts();
+    }
+    
+    function toggleCoordFamilyContactDetails(index) {
+      const cards = document.querySelectorAll('#coord-family-cards .coordinator-card');
+      if (cards[index]) {
+        cards[index].classList.toggle('active');
+      }
+    }
+    
+    function removeCoordFamilyContact(index) {
+      if (currentClient.coordFamilyContacts && currentClient.coordFamilyContacts[index]) {
+        const contact = currentClient.coordFamilyContacts[index];
+        if (confirm(`Are you sure you want to remove "${contact.name}"?`)) {
+          currentClient.coordFamilyContacts.splice(index, 1);
+          if (selectedClientIndex !== null) {
+            clients[selectedClientIndex] = { ...currentClient };
+            localStorage.setItem('clients', JSON.stringify(clients));
+          }
+          renderCoordFamilyContacts();
+        }
+      }
+    }
+    
+    // Todo List Functions
+    function toggleTodoSection() {
+      isTodoExpanded = !isTodoExpanded;
+      const content = document.getElementById('todo-content');
+      const toggle = document.getElementById('todo-toggle');
+      
+      if (isTodoExpanded) {
+        content.classList.add('expanded');
+        toggle.textContent = '▲';
+      } else {
+        content.classList.remove('expanded');
+        toggle.textContent = '▼';
+      }
+    }
+    
+    function addTodo() {
+      const input = document.getElementById('todo-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const todo = {
+          id: Date.now(),
+          text: text,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        todos.unshift(todo); // Add to beginning
+        saveTodos();
+        renderTodos();
+        input.value = '';
+      }
+    }
+    
+    function toggleTodo(id) {
+      const todo = todos.find(t => t.id === id);
+      if (todo) {
+        todo.completed = !todo.completed;
+        saveTodos();
+        renderTodos();
+      }
+    }
+    
+    function deleteTodo(id) {
+      todos = todos.filter(t => t.id !== id);
+      saveTodos();
+      renderTodos();
+    }
+    
+    function renderTodos() {
+      const todoList = document.getElementById('todo-list');
+      
+      if (todos.length === 0) {
+        todoList.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500); font-size: 0.875rem;">No tasks yet. Add one above!</div>';
+        return;
+      }
+      
+      todoList.innerHTML = todos.map(todo => `
+        <div class="todo-item ${todo.completed ? 'completed' : ''}">
+          <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
+                 onchange="toggleTodo(${todo.id})">
+          <span class="todo-text">${escapeHTML(todo.text)}</span>
+          <button class="todo-delete" onclick="deleteTodo(${todo.id})" title="Delete task">×</button>
+        </div>
+      `).join('');
+    }
+    
+    function saveTodos() {
+      try {
+        localStorage.setItem('todos', JSON.stringify(todos));
+        // Also save to GitHub if enabled
+        saveAllData();
+      } catch (e) {
+        console.error('Error saving todos:', e);
+      }
+    }
+    
+    // Handle Enter key in todo input
+    function handleTodoKeyPress(event) {
+      if (event.key === 'Enter') {
+        addTodo();
+      }
+    }
+    
+    function selectClient(index) {
+      selectedClientIndex = index;
+      const currentClients = getCurrentClientList();
+      currentClient = { ...currentClients[index] };
+      
+      console.log('Selecting client:', currentClient);
+      console.log('Client coordinators:', currentClient.coordinators);
+      
+      // Initialize arrays if they don't exist (for existing clients)
+      if (!currentClient.coordinators) currentClient.coordinators = [];
+      if (!currentClient.familyContacts) currentClient.familyContacts = [];
+      if (!currentClient.caregivers) currentClient.caregivers = [];
+      if (!currentClient.coordStakeholders) currentClient.coordStakeholders = [];
+      if (!currentClient.coordFamilyContacts) currentClient.coordFamilyContacts = [];
+      
+      renderClientList();
+      
+      // Load client data based on current mode
+      if (isSupportCoordMode) {
+        loadCoordClientData();
+      } else {
+        loadClientData();
+      }
+      
+      // Force render coordinators after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        console.log('Delayed coordinators render for client:', currentClient.firstName, currentClient.lastName);
+        if (isSupportCoordMode) {
+          renderCoordStakeholders();
+          renderCoordFamilyContacts();
+        } else {
+          renderCoordinators();
+        }
+      }, 100);
+    }
+    
+    function deleteClient(index) {
+      const currentClients = getCurrentClientList();
+      if (index < 0 || index >= currentClients.length) {
+        alert('Invalid client index');
+        return;
+      }
+      
+      const clientToDelete = currentClients[index];
+      const clientName = `${clientToDelete.firstName} ${clientToDelete.lastName}`.trim() || 'Unnamed Client';
+      
+      if (confirm(`Are you sure you want to delete "${clientName}"? This action cannot be undone.`)) {
+        // Remove the client from the array
+        currentClients.splice(index, 1);
+        
+        // Save all data (including GitHub sync)
+        saveAllData();
+        
+        // Reset selection if the deleted client was selected
+        if (selectedClientIndex === index) {
+          selectedClientIndex = null;
+          currentClient = null;
+          // Clear the form
+          clearClientForm();
+        } else if (selectedClientIndex > index) {
+          // Adjust the selected index if it was after the deleted client
+          selectedClientIndex--;
+        }
+        
+        // Re-render the client list
+        renderClientList();
+        
+        // Show success message
+        alert(`Client "${clientName}" has been deleted successfully.`);
+      }
+    }
+    
+    function clearClientForm() {
+      // Clear all form fields
+      const formFields = [
+        'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'interpreter',
+        'fundingType', 'ndisNumber', 'planStartDate', 'planEndDate',
+        'primaryDisability', 'supportNeeds', 'shortTermGoals', 'longTermGoals',
+        'generalNotes', 'progressNotes', 'alerts'
+      ];
+      
+      formFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+          element.value = '';
+        }
+      });
+      
+      // Clear family contacts and caregivers
+      if (currentClient) {
+        currentClient.familyContacts = [];
+        currentClient.caregivers = [];
+        currentClient.coordinators = [];
+        currentClient.reminders = [];
+        currentClient.documents = {};
+      }
+      
+      // Re-render the lists
+      renderFamilyContacts();
+      renderCaregivers();
+      renderCoordinators();
+      renderUpcomingReminders();
+      loadDocuments();
+      
+      // Update content header
+      document.querySelector('.content-title').textContent = 'Client Details';
+      document.querySelector('.content-subtitle').textContent = 'Select a client or add a new one to get started';
+    }
+    
+    function loadClientData() {
+      if (!currentClient) return;
+      
+      // Initialize coordinators array if it doesn't exist (for existing clients)
+      if (!currentClient.coordinators) {
+        currentClient.coordinators = [];
+      }
+      
+      // Update content header with client name
+      const clientName = `${currentClient.firstName} ${currentClient.lastName}`.trim() || 'Unnamed Client';
+      document.querySelector('.content-title').textContent = clientName;
+      document.querySelector('.content-subtitle').textContent = 'Manage client information and support needs';
+      
+      // Load data into form fields
+      document.getElementById('firstName').value = currentClient.firstName || '';
+      document.getElementById('lastName').value = currentClient.lastName || '';
+      document.getElementById('dob').value = currentClient.dob || '';
+      updateAgeDisplay();
+      document.getElementById('gender').value = currentClient.gender || '';
+      document.getElementById('primaryLanguage').value = currentClient.primaryLanguage || '';
+      document.getElementById('interpreter').value = currentClient.interpreter || '';
+      document.getElementById('fundingType').value = currentClient.fundingType || '';
+      document.getElementById('ndisNumber').value = currentClient.ndisNumber || '';
+
+      console.log('Loading dates - planStartDate:', currentClient.planStartDate, 'planEndDate:', currentClient.planEndDate);
+      document.getElementById('planStartDate').value = currentClient.planStartDate || '';
+      document.getElementById('planEndDate').value = currentClient.planEndDate || '';
+      document.getElementById('primaryDisability').value = currentClient.primaryDisability || '';
+      document.getElementById('supportNeeds').value = currentClient.supportNeeds || '';
+
+      // Note: supportCoordinator, coordinatorPhone, coordinatorEmail fields removed - now using coordinator cards
+      document.getElementById('shortTermGoals').value = currentClient.shortTermGoals || '';
+      document.getElementById('longTermGoals').value = currentClient.longTermGoals || '';
+      document.getElementById('generalNotes').value = currentClient.generalNotes || '';
+      document.getElementById('progressNotes').value = currentClient.progressNotes || '';
+      document.getElementById('alerts').value = currentClient.alerts || '';
+      
+      // Load family contacts
+      renderFamilyContacts();
+      
+      // Load caregivers
+      renderCaregivers();
+      
+      // Load coordinators
+      renderCoordinators();
+      
+            // Load documents
+      loadDocuments();
+      
+      // Render upcoming reminders
+      renderUpcomingReminders();
+      
+      // Set funding type visibility
+      const fundingType = currentClient.fundingType;
+      const ndisGroup = document.getElementById('ndis-number-group');
+      
+      // NDIS number field is always visible now
+      ndisGroup.style.display = 'flex';
+    }
+    
+    function saveClientData() {
+      if (!currentClient) return;
+      
+      // Save form data to currentClient
+      currentClient.firstName = document.getElementById('firstName').value;
+      currentClient.lastName = document.getElementById('lastName').value;
+      currentClient.dob = document.getElementById('dob').value;
+      currentClient.gender = document.getElementById('gender').value;
+      currentClient.primaryLanguage = document.getElementById('primaryLanguage').value;
+      currentClient.interpreter = document.getElementById('interpreter').value;
+      currentClient.fundingType = document.getElementById('fundingType').value;
+      currentClient.ndisNumber = document.getElementById('ndisNumber').value;
+
+      currentClient.planStartDate = document.getElementById('planStartDate').value;
+      currentClient.planEndDate = document.getElementById('planEndDate').value;
+      currentClient.primaryDisability = document.getElementById('primaryDisability').value;
+      currentClient.supportNeeds = document.getElementById('supportNeeds').value;
+
+      // Note: supportCoordinator, coordinatorPhone, coordinatorEmail fields removed - now using coordinator cards
+      currentClient.shortTermGoals = document.getElementById('shortTermGoals').value;
+      currentClient.longTermGoals = document.getElementById('longTermGoals').value;
+      currentClient.generalNotes = document.getElementById('generalNotes').value;
+      currentClient.progressNotes = document.getElementById('progressNotes').value;
+      currentClient.alerts = document.getElementById('alerts').value;
+      
+      // Save to clients array and localStorage
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        // Save all data (including GitHub sync)
+        saveAllData();
+      }
+    }
+    
+    // Family contacts functions
+    function renderFamilyContacts() {
+      console.log('renderFamilyContacts called');
+      const container = document.getElementById('family-contacts-cards');
+      console.log('container:', container);
+      
+      if (!container) {
+        console.log('Container not found');
+        return;
+      }
+      
+      if (!currentClient) {
+        console.log('No current client selected');
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      
+      if (!currentClient.familyContacts) {
+        currentClient.familyContacts = [];
+      }
+      
+      console.log('familyContacts to render:', currentClient.familyContacts);
+      
+      container.innerHTML = currentClient.familyContacts.map((contact, index) => `
+        <div class="coordinator-card" onclick="toggleFamilyContactDetails(${index})">
+          <div class="coordinator-name">${escapeHTML(contact.name || 'Unnamed Family Member')}</div>
+          <div class="coordinator-profession">${escapeHTML(contact.relationship || 'Relationship Not Specified')}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Name:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.name || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Relationship:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.relationship || 'Not specified')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Phone:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.phone || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Email:</span>
+              <span class="coordinator-detail-value">${escapeHTML(contact.email || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-actions">
+              <button class="btn btn-danger btn-sm" onclick="removeFamilyContact(${index}); event.stopPropagation();" title="Remove family contact">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function addFamilyContact() {
+      console.log('addFamilyContact called');
+      console.log('currentClient:', currentClient);
+      console.log('selectedClientIndex:', selectedClientIndex);
+      
+      if (!currentClient) {
+        console.log('No current client selected');
+        alert('Please select a client first');
+        return;
+      }
+      
+      if (!currentClient.familyContacts) {
+        currentClient.familyContacts = [];
+      }
+      
+      const name = prompt('Enter family member name:');
+      if (!name || name.trim() === '') return;
+      
+      const relationship = prompt('Enter relationship (e.g., Mother, Father, Sister):') || '';
+      const phone = prompt('Enter phone number (optional):') || '';
+      const email = prompt('Enter email address (optional):') || '';
+      
+      const newContact = {
+        name: name.trim(),
+        relationship: relationship.trim(),
+        phone: phone.trim(),
+        email: email.trim()
+      };
+      
+      currentClient.familyContacts.push(newContact);
+      console.log('Added new contact:', newContact);
+      console.log('Updated familyContacts:', currentClient.familyContacts);
+      
+      if (selectedClientIndex !== null) {
+        clients[selectedClientIndex] = { ...currentClient };
+        localStorage.setItem('clients', JSON.stringify(clients));
+        console.log('Saved to localStorage');
+      }
+      
+      renderFamilyContacts();
+      console.log('renderFamilyContacts completed');
+    }
+    
+    function toggleFamilyContactDetails(index) {
+      const cards = document.querySelectorAll('#family-contacts-cards .coordinator-card');
+      if (cards[index]) {
+        cards[index].classList.toggle('active');
+      }
+    }
+    
+    function removeFamilyContact(index) {
+      if (currentClient.familyContacts && currentClient.familyContacts[index]) {
+        currentClient.familyContacts.splice(index, 1);
+        if (selectedClientIndex !== null) {
+          clients[selectedClientIndex] = { ...currentClient };
+          localStorage.setItem('clients', JSON.stringify(clients));
+        }
+        renderFamilyContacts();
+      }
+    }
+    
+    // Caregiver functions
+    function renderCaregivers() {
+      const container = document.getElementById('caregiver-cards');
+      if (!container) {
+        console.log('Caregiver cards container not found');
+        return;
+      }
+      
+      if (!currentClient) {
+        console.log('No current client selected');
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      
+      if (!currentClient.caregivers) {
+        currentClient.caregivers = [];
+      }
+      
+      console.log('Rendering caregivers:', currentClient.caregivers);
+      
+      container.innerHTML = currentClient.caregivers.map((caregiver, index) => `
+        <div class="coordinator-card" onclick="toggleCaregiverDetails(${index})">
+          <div class="coordinator-name">${escapeHTML(caregiver.name || 'Unnamed Caregiver')}</div>
+          <div class="coordinator-profession">${escapeHTML(caregiver.canDrive === 'Yes' ? 'Can Drive' : caregiver.canDrive === 'No' ? 'Cannot Drive' : 'Driving Status Unknown')}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Phone:</span>
+              <span class="coordinator-detail-value">${escapeHTML(caregiver.phone || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Email:</span>
+              <span class="coordinator-detail-value">${escapeHTML(caregiver.email || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Can Drive:</span>
+              <span class="coordinator-detail-value">${escapeHTML(caregiver.canDrive || 'Not specified')}</span>
+            </div>
+            <div class="coordinator-actions">
+              <button class="btn btn-danger btn-sm" onclick="removeCaregiver(${index}); event.stopPropagation();" title="Remove caregiver">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function addCaregiver() {
+      if (!currentClient.caregivers) {
+        currentClient.caregivers = [];
+      }
+      
+      const name = prompt('Enter caregiver name:');
+      if (!name || name.trim() === '') return;
+      
+      const phone = prompt('Enter phone number (optional):') || '';
+      const email = prompt('Enter email address (optional):') || '';
+      const canDrive = prompt('Can this caregiver drive? (Yes/No/Leave blank):') || '';
+      
+      const newCaregiver = {
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        canDrive: canDrive.trim()
+      };
+      
+      currentClient.caregivers.push(newCaregiver);
+      console.log('Added new caregiver:', newCaregiver);
+      console.log('Current caregivers:', currentClient.caregivers);
+      
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      
+      renderCaregivers();
+    }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    function toggleCaregiverDetails(index) {
+      const cards = document.querySelectorAll('#caregiver-cards .coordinator-card');
+      if (cards[index]) {
+        cards[index].classList.toggle('active');
+      }
+    }
+
+    function removeCaregiver(index) {
+      if (currentClient.caregivers && currentClient.caregivers[index]) {
+        currentClient.caregivers.splice(index, 1);
+        if (selectedClientIndex !== null) {
+          clients[selectedClientIndex] = { ...currentClient };
+          localStorage.setItem('clients', JSON.stringify(clients));
+        }
+        renderCaregivers();
+      }
+    }
+    
+    // Coordinator functions
+    function renderCoordinators() {
+      const container = document.getElementById('coordinator-cards');
+      if (!container) {
+        console.log('Coordinator cards container not found');
+        return;
+      }
+      
+      if (!currentClient) {
+        console.log('No current client selected');
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      
+      if (!currentClient.coordinators) {
+        currentClient.coordinators = [];
+      }
+      
+      console.log('Rendering coordinators:', currentClient.coordinators);
+      
+      if (currentClient.coordinators.length === 0) {
+        container.innerHTML = '';
+        console.log('No coordinators to display');
+        return;
+      }
+      
+      container.innerHTML = currentClient.coordinators.map((coordinator, index) => `
+        <div class="coordinator-card" onclick="toggleCoordinatorDetails(${index})">
+          <div class="coordinator-actions">
+            <button class="btn btn-danger btn-sm" onclick="removeCoordinator(${index}); event.stopPropagation();" title="Remove coordinator">🗑️</button>
+          </div>
+          <div class="coordinator-name">${escapeHTML(coordinator.name || 'Unnamed')}</div>
+          <div class="coordinator-profession">${escapeHTML(coordinator.profession || 'No profession specified')}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Phone:</span>
+              <span class="coordinator-detail-value">${escapeHTML(coordinator.phone || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Email:</span>
+              <span class="coordinator-detail-value">${escapeHTML(coordinator.email || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Organization:</span>
+              <span class="coordinator-detail-value">${escapeHTML(coordinator.organization || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Role:</span>
+              <span class="coordinator-detail-value">${escapeHTML(coordinator.role || 'Not specified')}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      console.log('Rendered coordinator cards HTML:', container.innerHTML);
+    }
+    
+    function addCoordinator() {
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
+      }
+      
+      if (!currentClient.coordinators) {
+        currentClient.coordinators = [];
+      }
+      
+      const name = prompt('Enter coordinator/stakeholder name:');
+      if (!name) return;
+      
+      const profession = prompt('Enter profession/role (e.g., "iCare Coordinator", "Support Coordinator"):');
+      if (!profession) return;
+      
+      const phone = prompt('Enter phone number (optional):') || '';
+      const email = prompt('Enter email address (optional):') || '';
+      const organization = prompt('Enter organization (optional):') || '';
+      const role = prompt('Enter specific role (optional):') || '';
+      
+      const newCoordinator = {
+        name: name,
+        profession: profession,
+        phone: phone,
+        email: email,
+        organization: organization,
+        role: role
+      };
+      
+      currentClient.coordinators.push(newCoordinator);
+      console.log('Added coordinator:', newCoordinator);
+      console.log('Updated coordinators array:', currentClient.coordinators);
+      
+      if (selectedClientIndex !== null) {
+        clients[selectedClientIndex] = { ...currentClient };
+        localStorage.setItem('clients', JSON.stringify(clients));
+        console.log('Saved to localStorage');
+      }
+      
+      renderCoordinators();
+    }
+    
+    function removeCoordinator(index) {
+      if (currentClient.coordinators && currentClient.coordinators[index]) {
+        const coordinator = currentClient.coordinators[index];
+        if (confirm(`Are you sure you want to remove "${coordinator.name}"?`)) {
+          currentClient.coordinators.splice(index, 1);
+          if (selectedClientIndex !== null) {
+            clients[selectedClientIndex] = { ...currentClient };
+            localStorage.setItem('clients', JSON.stringify(clients));
+          }
+          renderCoordinators();
+        }
+      }
+    }
+    
+    function toggleCoordinatorDetails(index) {
+      const cards = document.querySelectorAll('#coordinator-cards .coordinator-card');
+      cards.forEach((card, i) => {
+        if (i === index) {
+          card.classList.toggle('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+
+    
+    // Reminder functions
+    function renderUpcomingReminders() {
+      const container = document.getElementById('upcoming-reminders');
+      if (!container) return;
+      
+      if (!currentClient) {
+        console.log('No current client selected');
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      
+      if (!currentClient.reminders) {
+        currentClient.reminders = [];
+      }
+      
+      // Get upcoming reminders (next 7 days)
+      const today = new Date();
+      const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+      
+      const upcomingReminders = currentClient.reminders.filter(reminder => {
+        const reminderDate = new Date(reminder.date);
+        return reminderDate >= today && reminderDate <= nextWeek;
+      }).sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      if (upcomingReminders.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 24px; color: var(--gray-500);">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">📅</div>
+            <div>No upcoming reminders</div>
+            <div style="font-size: 0.875rem; margin-top: 4px;">Add a reminder to get started</div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = upcomingReminders.map((reminder, index) => {
+        const reminderDate = new Date(reminder.date);
+        const daysUntil = Math.ceil((reminderDate - today) / (1000 * 60 * 60 * 24));
+        
+        let statusClass = 'upcoming';
+        let statusText = 'Upcoming';
+        
+        if (daysUntil === 0) {
+          statusClass = 'today';
+          statusText = 'Today';
+        } else if (daysUntil <= 1) {
+          statusClass = 'urgent';
+          statusText = 'Urgent';
+        }
+        
+        return `
+          <div class="reminder-item ${statusClass}">
+            <div class="reminder-content">
+              <div class="reminder-title">${escapeHTML(reminder.title)}</div>
+              <div class="reminder-details">${escapeHTML(reminder.description)}</div>
+              <div class="reminder-date">
+                ${reminderDate.toLocaleDateString()} at ${reminder.time || 'All day'}
+                ${daysUntil === 0 ? ' (Today)' : daysUntil === 1 ? ' (Tomorrow)' : ` (in ${daysUntil} days)`}
+              </div>
+            </div>
+            <div class="reminder-actions">
+              <span class="reminder-status status-${statusClass}">${statusText}</span>
+              <button class="btn btn-danger btn-sm" onclick="removeReminder(${index})">Remove</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function addReminder() {
+      const title = prompt('Enter reminder title:');
+      if (!title) return;
+      
+      const description = prompt('Enter reminder description (optional):');
+      const date = prompt('Enter date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+      if (!date) return;
+      
+      const time = prompt('Enter time (HH:MM) or leave empty for all day:');
+      
+      const newReminder = {
+        title: title,
+        description: description || '',
+        date: date,
+        time: time || '',
+        created: new Date().toISOString()
+      };
+      
+      if (!currentClient.reminders) {
+        currentClient.reminders = [];
+      }
+      
+      currentClient.reminders.push(newReminder);
+      
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      
+      renderUpcomingReminders();
+    }
+    
+    function removeReminder(index) {
+      if (confirm('Are you sure you want to remove this reminder?')) {
+        currentClient.reminders.splice(index, 1);
+        
+        if (selectedClientIndex !== null) {
+          clients[selectedClientIndex] = { ...currentClient };
+          localStorage.setItem('clients', JSON.stringify(clients));
+        }
+        
+        renderUpcomingReminders();
+      }
+    }
+    
+    function viewAllReminders() {
+      if (!currentClient.reminders || currentClient.reminders.length === 0) {
+        alert('No reminders found');
+        return;
+      }
+      
+      const allReminders = currentClient.reminders
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map(reminder => {
+          const date = new Date(reminder.date);
+          return `• ${reminder.title}\n  ${reminder.description}\n  ${date.toLocaleDateString()} ${reminder.time || 'All day'}`;
+        })
+        .join('\n\n');
+      
+      alert(`All Reminders:\n\n${allReminders}`);
+    }
+    
+    // Document functions
+    function loadDocuments() {
+      if (!currentClient) {
+        console.log('No current client selected');
+        return;
+      }
+      
+      if (!currentClient.documents) {
+        currentClient.documents = {};
+      }
+      
+      // Load document checkboxes and dates
+      for (let i = 1; i <= 10; i++) {
+        const checkbox = document.getElementById(`doc${i}`);
+        const dateInput = document.getElementById(`doc${i}-date`);
+        
+        if (checkbox && dateInput) {
+          const docName = checkbox.dataset.doc;
+          const docData = currentClient.documents[docName] || { completed: false, date: '' };
+          
+          checkbox.checked = docData.completed;
+          dateInput.value = docData.date || '';
+          
+          // Add event listeners
+          checkbox.addEventListener('change', (e) => {
+            if (!currentClient.documents[docName]) {
+              currentClient.documents[docName] = {};
+            }
+            currentClient.documents[docName].completed = e.target.checked;
+            if (selectedClientIndex !== null) {
+              clients[selectedClientIndex] = { ...currentClient };
+              localStorage.setItem('clients', JSON.stringify(clients));
+            }
+          });
+          
+          dateInput.addEventListener('change', (e) => {
+            if (!currentClient.documents[docName]) {
+              currentClient.documents[docName] = {};
+            }
+            currentClient.documents[docName].date = e.target.value;
+            if (selectedClientIndex !== null) {
+              clients[selectedClientIndex] = { ...currentClient };
+              localStorage.setItem('clients', JSON.stringify(clients));
+            }
+          });
+        }
+      }
+    }
+    
+    // Event listeners
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderClientList();
+    });
+    
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        filterFunding = tab.dataset.filter;
+        renderClientList();
+      });
+    });
+    
+    document.querySelectorAll('.tab-item').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+      });
+    });
+    
+    document.getElementById('add-client-btn').addEventListener('click', () => {
+      const currentClients = getCurrentClientList();
+      const newClient = getEmptyClient();
+      currentClients.push(newClient);
+      selectedClientIndex = currentClients.length - 1;
+      currentClient = { ...newClient };
+      
+      // Save all data (including GitHub sync)
+      saveAllData();
+      
+      renderClientList();
+      
+      // Load data based on current mode
+      if (isSupportCoordMode) {
+        loadCoordClientData();
+      } else {
+        loadClientData();
+      }
+    });
+    
+          // Add family contact button - use direct event listeners instead of delegation
+      document.addEventListener('DOMContentLoaded', () => {
+        
+        
+        // Add reminder button event listeners
+        const addReminderBtn = document.getElementById('add-reminder-btn');
+        const viewAllRemindersBtn = document.getElementById('view-all-reminders-btn');
+        
+        if (addReminderBtn) {
+          addReminderBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            addReminder();
+          });
+        }
+        
+        if (viewAllRemindersBtn) {
+          viewAllRemindersBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            viewAllReminders();
+          });
+        }
+      });
+    
+    // Funding type change handler
+    document.getElementById('fundingType').addEventListener('change', (e) => {
+      const fundingType = e.target.value;
+      const ndisGroup = document.getElementById('ndis-number-group');
+      
+      if (fundingType === 'NDIS') {
+        ndisGroup.style.display = 'flex';
+      } else {
+        ndisGroup.style.display = 'flex';
+      }
+    });
+    
+    // Auto-save on form changes
+    document.querySelectorAll('input, select, textarea').forEach(input => {
+      input.addEventListener('change', saveClientData);
+    });
+    
+    // Special handling for date of birth to show age
+    document.getElementById('dob').addEventListener('change', updateAgeDisplay);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Delete key to delete selected client
+      if (e.key === 'Delete' && selectedClientIndex !== null) {
+        e.preventDefault();
+        deleteClient(selectedClientIndex);
+      }
+      
+      // Ctrl/Cmd + N to add new client
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        document.getElementById('add-client-btn').click();
+      }
+    });
+    
+    // Remove duplicate event listeners - these are now handled above
+    
+    // Debug function to check coordinators
+    function debugCoordinators() {
+      console.log('=== Coordinator Debug Info ===');
+      console.log('Current client:', currentClient);
+      console.log('Current client coordinators:', currentClient ? currentClient.coordinators : 'No current client');
+      console.log('All clients:', clients);
+      console.log('Selected client index:', selectedClientIndex);
+      
+      const container = document.getElementById('coordinator-cards');
+      console.log('Coordinator cards container:', container);
+      console.log('Container innerHTML:', container ? container.innerHTML : 'Container not found');
+    }
+    
+    // Make debug function available globally
+    window.debugCoordinators = debugCoordinators;
+    
+    // Force refresh coordinators function
+    function forceRefreshCoordinators() {
+      console.log('Force refreshing coordinators...');
+      if (currentClient) {
+        console.log('Current client coordinators before refresh:', currentClient.coordinators);
+        renderCoordinators();
+      } else {
+        console.log('No current client selected');
+      }
+    }
+    
+    window.forceRefreshCoordinators = forceRefreshCoordinators;
+    
+    // Check and restore coordinators data
+    function checkAndRestoreCoordinators() {
+      console.log('=== Checking and Restoring Coordinators ===');
+      console.log('All clients:', clients);
+      
+      if (currentClient) {
+        console.log('Current client:', currentClient);
+        console.log('Current client coordinators:', currentClient.coordinators);
+        
+        // Check if coordinators exist in localStorage
+        const storedClients = localStorage.getItem('clients');
+        if (storedClients) {
+          const parsedClients = JSON.parse(storedClients);
+          const storedClient = parsedClients.find(c => 
+            c.firstName === currentClient.firstName && c.lastName === currentClient.lastName
+          );
+          
+          if (storedClient && storedClient.coordinators) {
+            console.log('Found coordinators in localStorage:', storedClient.coordinators);
+            if (storedClient.coordinators.length > 0) {
+              currentClient.coordinators = storedClient.coordinators;
+              console.log('Restored coordinators to current client');
+              renderCoordinators();
+            }
+          }
+        }
+      }
+    }
+    
+    window.checkAndRestoreCoordinators = checkAndRestoreCoordinators;
+    
+    // Test function to add sample coordinator
+    function addTestCoordinator() {
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
+      }
+      
+      if (!currentClient.coordinators) {
+        currentClient.coordinators = [];
+      }
+      
+      const testCoordinator = {
+        name: 'Test Coordinator',
+        profession: 'Test Profession',
+        phone: '123-456-7890',
+        email: 'test@example.com',
+        organization: 'Test Organization',
+        role: 'Test Role'
+      };
+      
+      currentClient.coordinators.push(testCoordinator);
+      console.log('Added test coordinator:', testCoordinator);
+      console.log('Updated coordinators array:', currentClient.coordinators);
+      
+      if (selectedClientIndex !== null) {
+        clients[selectedClientIndex] = { ...currentClient };
+        localStorage.setItem('clients', JSON.stringify(clients));
+        console.log('Saved test coordinator to localStorage');
+      }
+      
+      renderCoordinators();
+    }
+    
+    window.addTestCoordinator = addTestCoordinator;
+    
+    // Debug filter function
+    function debugFilter() {
+      console.log('=== Filter Debug Info ===');
+      console.log('Current filter:', filterFunding);
+      console.log('Current search query:', searchQuery);
+      console.log('All clients and their funding types:');
+      clients.forEach((client, index) => {
+        console.log(`${index}: ${client.firstName} ${client.lastName} - fundingType: "${client.fundingType}"`);
+      });
+      
+      // Test filtering
+      const testFilter = (filter) => {
+        const filtered = clients.filter(c => {
+          if (filter === 'all') return true;
+          const clientFunding = (c.fundingType || '').toLowerCase();
+          const filterLower = filter.toLowerCase();
+          return clientFunding === filterLower;
+        });
+        console.log(`Filter "${filter}" would show ${filtered.length} clients:`, filtered.map(c => c.firstName + ' ' + c.lastName));
+      };
+      
+      testFilter('all');
+      testFilter('ndis');
+      testFilter('icare');
+    }
+    
+    window.debugFilter = debugFilter;
+
+    // Initialize
+    // Ensure Service Department mode is active by default
+    updateSystemModeContent();
+    renderClientList();
+    renderTodos();
+    
+    // Initialize edit mode (default to read-only)
+    updateFieldEditability();
+    
+    // Initialize GitHub sync UI
+    updateGitHubSyncUI();
+    
+    // Add event listeners for todo input
+    document.addEventListener('DOMContentLoaded', () => {
+      const todoInput = document.getElementById('todo-input');
+      if (todoInput) {
+        todoInput.addEventListener('keypress', handleTodoKeyPress);
+      }
+      
+      // Add event listeners for Support Coordination inputs
+      const coordFundingType = document.getElementById('coordFundingType');
+      if (coordFundingType) {
+        coordFundingType.addEventListener('change', updatePlanManagerSection);
+      }
+      
+      // Add event listeners for Support Coordination tab navigation
+      const coordTabItems = document.querySelectorAll('.support-coord-mode .tab-item');
+      coordTabItems.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.dataset.tab;
+          switchCoordTab(targetTab);
+        });
+      });
+      
+      // Add auto-save for Support Coordination inputs
+      const coordInputs = document.querySelectorAll('.support-coord-mode input, .support-coord-mode textarea, .support-coord-mode select');
+      coordInputs.forEach(input => {
+        input.addEventListener('input', saveCoordClientData);
+        input.addEventListener('change', saveCoordClientData);
+      });
+    });
+    
+    // Support Coordination tab switching
+    function switchCoordTab(targetTab) {
+      // Remove active class from all tabs and panes
+      document.querySelectorAll('.support-coord-mode .tab-item').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.support-coord-mode .tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+      });
+      
+      // Add active class to selected tab and pane
+      document.querySelector(`.support-coord-mode .tab-item[data-tab="${targetTab}"]`).classList.add('active');
+      document.getElementById(`${targetTab}-tab`).classList.add('active');
+    }
+
+    function testDates() {
+      console.log('=== Date Test ===');
+      console.log('Current clients:', clients);
+      if (currentClient) {
+        console.log('Current client dates:', {
+          planStartDate: currentClient.planStartDate,
+          planEndDate: currentClient.planEndDate,
+          dob: currentClient.dob
+        });
+        console.log('Date input values:', {
+          planStartDate: document.getElementById('planStartDate')?.value,
+          planEndDate: document.getElementById('planEndDate')?.value,
+          dob: document.getElementById('dob')?.value
+        });
+      }
+      console.log('LocalStorage:', localStorage.getItem('clients'));
+      
+      // Test date input functionality
+      const testDate = '2024-01-15';
+      console.log('Testing with date:', testDate);
+      const testDateObj = new Date(testDate);
+      console.log('Parsed date object:', testDateObj);
+      console.log('Formatted date:', formatDate(testDate));
+      
+      // Test if date input can be set
+      const planStartInput = document.getElementById('planStartDate');
+      if (planStartInput) {
+        planStartInput.value = testDate;
+        console.log('Set input value to:', testDate);
+        console.log('Input value after setting:', planStartInput.value);
+      }
+    }
+  </script>
+</body>
+</html> 
