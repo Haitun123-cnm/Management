@@ -1311,7 +1311,7 @@
     </div>
   </div>
   
-  <script src="github-sync.js"></script>
+  <script src="simple-github-sync.js"></script>
   <script>
     // Global state
     let serviceClients = [];  // Service Department clients
@@ -1338,28 +1338,33 @@
     
     // Load data from GitHub or localStorage
     async function loadAllData() {
-      // Debug: Check githubSync status
-      console.log('GitHub sync object available:', !!window.githubSync);
-      if (window.githubSync) {
-        console.log('GitHub sync enabled:', window.githubSync.isSyncEnabled());
-        console.log('GitHub sync status:', window.githubSync.getStatus());
+      console.log('🔄 开始加载数据...');
+      
+      // 检查简化同步系统
+      console.log('GitHub sync object available:', !!window.simpleGitHubSync);
+      if (window.simpleGitHubSync) {
+        console.log('GitHub sync enabled:', window.simpleGitHubSync.isSyncEnabled());
+        console.log('GitHub sync status:', window.simpleGitHubSync.getStatus());
       }
       
-      // Try to load from GitHub first
-      if (window.githubSync && window.githubSync.isSyncEnabled()) {
-        console.log('Attempting to load data from GitHub...');
-        const githubData = await window.githubSync.loadData();
+      // 尝试从GitHub加载
+      if (window.simpleGitHubSync && window.simpleGitHubSync.isSyncEnabled()) {
+        console.log('📥 尝试从GitHub加载数据...');
+        const githubData = await window.simpleGitHubSync.loadAllData();
         if (githubData) {
           serviceClients = githubData.serviceClients || [];
           coordClients = githubData.coordClients || [];
           todos = githubData.todos || [];
-          console.log('Data loaded from GitHub:', { serviceClients: serviceClients.length, coordClients: coordClients.length, todos: todos.length });
+          console.log('✅ 从GitHub成功加载数据');
+          console.log('📊 服务客户数量:', serviceClients.length);
+          console.log('📊 协调客户数量:', coordClients.length);
+          console.log('📊 待办事项数量:', todos.length);
         } else {
-          console.log('No data found on GitHub, loading from localStorage...');
+          console.log('ℹ️ GitHub上没有数据，从本地存储加载...');
           loadFromLocalStorage();
         }
       } else {
-        console.log('GitHub sync disabled, loading from localStorage...');
+        console.log('ℹ️ GitHub同步未启用，从本地存储加载...');
         loadFromLocalStorage();
       }
       
@@ -1432,6 +1437,8 @@
     
     // Save all data to GitHub and localStorage
     async function saveAllData() {
+      console.log('💾 开始保存所有数据...');
+      
       const data = {
         serviceClients: serviceClients,
         coordClients: coordClients,
@@ -1439,20 +1446,23 @@
         lastUpdated: new Date().toISOString()
       };
       
-      // Save to localStorage
+      // 保存到本地存储
       localStorage.setItem('serviceClients', JSON.stringify(serviceClients));
       localStorage.setItem('coordClients', JSON.stringify(coordClients));
       localStorage.setItem('todos', JSON.stringify(todos));
+      console.log('✅ 数据已保存到本地存储');
       
-      // Save to GitHub if enabled
-      if (window.githubSync && window.githubSync.isSyncEnabled()) {
-        console.log('Saving data to GitHub...');
-        const success = await window.githubSync.saveData(data);
+      // 保存到GitHub（如果启用）
+      if (window.simpleGitHubSync && window.simpleGitHubSync.isSyncEnabled()) {
+        console.log('☁️ 正在保存数据到GitHub...');
+        const success = await window.simpleGitHubSync.saveAllData(data);
         if (success) {
-          console.log('Data saved to GitHub successfully');
+          console.log('✅ 数据成功保存到GitHub!');
         } else {
-          console.log('Failed to save data to GitHub');
+          console.log('❌ 保存到GitHub失败');
         }
+      } else {
+        console.log('ℹ️ GitHub同步未启用，只保存到本地');
       }
     }
     
@@ -1668,38 +1678,38 @@
     
     // GitHub Sync Functions
     function toggleGitHubSync() {
-      // Ensure githubSync is available
-      if (!window.githubSync) {
+      // 确保简化同步系统可用
+      if (!window.simpleGitHubSync) {
         alert('GitHub sync module not loaded. Please refresh the page and try again.');
         return;
       }
       
-      if (window.githubSync.isSyncEnabled()) {
-        // Disable GitHub sync
-        window.githubSync.removeToken();
+      if (window.simpleGitHubSync.isSyncEnabled()) {
+        // 禁用GitHub同步
+        window.simpleGitHubSync.removeToken();
         updateGitHubSyncUI();
         alert('GitHub sync disabled. Data will only be saved locally.');
       } else {
-        // Enable GitHub sync - prompt for token
-        const token = prompt('Enter your GitHub Personal Access Token:\n\nYour token: ghp_Hn3Kyjrrd3wggXuNsGN7X7gouEt0x12g970j\n\nCopy and paste the token above:');
+        // 启用GitHub同步 - 提示输入token
+        const token = prompt('输入你的GitHub Personal Access Token:\n\n你的token: ghp_Hn3Kyjrrd3wggXuNsGN7X7gouEt0x12g970j\n\n复制并粘贴上面的token:');
         
         if (token && token.trim()) {
-          // Clear any existing token first
+          // 清除任何现有的token
           localStorage.removeItem('github-token');
           
-          // Set the new token
-          window.githubSync.setToken(token.trim());
+          // 设置新token
+          window.simpleGitHubSync.setToken(token.trim());
           updateGitHubSyncUI();
           
-          // Test the token by trying to save data
+          // 测试token并保存数据
           saveAllData().then(() => {
-            alert('GitHub sync enabled! Your data will now be automatically synced across all devices.');
-            // Force reload to sync data
+            alert('✅ GitHub同步已启用! 你的数据现在会自动在所有设备间同步。');
+            // 强制重载以同步数据
             location.reload();
           }).catch((error) => {
             console.error('GitHub sync test failed:', error);
-            alert('GitHub sync setup failed. Please check your token and try again.\n\nError: ' + error.message);
-            window.githubSync.removeToken();
+            alert('❌ GitHub同步设置失败。请检查你的token并重试。\n\n错误: ' + error.message);
+            window.simpleGitHubSync.removeToken();
             updateGitHubSyncUI();
           });
         }
@@ -1711,16 +1721,16 @@
       const syncIcon = document.getElementById('github-sync-icon');
       const syncText = document.getElementById('github-sync-text');
       
-      if (window.githubSync && window.githubSync.isSyncEnabled()) {
+      if (window.simpleGitHubSync && window.simpleGitHubSync.isSyncEnabled()) {
         syncBtn.classList.add('github-sync-active');
         syncIcon.textContent = '☁️';
         syncText.textContent = 'GitHub Sync ON';
-        console.log('GitHub sync UI updated: ON');
+        console.log('✅ GitHub sync UI updated: ON');
       } else {
         syncBtn.classList.remove('github-sync-active');
         syncIcon.textContent = '📁';
         syncText.textContent = 'GitHub Sync';
-        console.log('GitHub sync UI updated: OFF');
+        console.log('❌ GitHub sync UI updated: OFF');
       }
     }
     
