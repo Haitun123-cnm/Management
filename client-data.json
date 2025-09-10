@@ -90,35 +90,6 @@
       "alerts": "",
       "coordStakeholders": [],
       "coordFamilyContacts": []
-    },
-    {
-      "firstName": "",
-      "lastName": "",
-      "dob": "",
-      "gender": "",
-      "primaryLanguage": "",
-      "interpreter": "",
-      "fundingType": "",
-      "ndisNumber": "",
-      "icareParticipant": "",
-      "planStartDate": "",
-      "planEndDate": "",
-      "primaryDisability": "",
-      "supportNeeds": "",
-      "riskAssessment": "",
-      "supportCoordinator": "",
-      "coordinatorPhone": "",
-      "coordinatorEmail": "",
-      "shortTermGoals": "",
-      "longTermGoals": "",
-      "familyContacts": [],
-      "caregivers": [],
-      "coordinators": [],
-      "documents": {},
-      "reminders": [],
-      "generalNotes": "",
-      "progressNotes": "",
-      "alerts": ""
     }
   ],
   "coordClients": [
@@ -157,5 +128,5 @@
   "todos": [
     "dfgfg <span class=\"todo-date\">(Added on: 25/3/2025)</span>"
   ],
-  "lastUpdated": "2025-09-10T13:51:13.457Z"
+  "lastUpdated": "2025-09-10T13:51:13.456Z"
 }
