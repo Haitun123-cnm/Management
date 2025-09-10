@@ -131,7 +131,7 @@
       "gender": "",
       "primaryLanguage": "",
       "interpreter": "",
-      "fundingType": "",
+      "fundingType": "Plan Managed",
       "ndisNumber": "51234561",
       "icareParticipant": "",
       "planStartDate": "",
@@ -192,5 +192,5 @@
   "todos": [
     "dfgfg <span class=\"todo-date\">(Added on: 25/3/2025)</span>"
   ],
-  "lastUpdated": "2025-09-10T13:54:00.555Z"
+  "lastUpdated": "2025-09-10T13:54:03.409Z"
 }
