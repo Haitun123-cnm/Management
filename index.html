@@ -1681,17 +1681,24 @@
         alert('GitHub sync disabled. Data will only be saved locally.');
       } else {
         // Enable GitHub sync - prompt for token
-        const token = prompt('Enter your GitHub Personal Access Token:\n\nTo create a token:\n1. Go to GitHub.com → Settings → Developer settings → Personal access tokens\n2. Click "Generate new token"\n3. Select "repo" scope\n4. Copy the token and paste it here');
+        const token = prompt('Enter your GitHub Personal Access Token:\n\nYour token: ghp_Hn3Kyjrrd3wggXuNsGN7X7gouEt0x12g970j\n\nCopy and paste the token above:');
         
         if (token && token.trim()) {
+          // Clear any existing token first
+          localStorage.removeItem('github-token');
+          
+          // Set the new token
           window.githubSync.setToken(token.trim());
           updateGitHubSyncUI();
           
           // Test the token by trying to save data
           saveAllData().then(() => {
             alert('GitHub sync enabled! Your data will now be automatically synced across all devices.');
-          }).catch(() => {
-            alert('GitHub sync setup failed. Please check your token and try again.');
+            // Force reload to sync data
+            location.reload();
+          }).catch((error) => {
+            console.error('GitHub sync test failed:', error);
+            alert('GitHub sync setup failed. Please check your token and try again.\n\nError: ' + error.message);
             window.githubSync.removeToken();
             updateGitHubSyncUI();
           });
@@ -1808,20 +1815,28 @@
     function saveCoordClientData() {
       if (!currentClient) return;
       
-      // Save basic information
-      currentClient.firstName = document.getElementById('coordFirstName').value;
-      currentClient.lastName = document.getElementById('coordLastName').value;
-      currentClient.ndisNumber = document.getElementById('coordNdisNumber').value;
-      currentClient.fundingType = document.getElementById('coordFundingType').value;
-      currentClient.planManager = document.getElementById('coordPlanManager').value;
-      currentClient.planManagerContact = document.getElementById('coordPlanManagerContact').value;
-      currentClient.generalNotes = document.getElementById('coordGeneralNotes').value;
-      
-      // Update clients array and save
-      if (selectedClientIndex !== null) {
-        const currentClients = getCurrentClientList();
-        currentClients[selectedClientIndex] = { ...currentClient };
-        saveAllData();
+      try {
+        // Save basic information with null checks
+        currentClient.firstName = document.getElementById('coordFirstName')?.value || '';
+        currentClient.lastName = document.getElementById('coordLastName')?.value || '';
+        currentClient.ndisNumber = document.getElementById('coordNdisNumber')?.value || '';
+        currentClient.fundingType = document.getElementById('coordFundingType')?.value || '';
+        currentClient.planManager = document.getElementById('coordPlanManager')?.value || '';
+        currentClient.planManagerContact = document.getElementById('coordPlanManagerContact')?.value || '';
+        currentClient.generalNotes = document.getElementById('coordGeneralNotes')?.value || '';
+        
+        console.log('Saving Support Coordination client data:', currentClient);
+        
+        // Update clients array and save
+        if (selectedClientIndex !== null) {
+          const currentClients = getCurrentClientList();
+          currentClients[selectedClientIndex] = { ...currentClient };
+          saveAllData();
+          console.log('Support Coordination data saved successfully');
+        }
+      } catch (error) {
+        console.error('Error saving Support Coordination data:', error);
+        showNotification('Error saving Support Coordination data. Please try again.', 'error');
       }
     }
     
