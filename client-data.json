@@ -7,7 +7,7 @@
       "gender": "",
       "primaryLanguage": "",
       "interpreter": "",
-      "fundingType": "",
+      "fundingType": "iCare",
       "ndisNumber": "",
       "icareParticipant": "",
       "planStartDate": "",
@@ -63,5 +63,5 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-10T04:47:14.086Z"
+  "lastUpdated": "2025-09-10T04:47:15.770Z"
 }
