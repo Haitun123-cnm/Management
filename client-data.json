@@ -63,38 +63,9 @@
       "familyContacts": [],
       "caregivers": [],
       "coordinators": [],
-      "documents": {},
-      "reminders": [],
-      "generalNotes": "",
-      "progressNotes": "",
-      "alerts": ""
-    },
-    {
-      "firstName": "",
-      "lastName": "",
-      "dob": "",
-      "gender": "",
-      "primaryLanguage": "",
-      "interpreter": "",
-      "fundingType": "",
-      "ndisNumber": "",
-      "icareParticipant": "",
-      "planStartDate": "",
-      "planEndDate": "",
-      "primaryDisability": "",
-      "supportNeeds": "",
-      "riskAssessment": "",
-      "supportCoordinator": "",
-      "coordinatorPhone": "",
-      "coordinatorEmail": "",
-      "shortTermGoals": "",
-      "longTermGoals": "",
-      "familyContacts": [],
-      "caregivers": [],
-      "coordinators": [],
       "documents": {
         "CCA Service Agreement": {
-          "completed": true
+          "completed": false
         }
       },
       "reminders": [],
@@ -107,5 +78,5 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-10T02:50:30.610Z"
+  "lastUpdated": "2025-09-10T02:51:36.257Z"
 }
