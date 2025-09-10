@@ -1678,6 +1678,11 @@
       
       // Re-render client list for the new mode
       renderClientList();
+      
+      // Re-initialize event listeners for the current mode
+      setTimeout(() => {
+        initializeSupportCoordEventListeners();
+      }, 100);
     }
     
     // GitHub Sync Functions
@@ -1770,6 +1775,34 @@
       }
     }
     
+    // 初始化Support Coordination事件监听器
+    function initializeSupportCoordEventListeners() {
+      console.log('🔧 初始化Support Coordination事件监听器...');
+      
+      // 移除现有的事件监听器（避免重复）
+      const coordInputs = document.querySelectorAll('.support-coord-mode input, .support-coord-mode textarea, .support-coord-mode select');
+      coordInputs.forEach(input => {
+        // 克隆元素来移除所有事件监听器
+        const newInput = input.cloneNode(true);
+        input.parentNode.replaceChild(newInput, input);
+      });
+      
+      // 重新添加事件监听器
+      const newCoordInputs = document.querySelectorAll('.support-coord-mode input, .support-coord-mode textarea, .support-coord-mode select');
+      newCoordInputs.forEach(input => {
+        input.addEventListener('input', () => {
+          console.log('📝 Support Coordination输入变化:', input.id, input.value);
+          saveCoordClientData();
+        });
+        input.addEventListener('change', () => {
+          console.log('🔄 Support Coordination字段变化:', input.id, input.value);
+          saveCoordClientData();
+        });
+      });
+      
+      console.log('✅ Support Coordination事件监听器已初始化，共', newCoordInputs.length, '个元素');
+    }
+    
     function updateButtonStates() {
       const addClientBtn = document.getElementById('add-client-btn');
       const createNewClientBtn = document.getElementById('create-new-client-btn');
@@ -1856,6 +1889,11 @@
       // Render stakeholders and family contacts
       renderCoordStakeholders();
       renderCoordFamilyContacts();
+      
+      // Initialize event listeners after loading data
+      setTimeout(() => {
+        initializeSupportCoordEventListeners();
+      }, 50);
     }
     
     function saveCoordClientData() {
@@ -3361,12 +3399,8 @@
         });
       });
       
-      // Add auto-save for Support Coordination inputs
-      const coordInputs = document.querySelectorAll('.support-coord-mode input, .support-coord-mode textarea, .support-coord-mode select');
-      coordInputs.forEach(input => {
-        input.addEventListener('input', saveCoordClientData);
-        input.addEventListener('change', saveCoordClientData);
-      });
+      // Initialize Support Coordination event listeners
+      initializeSupportCoordEventListeners();
     });
     
     // Support Coordination tab switching
