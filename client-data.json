@@ -1,42 +1,6 @@
 {
-  "serviceClients": [
-    {
-      "firstName": "",
-      "lastName": "",
-      "dob": "",
-      "gender": "",
-      "primaryLanguage": "",
-      "interpreter": "",
-      "fundingType": "",
-      "ndisNumber": "",
-      "icareParticipant": "",
-      "planStartDate": "",
-      "planEndDate": "",
-      "primaryDisability": "",
-      "supportNeeds": "",
-      "riskAssessment": "",
-      "supportCoordinator": "",
-      "coordinatorPhone": "",
-      "coordinatorEmail": "",
-      "shortTermGoals": "",
-      "longTermGoals": "",
-      "familyContacts": [],
-      "caregivers": [],
-      "coordinators": [],
-      "documents": {
-        "CCA Service Agreement": {
-          "completed": false
-        }
-      },
-      "reminders": [],
-      "generalNotes": "",
-      "progressNotes": "",
-      "alerts": "",
-      "coordStakeholders": [],
-      "coordFamilyContacts": []
-    }
-  ],
+  "serviceClients": [],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-10T04:21:47.321Z"
+  "lastUpdated": "2025-09-10T04:21:51.025Z"
 }
