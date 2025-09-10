@@ -30,37 +30,6 @@
       "alerts": "",
       "coordStakeholders": [],
       "coordFamilyContacts": []
-    },
-    {
-      "firstName": "La",
-      "lastName": "L",
-      "dob": "2024-12-12",
-      "gender": "Male",
-      "primaryLanguage": "English ",
-      "interpreter": "",
-      "fundingType": "NDIS",
-      "ndisNumber": "51355416",
-      "icareParticipant": "",
-      "planStartDate": "2025-10-10",
-      "planEndDate": "2026-10-10",
-      "primaryDisability": "",
-      "supportNeeds": "",
-      "riskAssessment": "",
-      "supportCoordinator": "",
-      "coordinatorPhone": "",
-      "coordinatorEmail": "",
-      "shortTermGoals": "",
-      "longTermGoals": "",
-      "familyContacts": [],
-      "caregivers": [],
-      "coordinators": [],
-      "documents": {},
-      "reminders": [],
-      "generalNotes": "",
-      "progressNotes": "",
-      "alerts": "",
-      "coordStakeholders": [],
-      "coordFamilyContacts": []
     }
   ],
   "coordClients": [
@@ -99,5 +68,5 @@
   "todos": [
     "dfgfg <span class=\"todo-date\">(Added on: 25/3/2025)</span>"
   ],
-  "lastUpdated": "2025-09-10T13:33:07.284Z"
+  "lastUpdated": "2025-09-10T13:33:10.332Z"
 }
