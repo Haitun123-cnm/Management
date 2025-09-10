@@ -884,6 +884,10 @@
         <span>+</span>
         Add New Client
       </button>
+      <button class="btn btn-secondary" id="create-new-client-btn" onclick="createNewClient()">
+        <span>🆕</span>
+        Create New Client
+      </button>
     </div>
   </div>
   
@@ -1713,6 +1717,26 @@
       }
     }
     
+    function updateButtonStates() {
+      const addClientBtn = document.getElementById('add-client-btn');
+      const createNewClientBtn = document.getElementById('create-new-client-btn');
+      const saveClientBtn = document.getElementById('save-client-btn');
+      
+      if (currentClient && selectedClientIndex !== null) {
+        // Client is selected
+        addClientBtn.textContent = 'Add New Client';
+        addClientBtn.title = 'A client is already selected. Use "Create New Client" to start fresh.';
+        createNewClientBtn.style.display = 'inline-block';
+        saveClientBtn.style.display = 'inline-block';
+      } else {
+        // No client selected
+        addClientBtn.textContent = 'Add New Client';
+        addClientBtn.title = 'Create a new client to get started';
+        createNewClientBtn.style.display = 'none';
+        saveClientBtn.style.display = 'none';
+      }
+    }
+    
     // Edit Mode Functions
     function toggleEditMode() {
       isEditMode = !isEditMode;
@@ -2128,6 +2152,9 @@
           renderCoordinators();
         }
       }, 100);
+      
+      // Update button states
+      updateButtonStates();
     }
     
     function deleteClient(index) {
@@ -2895,7 +2922,8 @@
       });
     });
     
-    document.getElementById('add-client-btn').addEventListener('click', () => {
+    // Create new client function
+    function createNewClient() {
       // Check if there's an unsaved client first
       if (currentClient && selectedClientIndex !== null) {
         const hasUnsavedChanges = checkForUnsavedChanges();
@@ -2926,7 +2954,20 @@
       }
       
       // Show confirmation
-      showNotification('New client created successfully!', 'success');
+      showNotification('New client created successfully! You can now fill in the details.', 'success');
+      
+      // Update button states
+      updateButtonStates();
+    }
+    
+    document.getElementById('add-client-btn').addEventListener('click', () => {
+      // If no client is selected, create a new one
+      if (!currentClient || selectedClientIndex === null) {
+        createNewClient();
+      } else {
+        // If a client is already selected, just show a message
+        showNotification('A client is already selected. Fill in the details and save, or use "Create New Client" to start fresh.', 'info');
+      }
     });
     
           // Add family contact button - use direct event listeners instead of delegation
@@ -3071,10 +3112,10 @@
         deleteClient(selectedClientIndex);
       }
       
-      // Ctrl/Cmd + N to add new client
+      // Ctrl/Cmd + N to create new client
       if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
-        document.getElementById('add-client-btn').click();
+        createNewClient();
       }
       
       // Ctrl/Cmd + S to save client
@@ -3233,6 +3274,9 @@
     
     // Initialize GitHub sync UI
     updateGitHubSyncUI();
+    
+    // Initialize button states
+    updateButtonStates();
     
     // Add event listeners for todo input
     document.addEventListener('DOMContentLoaded', () => {
