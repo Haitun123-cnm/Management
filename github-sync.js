@@ -4,7 +4,7 @@
 class GitHubDataSync {
     constructor() {
         this.owner = 'Haitun123-cnm';  // 你的GitHub用户名
-        this.repo = 'haitun123-client-system';  // 你的仓库名
+        this.repo = 'Management';  // 你的仓库名
         this.dataFile = 'client-data.json';
         this.token = null;
         this.isEnabled = false;
