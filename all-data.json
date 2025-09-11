@@ -21,7 +21,14 @@
       "shortTermGoals": "",
       "longTermGoals": "",
       "familyContacts": [],
-      "caregivers": [],
+      "caregivers": [
+        {
+          "name": "Bipendra Shrestha",
+          "phone": "",
+          "email": "",
+          "canDrive": ""
+        }
+      ],
       "coordinators": [],
       "documents": {},
       "reminders": [
@@ -42,6 +49,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T02:28:50.475Z",
+  "lastUpdated": "2025-09-11T02:29:16.597Z",
   "version": "1.0"
 }
