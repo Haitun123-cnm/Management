@@ -57,6 +57,12 @@
           "phone": "",
           "email": "",
           "canDrive": ""
+        },
+        {
+          "name": "Lakhwinder Singh",
+          "phone": "",
+          "email": "",
+          "canDrive": ""
         }
       ],
       "coordinators": [],
@@ -79,6 +85,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T02:31:40.427Z",
+  "lastUpdated": "2025-09-11T02:31:49.932Z",
   "version": "1.0"
 }
