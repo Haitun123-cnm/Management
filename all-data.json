@@ -20,7 +20,14 @@
       "coordinatorEmail": "",
       "shortTermGoals": "",
       "longTermGoals": "",
-      "familyContacts": [],
+      "familyContacts": [
+        {
+          "name": "Noor Sarsam",
+          "relationship": "Sister",
+          "phone": "",
+          "email": "nsar1111@y7mail.com"
+        }
+      ],
       "caregivers": [
         {
           "name": "Bipendra Shrestha",
@@ -142,6 +149,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T03:46:45.260Z",
+  "lastUpdated": "2025-09-11T03:47:10.605Z",
   "version": "1.0"
 }
