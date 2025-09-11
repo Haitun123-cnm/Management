@@ -27,6 +27,12 @@
           "phone": "0452 464 991",
           "email": "bshestha@ccoz.org.au",
           "canDrive": "Yes"
+        },
+        {
+          "name": "Pratipal Singh",
+          "phone": "",
+          "email": "",
+          "canDrive": ""
         }
       ],
       "coordinators": [],
@@ -49,6 +55,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T02:30:46.467Z",
+  "lastUpdated": "2025-09-11T02:30:58.572Z",
   "version": "1.0"
 }
