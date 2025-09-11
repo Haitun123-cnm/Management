@@ -134,6 +134,14 @@
           "email": "jessica.pye@concentric.com.au",
           "organization": "Concentric",
           "role": "physio"
+        },
+        {
+          "name": "Dr Vanderpoorten",
+          "profession": "Gastroenterologist & Hepatologist",
+          "phone": "02 8711 0160",
+          "email": "",
+          "organization": "Lakeview Private Hospital",
+          "role": ""
         }
       ],
       "documents": {},
@@ -155,6 +163,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T03:48:32.051Z",
+  "lastUpdated": "2025-09-11T03:50:25.636Z",
   "version": "1.0"
 }
