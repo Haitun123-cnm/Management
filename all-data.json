@@ -89,16 +89,7 @@
           "canDrive": ""
         }
       ],
-      "coordinators": [
-        {
-          "name": "Sarah Strong",
-          "profession": "ICare Case Manager",
-          "phone": "0410 837 395",
-          "email": "",
-          "organization": "",
-          "role": ""
-        }
-      ],
+      "coordinators": [],
       "documents": {},
       "reminders": [
         {
@@ -118,6 +109,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T03:37:15.567Z",
+  "lastUpdated": "2025-09-11T03:37:54.531Z",
   "version": "1.0"
 }
