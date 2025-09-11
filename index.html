@@ -1575,7 +1575,12 @@
         reminders: [],
         generalNotes: '',
         progressNotes: '',
-        alerts: ''
+        alerts: '',
+        // Support Coordination specific fields
+        planManager: '',
+        planManagerContact: '',
+        coordStakeholders: [],
+        coordFamilyContacts: []
       };
     }
     
@@ -1897,9 +1902,14 @@
     }
     
     function saveCoordClientData() {
-      if (!currentClient) return;
+      if (!currentClient) {
+        console.log('❌ No current client selected');
+        return;
+      }
       
       try {
+        console.log('🔄 Starting Support Coordination data save...');
+        
         // Save basic information with null checks
         currentClient.firstName = document.getElementById('coordFirstName')?.value || '';
         currentClient.lastName = document.getElementById('coordLastName')?.value || '';
@@ -1909,17 +1919,38 @@
         currentClient.planManagerContact = document.getElementById('coordPlanManagerContact')?.value || '';
         currentClient.generalNotes = document.getElementById('coordGeneralNotes')?.value || '';
         
-        console.log('Saving Support Coordination client data:', currentClient);
+        console.log('📝 Basic data saved:', {
+          firstName: currentClient.firstName,
+          lastName: currentClient.lastName,
+          ndisNumber: currentClient.ndisNumber,
+          fundingType: currentClient.fundingType,
+          planManager: currentClient.planManager,
+          planManagerContact: currentClient.planManagerContact
+        });
+        
+        // Save Support Coordination specific data
+        if (!currentClient.coordStakeholders) {
+          currentClient.coordStakeholders = [];
+        }
+        if (!currentClient.coordFamilyContacts) {
+          currentClient.coordFamilyContacts = [];
+        }
+        
+        console.log('🔄 Current client data before save:', currentClient);
         
         // Update clients array and save
         if (selectedClientIndex !== null) {
           const currentClients = getCurrentClientList();
           currentClients[selectedClientIndex] = { ...currentClient };
+          console.log('💾 Saving to clients array at index:', selectedClientIndex);
           saveAllData();
-          console.log('Support Coordination data saved successfully');
+          console.log('✅ Support Coordination data saved successfully');
+          showNotification('Support Coordination data saved!', 'success');
+        } else {
+          console.log('❌ No selectedClientIndex, cannot save');
         }
       } catch (error) {
-        console.error('Error saving Support Coordination data:', error);
+        console.error('❌ Error saving Support Coordination data:', error);
         showNotification('Error saving Support Coordination data. Please try again.', 'error');
       }
     }
