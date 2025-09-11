@@ -21,7 +21,14 @@
       "shortTermGoals": "",
       "longTermGoals": "",
       "familyContacts": [],
-      "caregivers": [],
+      "caregivers": [
+        {
+          "name": "Bipendra Shrestha",
+          "phone": "0452 464 991",
+          "email": "bshestha@ccoz.org.au",
+          "canDrive": "Yes"
+        }
+      ],
       "coordinators": [],
       "documents": {},
       "reminders": [
@@ -42,6 +49,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T02:29:45.659Z",
+  "lastUpdated": "2025-09-11T02:30:27.290Z",
   "version": "1.0"
 }
