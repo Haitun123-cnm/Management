@@ -33,6 +33,12 @@
           "phone": "",
           "email": "",
           "canDrive": ""
+        },
+        {
+          "name": "Sajindra Shrestha (New)",
+          "phone": "",
+          "email": "",
+          "canDrive": ""
         }
       ],
       "coordinators": [],
@@ -55,6 +61,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T02:30:58.572Z",
+  "lastUpdated": "2025-09-11T02:31:16.252Z",
   "version": "1.0"
 }
