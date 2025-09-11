@@ -45,6 +45,12 @@
           "phone": "",
           "email": "",
           "canDrive": ""
+        },
+        {
+          "name": "Bishal Karki",
+          "phone": "",
+          "email": "",
+          "canDrive": ""
         }
       ],
       "coordinators": [],
@@ -67,6 +73,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T02:31:25.020Z",
+  "lastUpdated": "2025-09-11T02:31:32.796Z",
   "version": "1.0"
 }
