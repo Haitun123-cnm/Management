@@ -105,6 +105,14 @@
           "email": "nadia.downey@concentric.com.au",
           "organization": "Concentric",
           "role": "OT"
+        },
+        {
+          "name": "Anneli Cassel",
+          "profession": "Communication Consulatant",
+          "phone": "",
+          "email": "",
+          "organization": "",
+          "role": ""
         }
       ],
       "documents": {},
@@ -126,6 +134,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T03:40:38.092Z",
+  "lastUpdated": "2025-09-11T03:43:28.452Z",
   "version": "1.0"
 }
