@@ -12,7 +12,7 @@
       "icareParticipant": "",
       "planStartDate": "",
       "planEndDate": "",
-      "primaryDisability": "",
+      "primaryDisability": "Traumatic Brain Injury (TBI) following a catastrophic accident.\n\nFull-time wheelchair user – requires hoist and specialised equipment for all transfers.\n\nOngoing impacts:\n\nMobility loss and muscle weakness\n\nBladder and bowel incontinence (uridome, enemas, bowel care)\n\nRisk of skin breakdown (daily monitoring and creams)\n\nEmotional and behavioural dysregulation (occasional verbal/physical aggression)",
       "supportNeeds": "",
       "riskAssessment": "",
       "supportCoordinator": "",
@@ -34,6 +34,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T00:31:36.323Z",
+  "lastUpdated": "2025-09-11T00:31:52.398Z",
   "version": "1.0"
 }
