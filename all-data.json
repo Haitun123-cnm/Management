@@ -105,6 +105,14 @@
           "email": "nadia.downey@concentric.com.au",
           "organization": "Concentric",
           "role": "OT"
+        },
+        {
+          "name": "Anneli Cassel",
+          "profession": "Communication Consultant",
+          "phone": "0492 861 170",
+          "email": "anneli@inspirerp.com.au",
+          "organization": "Inspire rehab & psychology",
+          "role": "Communication Consultant"
         }
       ],
       "documents": {},
@@ -126,6 +134,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T03:43:40.355Z",
+  "lastUpdated": "2025-09-11T03:44:39.108Z",
   "version": "1.0"
 }
