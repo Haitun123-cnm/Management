@@ -24,7 +24,15 @@
       "caregivers": [],
       "coordinators": [],
       "documents": {},
-      "reminders": [],
+      "reminders": [
+        {
+          "title": "Equipment review meeting",
+          "description": "Nadia (OT) and Sarah (Case Manager) will conduct a wheelchair check for Karm",
+          "date": "2025-09-18",
+          "time": "09:00",
+          "created": "2025-09-11T02:27:50.307Z"
+        }
+      ],
       "generalNotes": "",
       "progressNotes": "",
       "alerts": "",
@@ -34,6 +42,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T00:35:06.944Z",
+  "lastUpdated": "2025-09-11T02:27:50.308Z",
   "version": "1.0"
 }
