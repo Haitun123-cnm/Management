@@ -69,7 +69,7 @@ class SimpleGitHubSync {
             const url = `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${this.dataFile}`;
             
             const payload = {
-                message: `更新所有数据 - ${new Date().toLocaleString()}`,
+                message: `Auto-sync data`,
                 content: encodedContent,
                 branch: 'main'
             };

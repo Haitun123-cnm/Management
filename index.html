@@ -2493,6 +2493,7 @@
               <span class="coordinator-detail-value">${escapeHTML(contact.email || 'Not provided')}</span>
             </div>
             <div class="coordinator-actions">
+              <button class="btn btn-warning btn-sm" onclick="editFamilyContact(${index}); event.stopPropagation();" title="Edit family contact">Edit</button>
               <button class="btn btn-danger btn-sm" onclick="removeFamilyContact(${index}); event.stopPropagation();" title="Remove family contact">Remove</button>
             </div>
           </div>
@@ -2551,6 +2552,35 @@
       }
     }
     
+    function editFamilyContact(index) {
+      if (!currentClient.familyContacts || !currentClient.familyContacts[index]) return;
+      
+      const contact = currentClient.familyContacts[index];
+      
+      const name = prompt('Enter family contact name:', contact.name) || contact.name;
+      const relationship = prompt('Enter relationship:', contact.relationship) || contact.relationship;
+      const phone = prompt('Enter phone number:', contact.phone) || '';
+      const email = prompt('Enter email address:', contact.email) || '';
+      
+      // Update the contact
+      currentClient.familyContacts[index] = {
+        name: name.trim(),
+        relationship: relationship.trim(),
+        phone: phone.trim(),
+        email: email.trim()
+      };
+      
+      // Save changes
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      
+      renderFamilyContacts();
+      showNotification('Family contact updated successfully!', 'success');
+    }
+    
     function removeFamilyContact(index) {
       if (currentClient.familyContacts && currentClient.familyContacts[index]) {
         currentClient.familyContacts.splice(index, 1);
@@ -2600,7 +2630,20 @@
               <span class="coordinator-detail-label">Can Drive:</span>
               <span class="coordinator-detail-value">${escapeHTML(caregiver.canDrive || 'Not specified')}</span>
             </div>
+            ${caregiver.trainingNeeded ? `
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Training Needed:</span>
+              <span class="coordinator-detail-value">${escapeHTML(caregiver.trainingNeeded)}</span>
+            </div>
+            ${caregiver.trainingDetails ? `
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Training Details:</span>
+              <span class="coordinator-detail-value">${escapeHTML(caregiver.trainingDetails)}</span>
+            </div>
+            ` : ''}
+            ` : ''}
             <div class="coordinator-actions">
+              <button class="btn btn-warning btn-sm" onclick="editCaregiver(${index}); event.stopPropagation();" title="Edit caregiver">Edit</button>
               <button class="btn btn-danger btn-sm" onclick="removeCaregiver(${index}); event.stopPropagation();" title="Remove caregiver">Remove</button>
             </div>
           </div>
@@ -2613,31 +2656,72 @@
         currentClient.caregivers = [];
       }
       
-      const name = prompt('Enter caregiver name:');
-      if (!name || name.trim() === '') return;
-      
-      const phone = prompt('Enter phone number (optional):') || '';
-      const email = prompt('Enter email address (optional):') || '';
-      const canDrive = prompt('Can this caregiver drive? (Yes/No/Leave blank):') || '';
-      
-      const newCaregiver = {
-        name: name.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        canDrive: canDrive.trim()
+      let caregiverData = {
+        name: '',
+        phone: '',
+        email: '',
+        canDrive: '',
+        trainingNeeded: '',
+        trainingDetails: ''
       };
       
-      currentClient.caregivers.push(newCaregiver);
-      console.log('Added new caregiver:', newCaregiver);
-      console.log('Current caregivers:', currentClient.caregivers);
-      
-      if (selectedClientIndex !== null) {
-        const currentClients = getCurrentClientList();
-        currentClients[selectedClientIndex] = { ...currentClient };
-        saveAllData();
+      // Collect all information with ability to go back
+      while (true) {
+        const action = prompt(`Add Caregiver - Current Info:\n\nName: ${caregiverData.name || 'Not set'}\nPhone: ${caregiverData.phone || 'Not set'}\nEmail: ${caregiverData.email || 'Not set'}\nCan Drive: ${caregiverData.canDrive || 'Not set'}\nTraining Needed: ${caregiverData.trainingNeeded || 'Not set'}\nTraining Details: ${caregiverData.trainingDetails || 'Not set'}\n\nOptions:\n1 - Set/Edit Name\n2 - Set/Edit Phone\n3 - Set/Edit Email\n4 - Set/Edit Driving Status\n5 - Set/Edit Training Needed\n6 - Set/Edit Training Details\n7 - Save and Add\n8 - Cancel\n\nEnter option number:`);
+        
+        if (!action) break;
+        
+        switch (action.trim()) {
+          case '1':
+            caregiverData.name = prompt('Enter caregiver name:', caregiverData.name) || '';
+            break;
+          case '2':
+            caregiverData.phone = prompt('Enter phone number (optional):', caregiverData.phone) || '';
+            break;
+          case '3':
+            caregiverData.email = prompt('Enter email address (optional):', caregiverData.email) || '';
+            break;
+          case '4':
+            caregiverData.canDrive = prompt('Can this caregiver drive? (Yes/No/Leave blank):', caregiverData.canDrive) || '';
+            break;
+          case '5':
+            caregiverData.trainingNeeded = prompt('Training needed? (Yes/No, optional):', caregiverData.trainingNeeded) || '';
+            break;
+          case '6':
+            caregiverData.trainingDetails = prompt('What training is needed? (optional):', caregiverData.trainingDetails) || '';
+            break;
+          case '7':
+            if (!caregiverData.name.trim()) {
+              alert('Name is required!');
+              continue;
+            }
+            // Save the caregiver
+            const newCaregiver = {
+              name: caregiverData.name.trim(),
+              phone: caregiverData.phone.trim(),
+              email: caregiverData.email.trim(),
+              canDrive: caregiverData.canDrive.trim(),
+              trainingNeeded: caregiverData.trainingNeeded.trim(),
+              trainingDetails: caregiverData.trainingDetails.trim()
+            };
+            
+            currentClient.caregivers.push(newCaregiver);
+            
+            if (selectedClientIndex !== null) {
+              const currentClients = getCurrentClientList();
+              currentClients[selectedClientIndex] = { ...currentClient };
+              saveAllData();
+            }
+            
+            renderCaregivers();
+            showNotification('Caregiver added successfully!', 'success');
+            return;
+          case '8':
+            return;
+          default:
+            alert('Invalid option. Please enter a number from 1-8.');
+        }
       }
-      
-      renderCaregivers();
     }
     
 
@@ -2659,15 +2743,52 @@
       }
     }
 
+    function editCaregiver(index) {
+      if (!currentClient.caregivers || !currentClient.caregivers[index]) return;
+      
+      const caregiver = currentClient.caregivers[index];
+      
+      const name = prompt('Enter caregiver name:', caregiver.name) || caregiver.name;
+      const phone = prompt('Enter phone number:', caregiver.phone) || '';
+      const email = prompt('Enter email address:', caregiver.email) || '';
+      const canDrive = prompt('Can this caregiver drive? (Yes/No/Leave blank):', caregiver.canDrive) || '';
+      const trainingNeeded = prompt('Training needed? (Yes/No, optional):', caregiver.trainingNeeded) || '';
+      const trainingDetails = trainingNeeded.toLowerCase() === 'yes' ? 
+        prompt('What training is needed? (optional):', caregiver.trainingDetails) || '' : '';
+      
+      // Update the caregiver
+      currentClient.caregivers[index] = {
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        canDrive: canDrive.trim(),
+        trainingNeeded: trainingNeeded.trim(),
+        trainingDetails: trainingDetails.trim()
+      };
+      
+      // Save changes
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      
+      renderCaregivers();
+      showNotification('Caregiver updated successfully!', 'success');
+    }
+    
     function removeCaregiver(index) {
       if (currentClient.caregivers && currentClient.caregivers[index]) {
-        currentClient.caregivers.splice(index, 1);
-        if (selectedClientIndex !== null) {
-          const currentClients = getCurrentClientList();
-          currentClients[selectedClientIndex] = { ...currentClient };
-          saveAllData();
+        const caregiver = currentClient.caregivers[index];
+        if (confirm(`Are you sure you want to remove "${caregiver.name}"?`)) {
+          currentClient.caregivers.splice(index, 1);
+          if (selectedClientIndex !== null) {
+            const currentClients = getCurrentClientList();
+            currentClients[selectedClientIndex] = { ...currentClient };
+            saveAllData();
+          }
+          renderCaregivers();
         }
-        renderCaregivers();
       }
     }
     
@@ -2700,6 +2821,7 @@
       container.innerHTML = currentClient.coordinators.map((coordinator, index) => `
         <div class="coordinator-card" onclick="toggleCoordinatorDetails(${index})">
           <div class="coordinator-actions">
+            <button class="btn btn-warning btn-sm" onclick="editCoordinator(${index}); event.stopPropagation();" title="Edit coordinator">✏️</button>
             <button class="btn btn-danger btn-sm" onclick="removeCoordinator(${index}); event.stopPropagation();" title="Remove coordinator">🗑️</button>
           </div>
           <div class="coordinator-name">${escapeHTML(coordinator.name || 'Unnamed')}</div>
@@ -2738,40 +2860,109 @@
         currentClient.coordinators = [];
       }
       
-      const name = prompt('Enter coordinator/stakeholder name:');
-      if (!name) return;
-      
-      const profession = prompt('Enter profession/role (e.g., "iCare Coordinator", "Support Coordinator"):');
-      if (!profession) return;
-      
-      const phone = prompt('Enter phone number (optional):') || '';
-      const email = prompt('Enter email address (optional):') || '';
-      const organization = prompt('Enter organization (optional):') || '';
-      const role = prompt('Enter specific role (optional):') || '';
-      
-      const newCoordinator = {
-        name: name,
-        profession: profession,
-        phone: phone,
-        email: email,
-        organization: organization,
-        role: role
+      let coordinatorData = {
+        name: '',
+        profession: '',
+        phone: '',
+        email: '',
+        organization: '',
+        role: ''
       };
       
-      currentClient.coordinators.push(newCoordinator);
-      console.log('Added coordinator:', newCoordinator);
-      console.log('Updated coordinators array:', currentClient.coordinators);
+      // Collect all information with ability to go back
+      while (true) {
+        const action = prompt(`Add Coordinator/Stakeholder - Current Info:\n\nName: ${coordinatorData.name || 'Not set'}\nProfession: ${coordinatorData.profession || 'Not set'}\nPhone: ${coordinatorData.phone || 'Not set'}\nEmail: ${coordinatorData.email || 'Not set'}\nOrganization: ${coordinatorData.organization || 'Not set'}\nRole: ${coordinatorData.role || 'Not set'}\n\nOptions:\n1 - Set/Edit Name\n2 - Set/Edit Profession\n3 - Set/Edit Phone\n4 - Set/Edit Email\n5 - Set/Edit Organization\n6 - Set/Edit Role\n7 - Save and Add\n8 - Cancel\n\nEnter option number:`);
+        
+        if (!action) break;
+        
+        switch (action.trim()) {
+          case '1':
+            coordinatorData.name = prompt('Enter coordinator/stakeholder name:', coordinatorData.name) || '';
+            break;
+          case '2':
+            coordinatorData.profession = prompt('Enter profession/role:', coordinatorData.profession) || '';
+            break;
+          case '3':
+            coordinatorData.phone = prompt('Enter phone number (optional):', coordinatorData.phone) || '';
+            break;
+          case '4':
+            coordinatorData.email = prompt('Enter email address (optional):', coordinatorData.email) || '';
+            break;
+          case '5':
+            coordinatorData.organization = prompt('Enter organization (optional):', coordinatorData.organization) || '';
+            break;
+          case '6':
+            coordinatorData.role = prompt('Enter specific role (optional):', coordinatorData.role) || '';
+            break;
+          case '7':
+            if (!coordinatorData.name.trim()) {
+              alert('Name is required!');
+              continue;
+            }
+            if (!coordinatorData.profession.trim()) {
+              alert('Profession is required!');
+              continue;
+            }
+            // Save the coordinator
+            const newCoordinator = {
+              name: coordinatorData.name.trim(),
+              profession: coordinatorData.profession.trim(),
+              phone: coordinatorData.phone.trim(),
+              email: coordinatorData.email.trim(),
+              organization: coordinatorData.organization.trim(),
+              role: coordinatorData.role.trim()
+            };
+            
+            currentClient.coordinators.push(newCoordinator);
+            
+            if (selectedClientIndex !== null) {
+              const currentClients = getCurrentClientList();
+              currentClients[selectedClientIndex] = { ...currentClient };
+              saveAllData();
+            }
+            
+            renderCoordinators();
+            showNotification('Coordinator/Stakeholder added successfully!', 'success');
+            return;
+          case '8':
+            return;
+          default:
+            alert('Invalid option. Please enter a number from 1-8.');
+        }
+      }
+    }
+    
+    function editCoordinator(index) {
+      if (!currentClient.coordinators || !currentClient.coordinators[index]) return;
       
-      // Use consistent saving logic
+      const coordinator = currentClient.coordinators[index];
+      
+      const name = prompt('Enter coordinator/stakeholder name:', coordinator.name) || coordinator.name;
+      const profession = prompt('Enter profession/role:', coordinator.profession) || coordinator.profession;
+      const phone = prompt('Enter phone number:', coordinator.phone) || '';
+      const email = prompt('Enter email address:', coordinator.email) || '';
+      const organization = prompt('Enter organization:', coordinator.organization) || '';
+      const role = prompt('Enter specific role:', coordinator.role) || '';
+      
+      // Update the coordinator
+      currentClient.coordinators[index] = {
+        name: name.trim(),
+        profession: profession.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        organization: organization.trim(),
+        role: role.trim()
+      };
+      
+      // Save changes
       if (selectedClientIndex !== null) {
         const currentClients = getCurrentClientList();
         currentClients[selectedClientIndex] = { ...currentClient };
-        saveAllData(); // Use saveAllData instead of direct localStorage
-        console.log('Saved using saveAllData');
+        saveAllData();
       }
       
       renderCoordinators();
-      showNotification('Coordinator/Stakeholder added successfully!', 'success');
+      showNotification('Coordinator/Stakeholder updated successfully!', 'success');
     }
     
     function removeCoordinator(index) {
@@ -3003,14 +3194,9 @@
     
     document.querySelectorAll('.tab-item').forEach(tab => {
       tab.addEventListener('click', () => {
-        // Check for unsaved changes before switching tabs
+        // Auto-save data without prompting user
         if (currentClient && selectedClientIndex !== null) {
-          const hasUnsavedChanges = checkForUnsavedChanges();
-          if (hasUnsavedChanges) {
-            if (confirm('You have unsaved changes. Do you want to save them before switching tabs?')) {
-              saveClientData();
-            }
-          }
+          saveClientData();
         }
         
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
