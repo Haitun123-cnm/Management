@@ -167,14 +167,14 @@
   ],
   "coordClients": [
     {
-      "firstName": "Amy",
-      "lastName": "Lam",
+      "firstName": "",
+      "lastName": "",
       "dob": "",
       "gender": "",
       "primaryLanguage": "",
       "interpreter": "",
       "fundingType": "",
-      "ndisNumber": "430483099",
+      "ndisNumber": "",
       "icareParticipant": "",
       "planStartDate": "",
       "planEndDate": "",
@@ -194,13 +194,20 @@
       "generalNotes": "",
       "progressNotes": "",
       "alerts": "",
-      "coordStakeholders": [],
+      "coordStakeholders": [
+        {
+          "name": "Effie",
+          "profession": "Service Provider - Cleanning",
+          "phone": "0408 113 482",
+          "email": ""
+        }
+      ],
       "coordFamilyContacts": [],
       "planManager": "Myintegra",
       "planManagerContact": ""
     }
   ],
   "todos": [],
-  "lastUpdated": "2025-09-12T01:45:41.114Z",
+  "lastUpdated": "2025-09-12T01:46:31.756Z",
   "version": "1.0"
 }
