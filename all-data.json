@@ -99,7 +99,9 @@
           "name": "Kushal Kandel",
           "phone": "",
           "email": "",
-          "canDrive": ""
+          "canDrive": "",
+          "trainingNeeded": "",
+          "trainingDetails": ""
         }
       ],
       "coordinators": [
@@ -163,6 +165,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-11T23:45:42.758Z",
+  "lastUpdated": "2025-09-12T00:40:42.300Z",
   "version": "1.0"
 }
