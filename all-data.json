@@ -173,7 +173,7 @@
       "gender": "",
       "primaryLanguage": "",
       "interpreter": "",
-      "fundingType": "",
+      "fundingType": "Plan Managed",
       "ndisNumber": "430483099",
       "icareParticipant": "",
       "planStartDate": "",
@@ -201,6 +201,6 @@
     }
   ],
   "todos": [],
-  "lastUpdated": "2025-09-12T01:45:28.289Z",
+  "lastUpdated": "2025-09-12T01:45:30.555Z",
   "version": "1.0"
 }
