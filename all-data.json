@@ -194,13 +194,20 @@
       "generalNotes": "",
       "progressNotes": "",
       "alerts": "",
-      "coordStakeholders": [],
+      "coordStakeholders": [
+        {
+          "name": "Effie - Ladies Running Errands St George",
+          "profession": "Cleaning",
+          "phone": "0408 113 482",
+          "email": ""
+        }
+      ],
       "coordFamilyContacts": [],
       "planManager": "Myintegra",
       "planManagerContact": ""
     }
   ],
   "todos": [],
-  "lastUpdated": "2025-09-12T01:46:52.994Z",
+  "lastUpdated": "2025-09-12T01:47:23.146Z",
   "version": "1.0"
 }
