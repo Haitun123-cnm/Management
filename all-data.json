@@ -52,7 +52,7 @@
           "phone": "",
           "email": "",
           "canDrive": "",
-          "trainingNeeded": "",
+          "trainingNeeded": "On leave from 15.09.25 to 30.10.25",
           "trainingDetails": ""
         },
         {
@@ -167,6 +167,6 @@
   ],
   "coordClients": [],
   "todos": [],
-  "lastUpdated": "2025-09-12T00:41:08.949Z",
+  "lastUpdated": "2025-09-12T00:41:40.779Z",
   "version": "1.0"
 }
