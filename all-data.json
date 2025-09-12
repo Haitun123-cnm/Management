@@ -194,20 +194,13 @@
       "generalNotes": "",
       "progressNotes": "",
       "alerts": "",
-      "coordStakeholders": [
-        {
-          "name": "Effie",
-          "profession": "Service Provider - Cleanning",
-          "phone": "0408 113 482",
-          "email": ""
-        }
-      ],
+      "coordStakeholders": [],
       "coordFamilyContacts": [],
       "planManager": "Myintegra",
       "planManagerContact": ""
     }
   ],
   "todos": [],
-  "lastUpdated": "2025-09-12T01:46:31.756Z",
+  "lastUpdated": "2025-09-12T01:46:52.994Z",
   "version": "1.0"
 }
