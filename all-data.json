@@ -167,8 +167,8 @@
   ],
   "coordClients": [
     {
-      "firstName": "Amy",
-      "lastName": "Lam",
+      "firstName": "",
+      "lastName": "",
       "dob": "",
       "gender": "",
       "primaryLanguage": "",
@@ -237,6 +237,6 @@
     }
   ],
   "todos": [],
-  "lastUpdated": "2025-09-12T01:47:45.790Z",
+  "lastUpdated": "2025-09-12T01:47:57.674Z",
   "version": "1.0"
 }
