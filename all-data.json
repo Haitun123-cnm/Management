@@ -233,7 +233,9 @@
       "reminders": [],
       "generalNotes": "",
       "progressNotes": "",
-      "alerts": ""
+      "alerts": "",
+      "coordStakeholders": [],
+      "coordFamilyContacts": []
     }
   ],
   "todos": [
@@ -250,6 +252,6 @@
       "createdAt": "2025-09-12T01:48:19.537Z"
     }
   ],
-  "lastUpdated": "2025-09-22T23:30:38.652Z",
+  "lastUpdated": "2025-09-22T23:32:38.719Z",
   "version": "1.0"
 }
