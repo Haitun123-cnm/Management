@@ -864,6 +864,10 @@
   <div class="header">
     <div class="header-title" id="system-title">Service Management System</div>
     <div class="header-actions">
+      <button class="btn btn-secondary" id="edit-mode-btn" onclick="toggleEditMode()" title="Toggle edit mode">
+        <span id="edit-mode-icon">✏️</span>
+        <span id="edit-mode-text">Edit Mode</span>
+      </button>
       <button class="btn btn-secondary" id="system-mode-btn" onclick="toggleSystemMode()">
         <span id="system-mode-icon">🔄</span>
         <span id="system-mode-text">Switch Mode</span>
@@ -872,7 +876,15 @@
         <span id="sync-icon">☁️</span>
         <span id="sync-text">Sync</span>
       </button>
-      <button class="btn btn-primary" id="add-client-btn" onclick="createNewClient()">
+      <button class="btn btn-secondary" id="sync-now-btn" onclick="syncNow()" title="立即同步数据" style="display: none;">
+        <span>🔄</span>
+        <span>Sync Now</span>
+      </button>
+      <button class="btn btn-success" id="save-client-btn" onclick="saveClientDataWithConfirmation()">
+        <span>💾</span>
+        Save Client
+      </button>
+      <button class="btn btn-primary" id="add-client-btn">
         <span>+</span>
         Add Client
       </button>
@@ -2038,7 +2050,7 @@
       }
       
       // Show improved contact form
-      showContactForm('coordinator');
+      showContactForm('coord-stakeholder');
     }
     
     function toggleCoordStakeholderDetails(index) {
@@ -2510,9 +2522,6 @@
     }
     
     function addFamilyContact() {
-      console.log('addFamilyContact called');
-      console.log('currentClient:', currentClient);
-      
       if (!currentClient) {
         alert('Please select a client first');
         return;
@@ -2521,8 +2530,6 @@
       if (!currentClient.familyContacts) {
         currentClient.familyContacts = [];
       }
-      
-      console.log('Showing contact form for family');
       // Show improved contact form
       showContactForm('family');
     }
@@ -2530,12 +2537,15 @@
     function showContactForm(contactType, contactIndex = null, isEdit = false) {
       const contact = isEdit && contactIndex !== null ? 
         (contactType === 'family' ? currentClient.familyContacts[contactIndex] : 
-         contactType === 'coord' ? currentClient.coordFamilyContacts[contactIndex] : null) : null;
+         contactType === 'coord' ? currentClient.coordFamilyContacts[contactIndex] :
+         contactType === 'coordinator' ? currentClient.coordinators[contactIndex] :
+         contactType === 'coord-stakeholder' ? currentClient.coordStakeholders[contactIndex] : null) : null;
       
       const typeLabels = {
         'family': 'Family Contact',
         'coord': 'Family Contact',
-        'coordinator': 'Coordinator/Stakeholder'
+        'coordinator': 'Coordinator/Stakeholder',
+        'coord-stakeholder': 'Stakeholder'
       };
       
       let html = `
@@ -2552,7 +2562,7 @@
               <label style="display: block; margin-bottom: 5px; font-weight: bold;">关系/职业</label>
               <input type="text" id="contact-relationship" value="${contact ? (contact.relationship || contact.profession || '') : ''}" 
                      style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                     placeholder="${contactType === 'coordinator' ? '职业 (如: OT, Physio, Plan Manager)' : '关系 (如: Mother, Father, Sister)'}">
+                     placeholder="${(contactType === 'coordinator' || contactType === 'coord-stakeholder') ? '职业 (如: OT, Physio, Plan Manager)' : '关系 (如: Mother, Father, Sister)'}">
             </div>
             
             <div style="margin-bottom: 15px;">
@@ -2601,15 +2611,22 @@
       const phone = document.getElementById('contact-phone').value.trim();
       const email = document.getElementById('contact-email').value.trim();
       
+      const existingContact = (isEdit && contactIndex !== null) ? 
+        (contactType === 'family' ? currentClient.familyContacts[contactIndex] :
+         contactType === 'coord' ? currentClient.coordFamilyContacts[contactIndex] :
+         contactType === 'coordinator' ? currentClient.coordinators[contactIndex] :
+         contactType === 'coord-stakeholder' ? currentClient.coordStakeholders[contactIndex] : null) : null;
+      
       const contactData = {
+        ...(existingContact || {}),
         name,
-        relationship: contactType === 'coordinator' ? relationship : relationship,
+        relationship,
         phone,
         email
       };
       
-      // Add profession field for coordinators
-      if (contactType === 'coordinator') {
+      // Add profession field for coordinators/stakeholders
+      if (contactType === 'coordinator' || contactType === 'coord-stakeholder') {
         contactData.profession = relationship;
       }
       
@@ -2628,6 +2645,14 @@
         }
         renderCoordFamilyContacts();
       } else if (contactType === 'coordinator') {
+        if (!currentClient.coordinators) currentClient.coordinators = [];
+        if (isEdit && contactIndex !== null) {
+          currentClient.coordinators[contactIndex] = contactData;
+        } else {
+          currentClient.coordinators.push(contactData);
+        }
+        renderCoordinators();
+      } else if (contactType === 'coord-stakeholder') {
         if (isEdit && contactIndex !== null) {
           currentClient.coordStakeholders[contactIndex] = contactData;
         } else {
@@ -3033,8 +3058,6 @@
       if (!currentClient.coordinators) {
         currentClient.coordinators = [];
       }
-      
-      console.log('Showing contact form for coordinator');
       // Show improved contact form
       showContactForm('coordinator');
     }
