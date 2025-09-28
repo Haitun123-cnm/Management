@@ -49,6 +49,9 @@ class SimpleGitHubSync {
         console.log('🚀 开始保存数据到GitHub...');
         console.log('📁 仓库:', `${this.owner}/${this.repo}`);
         console.log('📄 文件:', this.dataFile);
+        
+        // 显示同步状态给用户
+        this.showSyncStatus('正在同步到GitHub...');
 
         try {
             // 准备数据
@@ -97,14 +100,17 @@ class SimpleGitHubSync {
 
             if (response.ok) {
                 console.log('✅ 数据成功保存到GitHub!');
+                this.showSyncStatus('✅ 数据已同步到GitHub');
                 return true;
             } else {
                 const error = await response.json();
                 console.error('❌ 保存失败:', error);
+                this.showSyncStatus('❌ 同步失败');
                 return false;
             }
         } catch (error) {
             console.error('❌ 保存错误:', error);
+            this.showSyncStatus('❌ 同步错误');
             return false;
         }
     }
@@ -182,6 +188,46 @@ class SimpleGitHubSync {
             repo: this.repo,
             dataFile: this.dataFile
         };
+    }
+
+    // 显示同步状态
+    showSyncStatus(message) {
+        // 创建或更新状态显示
+        let statusDiv = document.getElementById('github-sync-status');
+        if (!statusDiv) {
+            statusDiv = document.createElement('div');
+            statusDiv.id = 'github-sync-status';
+            statusDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                font-size: 14px;
+                z-index: 10000;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+            `;
+            document.body.appendChild(statusDiv);
+        }
+        
+        statusDiv.textContent = message;
+        statusDiv.style.background = message.includes('✅') ? '#10b981' : 
+                                    message.includes('❌') ? '#ef4444' : '#f59e0b';
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            if (statusDiv) {
+                statusDiv.style.opacity = '0';
+                setTimeout(() => {
+                    if (statusDiv && statusDiv.parentNode) {
+                        statusDiv.parentNode.removeChild(statusDiv);
+                    }
+                }, 300);
+            }
+        }, 3000);
     }
 }
 

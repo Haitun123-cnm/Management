@@ -872,6 +872,10 @@
         <span id="github-sync-icon">☁️</span>
         <span id="github-sync-text">GitHub Sync</span>
       </button>
+      <button class="btn btn-secondary" onclick="showBackupManager()">
+        <span>💾</span>
+        <span>备份管理</span>
+      </button>
       <button class="btn btn-secondary" id="edit-mode-btn" onclick="toggleEditMode()">
         <span id="edit-mode-icon">✏️</span>
         <span id="edit-mode-text">Edit Mode</span>
@@ -1316,6 +1320,7 @@
   </div>
   
   <script src="simple-github-sync.js"></script>
+  <script src="auto-backup.js"></script>
   <script>
     // Global state
     let serviceClients = [];  // Service Department clients
@@ -3590,6 +3595,90 @@
     
     // Initialize GitHub sync UI
     updateGitHubSyncUI();
+    
+    // Backup Management Functions
+    function showBackupManager() {
+        if (!window.autoBackupSystem) {
+            alert('备份系统未加载，请刷新页面重试。');
+            return;
+        }
+        
+        const backups = window.autoBackupSystem.getAllBackups();
+        const status = window.autoBackupSystem.showBackupStatus();
+        
+        let html = `
+            <div style="padding: 20px;">
+                <h3>💾 备份管理系统</h3>
+                <div style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px;">
+                    <h4>📊 系统状态</h4>
+                    <p><strong>自动备份:</strong> ${status.isRunning ? '✅ 运行中' : '❌ 已停止'}</p>
+                    <p><strong>GitHub同步:</strong> ${status.githubSync ? '✅ 已启用' : '❌ 未启用'}</p>
+                    <p><strong>备份数量:</strong> ${status.totalBackups} 个</p>
+                    <p><strong>最新备份:</strong> ${status.lastBackup ? new Date(status.lastBackup).toLocaleString() : '无'}</p>
+                </div>
+        `;
+        
+        if (backups.length > 0) {
+            html += `
+                <h4>📋 可用备份</h4>
+                <div style="max-height: 300px; overflow-y: auto;">
+            `;
+            
+            backups.forEach((backup, index) => {
+                const time = new Date(backup.time).toLocaleString();
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #e5e7eb; border-radius: 5px; margin-bottom: 10px;">
+                        <div>
+                            <strong>备份 #${index + 1}</strong><br>
+                            <small>${time}</small>
+                        </div>
+                        <button onclick="restoreBackup('${backup.id}')" style="background: #10b981; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                            恢复
+                        </button>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+        } else {
+            html += `<p>暂无备份数据</p>`;
+        }
+        
+        html += `
+                <div style="margin-top: 20px; text-align: center;">
+                    <button onclick="createManualBackup()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                        创建手动备份
+                    </button>
+                    <button onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        showModal('备份管理', html);
+    }
+    
+    function createManualBackup() {
+        if (window.autoBackupSystem) {
+            window.autoBackupSystem.createBackup();
+            alert('✅ 手动备份已创建');
+            showBackupManager(); // 刷新界面
+        }
+    }
+    
+    function restoreBackup(backupId) {
+        if (confirm('⚠️ 确定要恢复这个备份吗？当前数据将被覆盖！')) {
+            if (window.autoBackupSystem) {
+                window.autoBackupSystem.restoreBackup(backupId);
+            }
+        }
+    }
+    
+    // Initialize backup system
+    if (window.autoBackupSystem) {
+        console.log('🔄 自动备份系统已启动');
+    }
     
     // Initialize button states
     updateButtonStates();
