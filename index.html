@@ -309,6 +309,21 @@
       flex: 1;
       padding: 16px 0;
     }
+
+    .client-list-section-title {
+      padding: 6px 24px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-500);
+    }
+
+    .client-list-separator {
+      height: 1px;
+      background: var(--gray-200);
+      margin: 10px 24px;
+    }
     
     .client-item {
       padding: 12px 24px;
@@ -876,10 +891,6 @@
         <span id="edit-mode-icon">✏️</span>
         <span id="edit-mode-text">Edit Mode</span>
       </button>
-      <button class="btn btn-secondary" id="system-mode-btn" onclick="toggleSystemMode()">
-        <span id="system-mode-icon">🔄</span>
-        <span id="system-mode-text">Switch Mode</span>
-      </button>
       <button class="btn btn-secondary" id="data-sync-btn" onclick="showDataSyncManager()" title="数据同步管理">
         <span id="sync-icon">☁️</span>
         <span id="sync-text">Sync</span>
@@ -1041,7 +1052,7 @@
                   Attends Day Program
                 </label>
               </div>
-              <div class="form-grid" id="day-program-details">
+              <div class="form-grid" id="day-program-details" style="display: none;">
                 <div class="form-group">
                   <label class="form-label">Day Program Name</label>
                   <input type="text" class="form-input" id="dayProgramName" placeholder="Enter program name">
@@ -1303,6 +1314,40 @@
               </div>
             </div>
           </div>
+
+          <div class="form-section">
+            <div class="section-header">Day Program Information</div>
+            <div class="section-content">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" id="coordDayProgramEnabled">
+                  Attends Day Program
+                </label>
+              </div>
+              <div class="form-grid" id="coord-day-program-details" style="display: none;">
+                <div class="form-group">
+                  <label class="form-label">Day Program Name</label>
+                  <input type="text" class="form-input" id="coordDayProgramName" placeholder="Enter program name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Days Attending</label>
+                  <input type="text" class="form-input" id="coordDayProgramDays" placeholder="e.g., Mon, Wed, Fri">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Program Contact Name</label>
+                  <input type="text" class="form-input" id="coordDayProgramContactName" placeholder="Contact person">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Program Contact Phone</label>
+                  <input type="tel" class="form-input" id="coordDayProgramContactPhone" placeholder="Phone number">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Program Contact Email</label>
+                  <input type="email" class="form-input" id="coordDayProgramContactEmail" placeholder="Email address">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- Stakeholders Tab -->
@@ -1360,6 +1405,7 @@
     let serviceClients = [];  // Service Department clients
     let coordClients = [];    // Support Coordination clients
     let selectedClientIndex = null;
+    let selectedClientType = null; // 'service' or 'coord'
     
     // Modal functions
     function showModal(title, content) {
@@ -1404,13 +1450,17 @@
     let isSupportCoordMode = false;
     
     // Helper function to get current client list based on mode
+    function getClientListByType(type) {
+      return type === 'coord' ? coordClients : serviceClients;
+    }
+    
     function getCurrentClientList() {
-      return isSupportCoordMode ? coordClients : serviceClients;
+      return getClientListByType(selectedClientType || (isSupportCoordMode ? 'coord' : 'service'));
     }
     
     // Helper function to get current client list name for localStorage
     function getCurrentClientListKey() {
-      return isSupportCoordMode ? 'coordClients' : 'serviceClients';
+      return (selectedClientType || (isSupportCoordMode ? 'coord' : 'service')) === 'coord' ? 'coordClients' : 'serviceClients';
     }
     
     // Load data from GitHub or localStorage
@@ -1503,12 +1553,14 @@
         if (!client.coordinators) client.coordinators = [];
         if (!client.familyContacts) client.familyContacts = [];
         if (!client.caregivers) client.caregivers = [];
+      if (client.isSupportCoord === undefined) client.isSupportCoord = false;
       });
       
       // Initialize arrays for existing coordination clients
       coordClients.forEach((client, index) => {
         if (!client.coordStakeholders) client.coordStakeholders = [];
         if (!client.coordFamilyContacts) client.coordFamilyContacts = [];
+        if (client.isSupportCoord === undefined) client.isSupportCoord = true;
       });
     }
     
@@ -1737,107 +1789,85 @@
     // Render functions
     function renderClientList() {
       const clientList = document.getElementById('client-list');
-      const currentClients = getCurrentClientList();
-      const modeText = isSupportCoordMode ? 'coordination' : 'service';
       
-      console.log(`Rendering ${modeText} client list with filter:`, filterFunding, 'and search:', searchQuery);
-      console.log(`All ${modeText} clients:`, currentClients.map(c => ({ name: c.firstName + ' ' + c.lastName, funding: c.fundingType })));
-      
-      let filtered = currentClients.filter(c => {
+      const filterClients = (clients) => clients.filter(c => {
         let match = true;
         if (filterFunding !== 'all') {
-          // Handle case-insensitive comparison for funding types
-          const clientFunding = (c.fundingType || '').toLowerCase();
           const filterFundingLower = filterFunding.toLowerCase();
-          match = clientFunding === filterFundingLower;
-          console.log(`Client ${c.firstName} ${c.lastName}: funding="${c.fundingType}" (${clientFunding}) vs filter="${filterFunding}" (${filterFundingLower}) = ${match}`);
+          const normalizedFunding = c.isSupportCoord ? 'ndis' : (c.fundingType || '').toLowerCase();
+          match = normalizedFunding === filterFundingLower;
         }
-        if (searchQuery) match = match && ((c.firstName + ' ' + c.lastName).toLowerCase().includes(searchQuery.toLowerCase()));
+        if (searchQuery) {
+          match = match && ((c.firstName + ' ' + c.lastName).toLowerCase().includes(searchQuery.toLowerCase()));
+        }
         return match;
       });
       
-      console.log(`Filtered ${modeText} clients:`, filtered.length);
+      const filteredService = filterClients(serviceClients);
+      const filteredCoord = filterClients(coordClients);
       
-      if (!filtered.length) {
+      if (!filteredService.length && !filteredCoord.length) {
         clientList.innerHTML = `
           <div style="padding: 24px; text-align: center; color: var(--gray-500);">
-            No ${modeText} clients found. Add your first client to get started.
+            No clients found. Add your first client to get started.
           </div>
         `;
         return;
       }
       
-      clientList.innerHTML = filtered.map((c, i) => `
-        <div class="client-item ${selectedClientIndex === currentClients.indexOf(c) ? 'active' : ''}" 
-             onclick="selectClient(${currentClients.indexOf(c)})">
-          <div class="client-name">${escapeHTML(c.firstName)} ${escapeHTML(c.lastName)}</div>
-          <div class="client-info">
-            <span class="badge ${c.fundingType==='NDIS'?'badge-ndis':c.fundingType==='iCare'?'badge-icare':'badge-no-funding'}">${c.fundingType || 'No Funding'}</span>
-            ${c.planStartDate ? `• ${formatDate(c.planStartDate)}` : ''}
-          </div>
-          <div class="client-item-actions">
-            <button class="btn btn-danger btn-sm" onclick="deleteClient(${currentClients.indexOf(c)}); event.stopPropagation();" title="Delete client (or press Delete key when selected)">
-              🗑️
-            </button>
-          </div>
-        </div>
-      `).join('');
+      const renderSection = (title, clients, type) => {
+        if (!clients.length) return '';
+        const items = clients.map((c) => {
+          const index = getClientListByType(type).indexOf(c);
+          const isActive = selectedClientType === type && selectedClientIndex === index;
+          const fundingLabel = c.isSupportCoord ? 'NDIS' : (c.fundingType || 'No Funding');
+          const badgeClass = fundingLabel === 'NDIS' ? 'badge-ndis' : fundingLabel === 'iCare' ? 'badge-icare' : 'badge-no-funding';
+          return `
+            <div class="client-item ${isActive ? 'active' : ''}" 
+                 onclick="selectClient(${index}, '${type}')">
+              <div class="client-name">${escapeHTML(c.firstName)} ${escapeHTML(c.lastName)}</div>
+              <div class="client-info">
+                <span class="badge ${badgeClass}">${fundingLabel}</span>
+                ${c.planStartDate ? `• ${formatDate(c.planStartDate)}` : ''}
+              </div>
+              <div class="client-item-actions">
+                <button class="btn btn-danger btn-sm" onclick="deleteClient(${index}, '${type}'); event.stopPropagation();" title="Delete client (or press Delete key when selected)">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        return `
+          <div class="client-list-section-title">${title}</div>
+          ${items}
+        `;
+      };
+      
+      const serviceSection = renderSection('Service Clients', filteredService, 'service');
+      const coordSection = renderSection('Support Coordination Clients', filteredCoord, 'coord');
+      const separator = serviceSection && coordSection ? '<div class="client-list-separator"></div>' : '';
+      
+      clientList.innerHTML = `${serviceSection}${separator}${coordSection}`;
     }
     
     // System Mode Functions
-    function toggleSystemMode() {
-      isSupportCoordMode = !isSupportCoordMode;
-      updateSystemModeUI();
-      updateSystemModeContent();
-    }
-    
-    function updateSystemModeUI() {
-      const systemBtn = document.getElementById('system-mode-btn');
-      const systemIcon = document.getElementById('system-mode-icon');
-      const systemText = document.getElementById('system-mode-text');
-      const systemTitle = document.getElementById('system-title');
-      
-      if (isSupportCoordMode) {
-        systemBtn.classList.add('system-mode-active');
-        systemIcon.textContent = '🏢';
-        systemText.textContent = 'Switch to Service Department';
-        systemTitle.textContent = 'Support Coordination System';
-      } else {
-        systemBtn.classList.remove('system-mode-active');
-        systemIcon.textContent = '🔄';
-        systemText.textContent = 'Switch to Support Coordination';
-        systemTitle.textContent = 'Service Management System';
-      }
-    }
-    
     function updateSystemModeContent() {
       const serviceMode = document.querySelector('.service-dept-mode');
       const coordMode = document.querySelector('.support-coord-mode');
-      
-      // Clear current selection when switching modes
-      selectedClientIndex = null;
-      currentClient = null;
-      clearClientForm();
+      const systemTitle = document.getElementById('system-title');
       
       if (isSupportCoordMode) {
-        // Switch to Support Coordination mode
         serviceMode.classList.remove('active');
         coordMode.classList.add('active');
         console.log('Switched to Support Coordination mode');
+        if (systemTitle) systemTitle.textContent = 'Support Coordination System';
       } else {
-        // Switch to Service Department mode
         serviceMode.classList.add('active');
         coordMode.classList.remove('active');
         console.log('Switched to Service Department mode');
+        if (systemTitle) systemTitle.textContent = 'Service Management System';
       }
-      
-      // Re-render client list for the new mode
-      renderClientList();
-      
-      // Re-initialize event listeners for the current mode
-      setTimeout(() => {
-        initializeSupportCoordEventListeners();
-      }, 100);
     }
     
     // GitHub Sync Functions
@@ -1953,6 +1983,9 @@
           saveCoordClientData();
         });
         input.addEventListener('change', () => {
+          if (input.id === 'coordDayProgramEnabled') {
+            updateCoordDayProgramVisibility();
+          }
           console.log('🔄 Support Coordination字段变化:', input.id, input.value);
           saveCoordClientData();
         });
@@ -2039,10 +2072,17 @@
       document.getElementById('coordFundingType').value = currentClient.fundingType || '';
       document.getElementById('coordPlanManager').value = currentClient.planManager || '';
       document.getElementById('coordPlanManagerContact').value = currentClient.planManagerContact || '';
+      document.getElementById('coordDayProgramEnabled').checked = !!currentClient.dayProgramEnabled;
+      document.getElementById('coordDayProgramName').value = currentClient.dayProgramName || '';
+      document.getElementById('coordDayProgramDays').value = currentClient.dayProgramDays || '';
+      document.getElementById('coordDayProgramContactName').value = currentClient.dayProgramContactName || '';
+      document.getElementById('coordDayProgramContactPhone').value = currentClient.dayProgramContactPhone || '';
+      document.getElementById('coordDayProgramContactEmail').value = currentClient.dayProgramContactEmail || '';
       document.getElementById('coordGeneralNotes').value = currentClient.generalNotes || '';
       
       // Show/hide plan manager section based on funding type
       updatePlanManagerSection();
+      updateCoordDayProgramVisibility();
       
       // Render stakeholders and family contacts
       renderCoordStakeholders();
@@ -2064,12 +2104,19 @@
         console.log('🔄 Starting Support Coordination data save...');
         
         // Save basic information with null checks
+        currentClient.isSupportCoord = true;
         currentClient.firstName = document.getElementById('coordFirstName')?.value || '';
         currentClient.lastName = document.getElementById('coordLastName')?.value || '';
         currentClient.ndisNumber = document.getElementById('coordNdisNumber')?.value || '';
         currentClient.fundingType = document.getElementById('coordFundingType')?.value || '';
         currentClient.planManager = document.getElementById('coordPlanManager')?.value || '';
         currentClient.planManagerContact = document.getElementById('coordPlanManagerContact')?.value || '';
+        currentClient.dayProgramEnabled = document.getElementById('coordDayProgramEnabled')?.checked || false;
+        currentClient.dayProgramName = document.getElementById('coordDayProgramName')?.value || '';
+        currentClient.dayProgramDays = document.getElementById('coordDayProgramDays')?.value || '';
+        currentClient.dayProgramContactName = document.getElementById('coordDayProgramContactName')?.value || '';
+        currentClient.dayProgramContactPhone = document.getElementById('coordDayProgramContactPhone')?.value || '';
+        currentClient.dayProgramContactEmail = document.getElementById('coordDayProgramContactEmail')?.value || '';
         currentClient.generalNotes = document.getElementById('coordGeneralNotes')?.value || '';
         
         console.log('📝 Basic data saved:', {
@@ -2122,6 +2169,13 @@
     function updateDayProgramVisibility() {
       const enabledCheckbox = document.getElementById('dayProgramEnabled');
       const details = document.getElementById('day-program-details');
+      if (!enabledCheckbox || !details) return;
+      details.style.display = enabledCheckbox.checked ? 'grid' : 'none';
+    }
+
+    function updateCoordDayProgramVisibility() {
+      const enabledCheckbox = document.getElementById('coordDayProgramEnabled');
+      const details = document.getElementById('coord-day-program-details');
       if (!enabledCheckbox || !details) return;
       details.style.display = enabledCheckbox.checked ? 'grid' : 'none';
     }
@@ -2366,10 +2420,13 @@
       }
     }
     
-    function selectClient(index) {
+    function selectClient(index, type = 'service') {
       selectedClientIndex = index;
-      const currentClients = getCurrentClientList();
+      selectedClientType = type;
+      const currentClients = getClientListByType(type);
       currentClient = { ...currentClients[index] };
+      currentClient.isSupportCoord = type === 'coord';
+      isSupportCoordMode = currentClient.isSupportCoord;
       
       console.log('Selecting client:', currentClient);
       console.log('Client coordinators:', currentClient.coordinators);
@@ -2381,10 +2438,11 @@
       if (!currentClient.coordStakeholders) currentClient.coordStakeholders = [];
       if (!currentClient.coordFamilyContacts) currentClient.coordFamilyContacts = [];
       
+      updateSystemModeContent();
       renderClientList();
       
-      // Load client data based on current mode
-      if (isSupportCoordMode) {
+      // Load client data based on current type
+      if (currentClient.isSupportCoord) {
         loadCoordClientData();
       } else {
         loadClientData();
@@ -2393,7 +2451,7 @@
       // Force render coordinators after a short delay to ensure DOM is ready
       setTimeout(() => {
         console.log('Delayed coordinators render for client:', currentClient.firstName, currentClient.lastName);
-        if (isSupportCoordMode) {
+      if (currentClient.isSupportCoord) {
           renderCoordStakeholders();
           renderCoordFamilyContacts();
         } else {
@@ -2405,8 +2463,8 @@
       updateButtonStates();
     }
     
-    function deleteClient(index) {
-      const currentClients = getCurrentClientList();
+    function deleteClient(index, type = 'service') {
+      const currentClients = getClientListByType(type);
       if (index < 0 || index >= currentClients.length) {
         alert('Invalid client index');
         return;
@@ -2423,12 +2481,13 @@
         saveAllData();
         
         // Reset selection if the deleted client was selected
-        if (selectedClientIndex === index) {
+        if (selectedClientType === type && selectedClientIndex === index) {
           selectedClientIndex = null;
+          selectedClientType = null;
           currentClient = null;
           // Clear the form
           clearClientForm();
-        } else if (selectedClientIndex > index) {
+        } else if (selectedClientType === type && selectedClientIndex > index) {
           // Adjust the selected index if it was after the deleted client
           selectedClientIndex--;
         }
@@ -2464,6 +2523,22 @@
         dayProgramEnabled.checked = false;
       }
       updateDayProgramVisibility();
+
+      const coordDayProgramEnabled = document.getElementById('coordDayProgramEnabled');
+      if (coordDayProgramEnabled) {
+        coordDayProgramEnabled.checked = false;
+      }
+      const coordFields = [
+        'coordDayProgramName', 'coordDayProgramDays', 'coordDayProgramContactName',
+        'coordDayProgramContactPhone', 'coordDayProgramContactEmail'
+      ];
+      coordFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+          element.value = '';
+        }
+      });
+      updateCoordDayProgramVisibility();
       
       // Clear family contacts and caregivers
       if (currentClient) {
@@ -2557,6 +2632,7 @@
       if (!currentClient) return;
       
       // Save form data to currentClient
+      currentClient.isSupportCoord = false;
       currentClient.firstName = document.getElementById('firstName').value;
       currentClient.lastName = document.getElementById('lastName').value;
       currentClient.dob = document.getElementById('dob').value;
@@ -3473,9 +3549,19 @@
         }
       });
     }
+
+    const coordDayProgramEnabledCheckbox = document.getElementById('coordDayProgramEnabled');
+    if (coordDayProgramEnabledCheckbox) {
+      coordDayProgramEnabledCheckbox.addEventListener('change', () => {
+        updateCoordDayProgramVisibility();
+        if (currentClient && selectedClientIndex !== null) {
+          saveCoordClientData();
+        }
+      });
+    }
     
     // Create new client function
-    function createNewClient() {
+    function createNewClient(isSupportCoord = false) {
       // Check if there's an unsaved client first
       if (currentClient && selectedClientIndex !== null) {
         const hasUnsavedChanges = checkForUnsavedChanges();
@@ -3487,19 +3573,23 @@
         }
       }
       
-      const currentClients = getCurrentClientList();
+      const currentClients = getClientListByType(isSupportCoord ? 'coord' : 'service');
       const newClient = getEmptyClient();
+      newClient.isSupportCoord = isSupportCoord;
       currentClients.push(newClient);
       selectedClientIndex = currentClients.length - 1;
+      selectedClientType = isSupportCoord ? 'coord' : 'service';
       currentClient = { ...newClient };
+      isSupportCoordMode = isSupportCoord;
       
       // Save all data (including GitHub sync)
       saveAllData();
       
+      updateSystemModeContent();
       renderClientList();
       
-      // Load data based on current mode
-      if (isSupportCoordMode) {
+      // Load data based on client type
+      if (isSupportCoord) {
         loadCoordClientData();
       } else {
         loadClientData();
@@ -3516,11 +3606,34 @@
       // Update button states
       updateButtonStates();
     }
+
+    function showNewClientModal() {
+      const content = `
+        <div style="padding: 20px;">
+          <div style="margin-bottom: 12px; color: #6b7280; font-size: 0.9rem;">
+            创建新客户前，请选择客户类型。
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <input type="checkbox" id="new-client-support-coord">
+            <label for="new-client-support-coord" style="margin: 0;">Support Coordination 客户</label>
+          </div>
+          <div style="text-align: right;">
+            <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; margin-right: 8px;">
+              取消
+            </button>
+            <button type="button" onclick="createNewClient(document.getElementById('new-client-support-coord').checked); closeModal();" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
+              创建
+            </button>
+          </div>
+        </div>
+      `;
+      showModal('创建新客户', content);
+    }
     
     document.getElementById('add-client-btn').addEventListener('click', () => {
       // If no client is selected, create a new one
       if (!currentClient || selectedClientIndex === null) {
-        createNewClient();
+        showNewClientModal();
       } else {
         // If a client is already selected, just show a message
         showNotification('A client is already selected. Fill in the details and save, or use "Create New Client" to start fresh.', 'info');
@@ -3666,13 +3779,13 @@
       // Delete key to delete selected client
       if (e.key === 'Delete' && selectedClientIndex !== null) {
         e.preventDefault();
-        deleteClient(selectedClientIndex);
+        deleteClient(selectedClientIndex, selectedClientType || 'service');
       }
       
       // Ctrl/Cmd + N to create new client
       if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
-        createNewClient();
+        showNewClientModal();
       }
       
       // Ctrl/Cmd + S to save client
