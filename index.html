@@ -1035,7 +1035,13 @@
           <div class="form-section">
             <div class="section-header">Day Program Information</div>
             <div class="section-content">
-              <div class="form-grid">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" id="dayProgramEnabled">
+                  Attends Day Program
+                </label>
+              </div>
+              <div class="form-grid" id="day-program-details">
                 <div class="form-group">
                   <label class="form-label">Day Program Name</label>
                   <input type="text" class="form-input" id="dayProgramName" placeholder="Enter program name">
@@ -1698,6 +1704,7 @@
         icareParticipant: '',
         planStartDate: '',
         planEndDate: '',
+        dayProgramEnabled: false,
         dayProgramName: '',
         dayProgramDays: '',
         dayProgramContactName: '',
@@ -2112,6 +2119,13 @@
       }
     }
     
+    function updateDayProgramVisibility() {
+      const enabledCheckbox = document.getElementById('dayProgramEnabled');
+      const details = document.getElementById('day-program-details');
+      if (!enabledCheckbox || !details) return;
+      details.style.display = enabledCheckbox.checked ? 'grid' : 'none';
+    }
+    
     function renderCoordStakeholders() {
       const container = document.getElementById('coord-stakeholder-cards');
       if (!container) return;
@@ -2445,6 +2459,12 @@
         }
       });
       
+      const dayProgramEnabled = document.getElementById('dayProgramEnabled');
+      if (dayProgramEnabled) {
+        dayProgramEnabled.checked = false;
+      }
+      updateDayProgramVisibility();
+      
       // Clear family contacts and caregivers
       if (currentClient) {
         currentClient.familyContacts = [];
@@ -2489,11 +2509,13 @@
       document.getElementById('interpreter').value = currentClient.interpreter || '';
       document.getElementById('fundingType').value = currentClient.fundingType || '';
       document.getElementById('ndisNumber').value = currentClient.ndisNumber || '';
+      document.getElementById('dayProgramEnabled').checked = !!currentClient.dayProgramEnabled;
       document.getElementById('dayProgramName').value = currentClient.dayProgramName || '';
       document.getElementById('dayProgramDays').value = currentClient.dayProgramDays || '';
       document.getElementById('dayProgramContactName').value = currentClient.dayProgramContactName || '';
       document.getElementById('dayProgramContactPhone').value = currentClient.dayProgramContactPhone || '';
       document.getElementById('dayProgramContactEmail').value = currentClient.dayProgramContactEmail || '';
+      updateDayProgramVisibility();
 
       console.log('Loading dates - planStartDate:', currentClient.planStartDate, 'planEndDate:', currentClient.planEndDate);
       document.getElementById('planStartDate').value = currentClient.planStartDate || '';
@@ -2543,6 +2565,7 @@
       currentClient.interpreter = document.getElementById('interpreter').value;
       currentClient.fundingType = document.getElementById('fundingType').value;
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
+      currentClient.dayProgramEnabled = document.getElementById('dayProgramEnabled').checked;
       currentClient.dayProgramName = document.getElementById('dayProgramName').value;
       currentClient.dayProgramDays = document.getElementById('dayProgramDays').value;
       currentClient.dayProgramContactName = document.getElementById('dayProgramContactName').value;
@@ -3440,6 +3463,16 @@
         document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
       });
     });
+    
+    const dayProgramEnabledCheckbox = document.getElementById('dayProgramEnabled');
+    if (dayProgramEnabledCheckbox) {
+      dayProgramEnabledCheckbox.addEventListener('change', () => {
+        updateDayProgramVisibility();
+        if (currentClient && selectedClientIndex !== null) {
+          saveClientData();
+        }
+      });
+    }
     
     // Create new client function
     function createNewClient() {
