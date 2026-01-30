@@ -1031,6 +1031,34 @@
               </div>
             </div>
           </div>
+
+          <div class="form-section">
+            <div class="section-header">Day Program Information</div>
+            <div class="section-content">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Day Program Name</label>
+                  <input type="text" class="form-input" id="dayProgramName" placeholder="Enter program name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Days Attending</label>
+                  <input type="text" class="form-input" id="dayProgramDays" placeholder="e.g., Mon, Wed, Fri">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Program Contact Name</label>
+                  <input type="text" class="form-input" id="dayProgramContactName" placeholder="Contact person">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Program Contact Phone</label>
+                  <input type="tel" class="form-input" id="dayProgramContactPhone" placeholder="Phone number">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Program Contact Email</label>
+                  <input type="email" class="form-input" id="dayProgramContactEmail" placeholder="Email address">
+                </div>
+              </div>
+            </div>
+          </div>
           
                     <div class="form-section">
             <div class="section-header">Upcoming Schedules & Reminders</div>
@@ -1670,6 +1698,11 @@
         icareParticipant: '',
         planStartDate: '',
         planEndDate: '',
+        dayProgramName: '',
+        dayProgramDays: '',
+        dayProgramContactName: '',
+        dayProgramContactPhone: '',
+        dayProgramContactEmail: '',
         primaryDisability: '',
         supportNeeds: '',
         riskAssessment: '',
@@ -2399,6 +2432,8 @@
       const formFields = [
         'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'interpreter',
         'fundingType', 'ndisNumber', 'planStartDate', 'planEndDate',
+        'dayProgramName', 'dayProgramDays', 'dayProgramContactName',
+        'dayProgramContactPhone', 'dayProgramContactEmail',
         'primaryDisability', 'supportNeeds', 'shortTermGoals', 'longTermGoals',
         'generalNotes', 'progressNotes', 'alerts'
       ];
@@ -2454,6 +2489,11 @@
       document.getElementById('interpreter').value = currentClient.interpreter || '';
       document.getElementById('fundingType').value = currentClient.fundingType || '';
       document.getElementById('ndisNumber').value = currentClient.ndisNumber || '';
+      document.getElementById('dayProgramName').value = currentClient.dayProgramName || '';
+      document.getElementById('dayProgramDays').value = currentClient.dayProgramDays || '';
+      document.getElementById('dayProgramContactName').value = currentClient.dayProgramContactName || '';
+      document.getElementById('dayProgramContactPhone').value = currentClient.dayProgramContactPhone || '';
+      document.getElementById('dayProgramContactEmail').value = currentClient.dayProgramContactEmail || '';
 
       console.log('Loading dates - planStartDate:', currentClient.planStartDate, 'planEndDate:', currentClient.planEndDate);
       document.getElementById('planStartDate').value = currentClient.planStartDate || '';
@@ -2503,6 +2543,11 @@
       currentClient.interpreter = document.getElementById('interpreter').value;
       currentClient.fundingType = document.getElementById('fundingType').value;
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
+      currentClient.dayProgramName = document.getElementById('dayProgramName').value;
+      currentClient.dayProgramDays = document.getElementById('dayProgramDays').value;
+      currentClient.dayProgramContactName = document.getElementById('dayProgramContactName').value;
+      currentClient.dayProgramContactPhone = document.getElementById('dayProgramContactPhone').value;
+      currentClient.dayProgramContactEmail = document.getElementById('dayProgramContactEmail').value;
 
       currentClient.planStartDate = document.getElementById('planStartDate').value;
       currentClient.planEndDate = document.getElementById('planEndDate').value;
