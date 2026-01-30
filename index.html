@@ -872,7 +872,7 @@
         <span id="system-mode-icon">🔄</span>
         <span id="system-mode-text">Switch Mode</span>
       </button>
-      <button class="btn btn-secondary" id="data-sync-btn" onclick="showDataSyncManager()">
+      <button class="btn btn-secondary" id="data-sync-btn" onclick="showDataSyncManager()" title="数据同步管理">
         <span id="sync-icon">☁️</span>
         <span id="sync-text">Sync</span>
       </button>
@@ -1493,6 +1493,7 @@
         const success = await window.simpleGitHubSync.saveAllData(data);
         if (success) {
           console.log('✅ 数据成功保存到GitHub!');
+          localStorage.setItem('lastSyncTime', data.lastUpdated);
         } else {
           console.log('❌ 保存到GitHub失败');
         }
@@ -1503,6 +1504,76 @@
     
     // Initialize data loading
     loadAllData();
+    
+    // Auto-sync: Periodically check for updates from GitHub
+    let autoSyncInterval = null;
+    function startAutoSync() {
+        // Clear any existing interval
+        if (autoSyncInterval) {
+            clearInterval(autoSyncInterval);
+        }
+        
+        // Only start if GitHub sync is enabled
+        if (window.simpleGitHubSync && window.simpleGitHubSync.isSyncEnabled()) {
+            console.log('🔄 启动自动同步 (每30秒检查一次)');
+            
+            // Check for updates every 30 seconds
+            autoSyncInterval = setInterval(async () => {
+                try {
+                    console.log('🔄 自动检查GitHub更新...');
+                    const githubData = await window.simpleGitHubSync.loadAllData();
+                    
+                    if (githubData && githubData.lastUpdated) {
+                        const githubTime = new Date(githubData.lastUpdated).getTime();
+                        const localTime = localStorage.getItem('lastSyncTime') ? 
+                            new Date(localStorage.getItem('lastSyncTime')).getTime() : 0;
+                        
+                        // If GitHub has newer data, load it
+                        if (githubTime > localTime) {
+                            console.log('📥 发现GitHub上有新数据，正在同步...');
+                            serviceClients = githubData.serviceClients || serviceClients;
+                            coordClients = githubData.coordClients || coordClients;
+                            todos = githubData.todos || todos;
+                            normalizeClientData();
+                            renderClientList();
+                            renderTodos();
+                            localStorage.setItem('lastSyncTime', githubData.lastUpdated);
+                            console.log('✅ 自动同步完成');
+                        } else {
+                            console.log('ℹ️ 本地数据已是最新');
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ 自动同步检查失败:', error);
+                }
+            }, 30000); // Check every 30 seconds
+        }
+    }
+    
+    // Start auto-sync after a short delay to ensure sync system is initialized
+    setTimeout(() => {
+        startAutoSync();
+    }, 2000);
+    
+    // Restart auto-sync when sync is enabled/disabled
+    const originalSetToken = window.simpleGitHubSync?.setToken;
+    if (window.simpleGitHubSync && originalSetToken) {
+        window.simpleGitHubSync.setToken = function(token) {
+            originalSetToken.call(this, token);
+            startAutoSync();
+        };
+    }
+    
+    const originalRemoveToken = window.simpleGitHubSync?.removeToken;
+    if (window.simpleGitHubSync && originalRemoveToken) {
+        window.simpleGitHubSync.removeToken = function() {
+            originalRemoveToken.call(this);
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+                autoSyncInterval = null;
+            }
+        };
+    }
     
     // Migration: Move old 'clients' data to 'serviceClients' if it exists
     if (localStorage.getItem('clients') && serviceClients.length === 0) {
@@ -1769,16 +1840,19 @@
       const syncBtn = document.getElementById('github-sync-btn');
       const syncIcon = document.getElementById('github-sync-icon');
       const syncText = document.getElementById('github-sync-text');
+      const syncNowBtn = document.getElementById('sync-now-btn');
       
       if (window.simpleGitHubSync && window.simpleGitHubSync.isSyncEnabled()) {
         syncBtn.classList.add('github-sync-active');
         syncIcon.textContent = '☁️';
         syncText.textContent = 'GitHub Sync ON';
+        if (syncNowBtn) syncNowBtn.style.display = 'inline-flex';
         console.log('✅ GitHub sync UI updated: ON');
       } else {
         syncBtn.classList.remove('github-sync-active');
         syncIcon.textContent = '📁';
         syncText.textContent = 'GitHub Sync';
+        if (syncNowBtn) syncNowBtn.style.display = 'none';
         console.log('❌ GitHub sync UI updated: OFF');
       }
     }
@@ -2522,6 +2596,9 @@
     }
     
     function addFamilyContact() {
+      console.log('addFamilyContact called');
+      console.log('currentClient:', currentClient);
+      
       if (!currentClient) {
         alert('Please select a client first');
         return;
@@ -3345,6 +3422,11 @@
       // Show confirmation
       showNotification('New client created successfully! You can now fill in the details.', 'success');
       
+      // Enable edit mode for new client entry
+      isEditMode = true;
+      updateEditModeUI();
+      updateFieldEditability();
+      
       // Update button states
       updateButtonStates();
     }
@@ -3660,6 +3742,7 @@
     
     // Initialize edit mode (default to read-only)
     updateFieldEditability();
+    updateEditModeUI();
     
     // Initialize GitHub sync UI
     updateGitHubSyncUI();
@@ -3696,6 +3779,9 @@
         if (githubStatus && githubStatus.enabled) {
             html += `
                 <p>✅ GitHub同步已启用</p>
+                <button onclick="syncNow()" style="background: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">
+                    🔄 立即同步
+                </button>
                 <button onclick="testGitHubSync()" style="background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
                     测试同步
                 </button>
