@@ -991,6 +991,10 @@
                   <input type="text" class="form-input" id="primaryLanguage" placeholder="e.g., English">
                 </div>
                 <div class="form-group">
+                  <label class="form-label">Participant Direct Contact</label>
+                  <input type="tel" class="form-input" id="participantDirectContact" placeholder="Participant phone number">
+                </div>
+                <div class="form-group">
                   <label class="form-label">Interpreter Required</label>
                   <select class="form-select" id="interpreter">
                     <option value="">Select</option>
@@ -1803,6 +1807,7 @@
         dob: '',
         gender: '',
         primaryLanguage: '',
+        participantDirectContact: '',
         interpreter: '',
         fundingType: '',
         ndisNumber: '',
@@ -2471,7 +2476,7 @@
     function clearClientForm() {
       // Clear all form fields
       const formFields = [
-        'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'interpreter',
+        'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'participantDirectContact', 'interpreter',
         'fundingType', 'ndisNumber', 'planStartDate', 'planEndDate',
         'icareCaseManager', 'icareCaseManagerPhone', 'icareCaseManagerEmail',
         'icareCoordinator', 'icareCoordinatorPhone', 'icareCoordinatorEmail',
@@ -2556,6 +2561,7 @@
       updateAgeDisplay();
       document.getElementById('gender').value = currentClient.gender || '';
       document.getElementById('primaryLanguage').value = currentClient.primaryLanguage || '';
+      document.getElementById('participantDirectContact').value = currentClient.participantDirectContact || '';
       document.getElementById('interpreter').value = currentClient.interpreter || '';
       document.getElementById('fundingType').value = currentClient.fundingType || '';
       document.getElementById('ndisNumber').value = currentClient.ndisNumber || '';
@@ -2623,6 +2629,7 @@
       currentClient.dob = document.getElementById('dob').value;
       currentClient.gender = document.getElementById('gender').value;
       currentClient.primaryLanguage = document.getElementById('primaryLanguage').value;
+      currentClient.participantDirectContact = document.getElementById('participantDirectContact').value;
       currentClient.interpreter = document.getElementById('interpreter').value;
       currentClient.fundingType = document.getElementById('fundingType').value;
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
@@ -3766,6 +3773,7 @@
     
     // Special handling for date of birth to show age
     document.getElementById('dob').addEventListener('change', updateAgeDisplay);
+    document.getElementById('dob').addEventListener('input', updateAgeDisplay);
     
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
