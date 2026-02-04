@@ -121,124 +121,6 @@
       display: block !important;
     }
     
-    /* Todo List Styles */
-    .todo-section {
-      border-top: 1px solid var(--gray-200);
-      background: var(--white);
-    }
-    
-    .todo-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      cursor: pointer;
-      background: var(--gray-50);
-      border-bottom: 1px solid var(--gray-200);
-      transition: background-color 0.2s;
-    }
-    
-    .todo-header:hover {
-      background: var(--gray-100);
-    }
-    
-    .todo-title {
-      font-weight: 500;
-      color: var(--gray-700);
-      font-size: 0.875rem;
-    }
-    
-    .todo-toggle {
-      font-size: 0.75rem;
-      color: var(--gray-500);
-      transition: transform 0.2s;
-    }
-    
-    .todo-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-    }
-    
-    .todo-content.expanded {
-      max-height: 400px;
-    }
-    
-    .todo-input-container {
-      display: flex;
-      gap: 8px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--gray-200);
-    }
-    
-    .todo-input {
-      flex: 1;
-      padding: 6px 8px;
-      border: 1px solid var(--gray-300);
-      border-radius: 4px;
-      font-size: 0.875rem;
-    }
-    
-    .todo-input:focus {
-      outline: none;
-      border-color: var(--primary-blue);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-    }
-    
-    .todo-list {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    
-    .todo-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-bottom: 1px solid var(--gray-100);
-      transition: background-color 0.2s;
-    }
-    
-    .todo-item:hover {
-      background: var(--gray-50);
-    }
-    
-    .todo-item.completed {
-      opacity: 0.6;
-    }
-    
-    .todo-item.completed .todo-text {
-      text-decoration: line-through;
-      color: var(--gray-500);
-    }
-    
-    .todo-checkbox {
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
-    
-    .todo-text {
-      flex: 1;
-      font-size: 0.875rem;
-      color: var(--gray-700);
-      word-break: break-word;
-    }
-    
-    .todo-delete {
-      background: none;
-      border: none;
-      color: var(--gray-400);
-      cursor: pointer;
-      padding: 2px;
-      border-radius: 2px;
-      transition: color 0.2s;
-    }
-    
-    .todo-delete:hover {
-      color: var(--red-500);
-    }
-    
     /* Main Layout */
     .main-container {
       display: flex;
@@ -1051,23 +933,6 @@
       <div class="client-list" id="client-list">
         <!-- Client items will be rendered here -->
       </div>
-      
-      <!-- Todo List Section -->
-      <div class="todo-section">
-        <div class="todo-header" onclick="toggleTodoSection()">
-          <span class="todo-title">📝 Quick Tasks</span>
-          <span class="todo-toggle" id="todo-toggle">▼</span>
-        </div>
-        <div class="todo-content" id="todo-content">
-          <div class="todo-input-container">
-            <input type="text" class="todo-input" id="todo-input" placeholder="Add a quick task..." maxlength="100">
-            <button class="btn btn-sm btn-primary" onclick="addTodo()">Add</button>
-          </div>
-          <div class="todo-list" id="todo-list">
-            <!-- Todo items will be rendered here -->
-          </div>
-        </div>
-      </div>
     </div>
     
     <!-- Main Content -->
@@ -1662,8 +1527,6 @@
     let searchQuery = '';
     let editField = {};
     let isEditMode = false;
-    let todos = [];
-    let isTodoExpanded = false;
     let isSupportCoordMode = false;
     
     // Helper function to get current client list based on mode
@@ -1698,11 +1561,9 @@
         if (githubData) {
           serviceClients = githubData.serviceClients || [];
           coordClients = githubData.coordClients || [];
-          todos = githubData.todos || [];
           console.log('✅ 从GitHub成功加载数据');
           console.log('📊 服务客户数量:', serviceClients.length);
           console.log('📊 协调客户数量:', coordClients.length);
-          console.log('📊 待办事项数量:', todos.length);
         } else {
           console.log('ℹ️ GitHub上没有数据，从本地存储加载...');
           loadFromLocalStorage();
@@ -1740,16 +1601,6 @@
         }
       }
       
-      // Load todos from localStorage
-      if (localStorage.getItem('todos')) {
-        try {
-          todos = JSON.parse(localStorage.getItem('todos')) || [];
-          console.log('Loaded todos from localStorage:', todos.length);
-        } catch (e) {
-          console.error('Error loading todos:', e);
-          todos = [];
-        }
-      }
     }
     
     // Normalize client data
@@ -1788,14 +1639,12 @@
       const data = {
         serviceClients: serviceClients,
         coordClients: coordClients,
-        todos: todos,
         lastUpdated: new Date().toISOString()
       };
       
       // 保存到本地存储
       localStorage.setItem('serviceClients', JSON.stringify(serviceClients));
       localStorage.setItem('coordClients', JSON.stringify(coordClients));
-      localStorage.setItem('todos', JSON.stringify(todos));
       console.log('✅ 数据已保存到本地存储');
       
       // 保存到GitHub（如果启用）
@@ -1844,10 +1693,8 @@
                             console.log('📥 发现GitHub上有新数据，正在同步...');
                             serviceClients = githubData.serviceClients || serviceClients;
                             coordClients = githubData.coordClients || coordClients;
-                            todos = githubData.todos || todos;
                             normalizeClientData();
                             renderClientList();
-                            renderTodos();
                             localStorage.setItem('lastSyncTime', githubData.lastUpdated);
                             console.log('✅ 自动同步完成');
                         } else {
@@ -1896,17 +1743,6 @@
         console.log('Migrated old clients data to serviceClients');
       } catch (e) {
         console.error('Error migrating old clients data:', e);
-      }
-    }
-    
-    // Load todos from localStorage
-    if (localStorage.getItem('todos')) {
-      try {
-        todos = JSON.parse(localStorage.getItem('todos')) || [];
-        console.log('Loaded todos from localStorage:', todos.length);
-      } catch (e) {
-        console.error('Error loading todos:', e);
-        todos = [];
       }
     }
     
@@ -2124,7 +1960,6 @@
             // 重新加载数据而不是重载页面
             loadAllData().then(() => {
               renderClientList();
-              renderTodos();
               showNotification('数据同步完成！', 'success');
             });
           }).catch((error) => {
@@ -2176,7 +2011,6 @@
         
         // 更新界面
         renderClientList();
-        renderTodos();
         
         showNotification('数据同步完成！', 'success');
         console.log('✅ 手动同步完成');
@@ -2265,11 +2099,6 @@
       const editableFields = document.querySelectorAll('input, textarea, select');
       
       editableFields.forEach(field => {
-        // Skip todo-related fields - they should always be editable
-        if (field.id === 'todo-input' || field.classList.contains('todo-checkbox')) {
-          return;
-        }
-        
         if (isEditMode) {
           // Enable editing
           field.classList.remove('field-readonly');
@@ -2556,90 +2385,6 @@
           }
           renderCoordFamilyContacts();
         }
-      }
-    }
-    
-    // Todo List Functions
-    function toggleTodoSection() {
-      isTodoExpanded = !isTodoExpanded;
-      const content = document.getElementById('todo-content');
-      const toggle = document.getElementById('todo-toggle');
-      
-      if (isTodoExpanded) {
-        content.classList.add('expanded');
-        toggle.textContent = '▲';
-      } else {
-        content.classList.remove('expanded');
-        toggle.textContent = '▼';
-      }
-    }
-    
-    function addTodo() {
-      const input = document.getElementById('todo-input');
-      const text = input.value.trim();
-      
-      if (text) {
-        const todo = {
-          id: Date.now(),
-          text: text,
-          completed: false,
-          createdAt: new Date().toISOString()
-        };
-        
-        todos.unshift(todo); // Add to beginning
-        saveTodos();
-        renderTodos();
-        input.value = '';
-      }
-    }
-    
-    function toggleTodo(id) {
-      const todo = todos.find(t => t.id === id);
-      if (todo) {
-        todo.completed = !todo.completed;
-        saveTodos();
-        renderTodos();
-      }
-    }
-    
-    function deleteTodo(id) {
-      todos = todos.filter(t => t.id !== id);
-      saveTodos();
-      renderTodos();
-    }
-    
-    function renderTodos() {
-      const todoList = document.getElementById('todo-list');
-      
-      if (todos.length === 0) {
-        todoList.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500); font-size: 0.875rem;">No tasks yet. Add one above!</div>';
-        return;
-      }
-      
-      todoList.innerHTML = todos.map(todo => `
-        <div class="todo-item ${todo.completed ? 'completed' : ''}">
-          <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
-                 onchange="toggleTodo(${todo.id})">
-          <span class="todo-text">${escapeHTML(todo.text)}</span>
-          <button class="todo-delete" onclick="deleteTodo(${todo.id})" title="Delete task">×</button>
-        </div>
-      `).join('');
-    }
-    
-    function saveTodos() {
-      try {
-        localStorage.setItem('todos', JSON.stringify(todos));
-        // Also save to GitHub if enabled
-        saveAllData();
-      } catch (e) {
-        console.error('Error saving todos:', e);
-      }
-    }
-    
-    // Handle Enter key in todo input
-    function handleTodoKeyPress(event) {
-      if (event.key === 'Enter') {
-        addTodo();
       }
     }
     
@@ -4185,7 +3930,6 @@
     // Ensure Service Department mode is active by default
     updateSystemModeContent();
     renderClientList();
-    renderTodos();
     loadDailyTasks();
     renderDailyTasks();
     
@@ -4415,13 +4159,7 @@
     // Initialize button states
     updateButtonStates();
     
-    // Add event listeners for todo input
     document.addEventListener('DOMContentLoaded', () => {
-      const todoInput = document.getElementById('todo-input');
-      if (todoInput) {
-        todoInput.addEventListener('keypress', handleTodoKeyPress);
-      }
-      
       // Add event listeners for Support Coordination inputs
       const coordFundingType = document.getElementById('coordFundingType');
       if (coordFundingType) {
