@@ -3394,36 +3394,125 @@
     }
     
     function addReminder() {
-      const title = prompt('Enter reminder title:');
-      if (!title) return;
-      
-      const description = prompt('Enter reminder description (optional):');
-      const date = prompt('Enter date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
-      if (!date) return;
-      
-      const time = prompt('Enter time (HH:MM) or leave empty for all day:');
-      
-      const newReminder = {
-        title: title,
-        description: description || '',
-        date: date,
-        time: time || '',
-        created: new Date().toISOString()
-      };
-      
-      if (!currentClient.reminders) {
-        currentClient.reminders = [];
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
       }
       
-      currentClient.reminders.push(newReminder);
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const html = `
+        <div style="padding: 20px; max-width: 520px;">
+          <h3>Add Reminder</h3>
+          <form id="reminder-form">
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Title *</label>
+              <input type="text" class="form-input" id="reminder-title" required>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Description</label>
+              <input type="text" class="form-input" id="reminder-description" placeholder="Optional">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Date (YYYYMMDD) *</label>
+              <input type="text" class="form-input" id="reminder-date-digits" inputmode="numeric" placeholder="e.g., 20250130" value="${today}" required>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Time (HHMM)</label>
+              <input type="text" class="form-input" id="reminder-time-digits" inputmode="numeric" placeholder="e.g., 0930">
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+              <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; margin-right: 8px;">
+                Cancel
+              </button>
+              <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
       
-      if (selectedClientIndex !== null) {
-        const currentClients = getCurrentClientList();
-        currentClients[selectedClientIndex] = { ...currentClient };
-        saveAllData();
+      showModal('Add Reminder', html);
+      
+      const dateInput = document.getElementById('reminder-date-digits');
+      const timeInput = document.getElementById('reminder-time-digits');
+      if (dateInput) {
+        dateInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
+        });
+      }
+      if (timeInput) {
+        timeInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        });
       }
       
-      renderUpcomingReminders();
+      document.getElementById('reminder-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = document.getElementById('reminder-title').value.trim();
+        const description = document.getElementById('reminder-description').value.trim();
+        const dateDigits = document.getElementById('reminder-date-digits').value.trim();
+        const timeDigits = document.getElementById('reminder-time-digits').value.trim();
+        
+        if (!title) {
+          alert('Title is required');
+          return;
+        }
+        
+        if (!/^\d{8}$/.test(dateDigits)) {
+          alert('Date must be 8 digits (YYYYMMDD)');
+          return;
+        }
+        
+        const yyyy = dateDigits.slice(0, 4);
+        const mm = dateDigits.slice(4, 6);
+        const dd = dateDigits.slice(6, 8);
+        const monthNum = Number(mm);
+        const dayNum = Number(dd);
+        if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) {
+          alert('Invalid date');
+          return;
+        }
+        const date = `${yyyy}-${mm}-${dd}`;
+        
+        let time = '';
+        if (timeDigits) {
+          if (!/^\d{4}$/.test(timeDigits)) {
+            alert('Time must be 4 digits (HHMM)');
+            return;
+          }
+          const hh = Number(timeDigits.slice(0, 2));
+          const min = Number(timeDigits.slice(2, 4));
+          if (hh < 0 || hh > 23 || min < 0 || min > 59) {
+            alert('Invalid time');
+            return;
+          }
+          time = `${timeDigits.slice(0, 2)}:${timeDigits.slice(2, 4)}`;
+        }
+        
+        const newReminder = {
+          title,
+          description: description || '',
+          date,
+          time,
+          created: new Date().toISOString()
+        };
+        
+        if (!currentClient.reminders) {
+          currentClient.reminders = [];
+        }
+        
+        currentClient.reminders.push(newReminder);
+        
+        if (selectedClientIndex !== null) {
+          const currentClients = getCurrentClientList();
+          currentClients[selectedClientIndex] = { ...currentClient };
+          saveAllData();
+        }
+        
+        renderUpcomingReminders();
+        closeModal();
+      });
     }
     
     function removeReminder(index) {
