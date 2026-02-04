@@ -1040,6 +1040,16 @@
                   <input type="date" class="form-input" id="planEndDate">
                 </div>
               </div>
+              <div class="form-grid" id="icare-details" style="display: none; margin-top: 12px;">
+                <div class="form-group">
+                  <label class="form-label">iCare Case Manager</label>
+                  <input type="text" class="form-input" id="icareCaseManager" placeholder="Case manager name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">iCare Coordinator</label>
+                  <input type="text" class="form-input" id="icareCoordinator" placeholder="Coordinator name">
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1754,6 +1764,8 @@
         fundingType: '',
         ndisNumber: '',
         icareParticipant: '',
+        icareCaseManager: '',
+        icareCoordinator: '',
         planStartDate: '',
         planEndDate: '',
         dayProgramEnabled: false,
@@ -2505,6 +2517,7 @@
       const formFields = [
         'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'interpreter',
         'fundingType', 'ndisNumber', 'planStartDate', 'planEndDate',
+        'icareCaseManager', 'icareCoordinator',
         'dayProgramName', 'dayProgramDays', 'dayProgramContactName',
         'dayProgramContactPhone', 'dayProgramContactEmail',
         'primaryDisability', 'supportNeeds', 'shortTermGoals', 'longTermGoals',
@@ -2517,6 +2530,11 @@
           element.value = '';
         }
       });
+
+      const icareDetails = document.getElementById('icare-details');
+      if (icareDetails) {
+        icareDetails.style.display = 'none';
+      }
       
       const dayProgramEnabled = document.getElementById('dayProgramEnabled');
       if (dayProgramEnabled) {
@@ -2584,6 +2602,8 @@
       document.getElementById('interpreter').value = currentClient.interpreter || '';
       document.getElementById('fundingType').value = currentClient.fundingType || '';
       document.getElementById('ndisNumber').value = currentClient.ndisNumber || '';
+      document.getElementById('icareCaseManager').value = currentClient.icareCaseManager || '';
+      document.getElementById('icareCoordinator').value = currentClient.icareCoordinator || '';
       document.getElementById('dayProgramEnabled').checked = !!currentClient.dayProgramEnabled;
       document.getElementById('dayProgramName').value = currentClient.dayProgramName || '';
       document.getElementById('dayProgramDays').value = currentClient.dayProgramDays || '';
@@ -2623,9 +2643,13 @@
       // Set funding type visibility
       const fundingType = currentClient.fundingType;
       const ndisGroup = document.getElementById('ndis-number-group');
+      const icareDetails = document.getElementById('icare-details');
       
       // NDIS number field is always visible now
       ndisGroup.style.display = 'flex';
+      if (icareDetails) {
+        icareDetails.style.display = fundingType === 'iCare' ? 'grid' : 'none';
+      }
     }
     
     function saveClientData() {
@@ -2641,6 +2665,8 @@
       currentClient.interpreter = document.getElementById('interpreter').value;
       currentClient.fundingType = document.getElementById('fundingType').value;
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
+      currentClient.icareCaseManager = document.getElementById('icareCaseManager').value;
+      currentClient.icareCoordinator = document.getElementById('icareCoordinator').value;
       currentClient.dayProgramEnabled = document.getElementById('dayProgramEnabled').checked;
       currentClient.dayProgramName = document.getElementById('dayProgramName').value;
       currentClient.dayProgramDays = document.getElementById('dayProgramDays').value;
@@ -3669,11 +3695,13 @@
     document.getElementById('fundingType').addEventListener('change', (e) => {
       const fundingType = e.target.value;
       const ndisGroup = document.getElementById('ndis-number-group');
+      const icareDetails = document.getElementById('icare-details');
       
-      if (fundingType === 'NDIS') {
+      if (ndisGroup) {
         ndisGroup.style.display = 'flex';
-      } else {
-        ndisGroup.style.display = 'flex';
+      }
+      if (icareDetails) {
+        icareDetails.style.display = fundingType === 'iCare' ? 'grid' : 'none';
       }
     });
     
