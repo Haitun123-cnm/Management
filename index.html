@@ -55,6 +55,12 @@
       box-shadow: var(--shadow-sm);
     }
     
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .header-title {
       font-size: 1.25rem;
       font-weight: 600;
@@ -327,8 +333,6 @@
 
     .daily-task-widget {
       position: relative;
-      width: 100%;
-      margin: 12px 0;
     }
 
     .daily-task-toggle {
@@ -373,7 +377,10 @@
     }
 
     .daily-task-panel {
-      margin-top: 8px;
+      position: absolute;
+      top: 42px;
+      left: 0;
+      width: 280px;
       background: var(--white);
       border: 1px solid var(--gray-200);
       border-radius: 8px;
@@ -384,6 +391,7 @@
       overflow: hidden;
       pointer-events: none;
       transition: opacity 0.2s ease, max-height 0.2s ease;
+      z-index: 1000;
     }
 
     .daily-task-widget:hover .daily-task-panel {
@@ -982,7 +990,25 @@
 <body>
   <!-- Header -->
   <div class="header">
-    <div class="header-title" id="system-title">Service Management System</div>
+    <div class="header-left">
+      <div class="header-title" id="system-title">Service Management System</div>
+      <div class="daily-task-widget">
+        <div class="daily-task-toggle">
+          <span class="daily-task-toggle-left">
+            <span id="daily-task-indicator" class="daily-task-indicator"></span>
+            Today Tasks
+          </span>
+          <span>📝</span>
+        </div>
+        <div class="daily-task-panel">
+          <div class="daily-task-input">
+            <input type="text" id="daily-task-input" placeholder="Add a task..." maxlength="80" onkeydown="handleDailyTaskKeyPress(event)">
+            <button class="btn btn-secondary btn-sm" onclick="addDailyTask()">Add</button>
+          </div>
+          <div class="daily-task-list" id="daily-task-list"></div>
+        </div>
+      </div>
+    </div>
     <div class="header-actions">
       <button class="btn btn-secondary" id="edit-mode-btn" onclick="toggleEditMode()" title="Toggle edit mode">
         <span id="edit-mode-icon">✏️</span>
@@ -1020,22 +1046,6 @@
           <button class="filter-tab active" data-filter="all">All</button>
           <button class="filter-tab" data-filter="ndis">NDIS</button>
           <button class="filter-tab" data-filter="icare">iCare</button>
-        </div>
-        <div class="daily-task-widget">
-          <div class="daily-task-toggle">
-            <span class="daily-task-toggle-left">
-              <span id="daily-task-indicator" class="daily-task-indicator"></span>
-              Today Tasks
-            </span>
-            <span>📝</span>
-          </div>
-          <div class="daily-task-panel">
-            <div class="daily-task-input">
-              <input type="text" id="daily-task-input" placeholder="Add a task..." maxlength="80" onkeydown="handleDailyTaskKeyPress(event)">
-              <button class="btn btn-secondary btn-sm" onclick="addDailyTask()">Add</button>
-            </div>
-            <div class="daily-task-list" id="daily-task-list"></div>
-          </div>
         </div>
       </div>
       <div class="client-list" id="client-list">
