@@ -327,22 +327,44 @@
 
     .daily-task-widget {
       position: relative;
-      display: inline-flex;
-      align-items: center;
+      width: 100%;
+      margin: 12px 0;
     }
 
     .daily-task-toggle {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 12px;
       border: 1px solid var(--gray-200);
-      border-radius: 6px;
-      font-size: 0.75rem;
-      color: var(--gray-700);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gray-800);
       background: var(--white);
       cursor: pointer;
       transition: background 0.2s, border-color 0.2s;
+    }
+
+    .daily-task-toggle-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .daily-task-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    }
+
+    .daily-task-indicator.ok {
+      background: #22c55e;
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15);
     }
 
     .daily-task-widget:hover .daily-task-toggle {
@@ -351,10 +373,7 @@
     }
 
     .daily-task-panel {
-      position: absolute;
-      top: 36px;
-      right: 0;
-      width: 260px;
+      margin-top: 8px;
       background: var(--white);
       border: 1px solid var(--gray-200);
       border-radius: 8px;
@@ -365,12 +384,11 @@
       overflow: hidden;
       pointer-events: none;
       transition: opacity 0.2s ease, max-height 0.2s ease;
-      z-index: 1000;
     }
 
     .daily-task-widget:hover .daily-task-panel {
       opacity: 1;
-      max-height: 300px;
+      max-height: 320px;
       pointer-events: auto;
     }
 
@@ -382,25 +400,25 @@
 
     .daily-task-input input {
       flex: 1;
-      padding: 6px 8px;
+      padding: 8px 10px;
       border: 1px solid var(--gray-300);
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
 
     .daily-task-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      max-height: 200px;
+      gap: 8px;
+      max-height: 220px;
       overflow-y: auto;
     }
 
     .daily-task-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
+      gap: 8px;
+      font-size: 0.85rem;
       color: var(--gray-700);
     }
     
@@ -978,16 +996,6 @@
         <span>🔄</span>
         <span>Sync Now</span>
       </button>
-      <div class="daily-task-widget">
-        <div class="daily-task-toggle">✅ Today Tasks</div>
-        <div class="daily-task-panel">
-          <div class="daily-task-input">
-            <input type="text" id="daily-task-input" placeholder="Add a task..." maxlength="80" onkeydown="handleDailyTaskKeyPress(event)">
-            <button class="btn btn-secondary btn-sm" onclick="addDailyTask()">Add</button>
-          </div>
-          <div class="daily-task-list" id="daily-task-list"></div>
-        </div>
-      </div>
       <button class="btn btn-success" id="save-client-btn" onclick="saveClientDataWithConfirmation()">
         <span>💾</span>
         Save Client
@@ -1012,6 +1020,22 @@
           <button class="filter-tab active" data-filter="all">All</button>
           <button class="filter-tab" data-filter="ndis">NDIS</button>
           <button class="filter-tab" data-filter="icare">iCare</button>
+        </div>
+        <div class="daily-task-widget">
+          <div class="daily-task-toggle">
+            <span class="daily-task-toggle-left">
+              <span id="daily-task-indicator" class="daily-task-indicator"></span>
+              Today Tasks
+            </span>
+            <span>📝</span>
+          </div>
+          <div class="daily-task-panel">
+            <div class="daily-task-input">
+              <input type="text" id="daily-task-input" placeholder="Add a task..." maxlength="80" onkeydown="handleDailyTaskKeyPress(event)">
+              <button class="btn btn-secondary btn-sm" onclick="addDailyTask()">Add</button>
+            </div>
+            <div class="daily-task-list" id="daily-task-list"></div>
+          </div>
         </div>
       </div>
       <div class="client-list" id="client-list">
@@ -1585,11 +1609,14 @@
 
   function renderDailyTasks() {
     const list = document.getElementById('daily-task-list');
+    const indicator = document.getElementById('daily-task-indicator');
     if (!list) return;
     if (dailyTasks.length === 0) {
       list.innerHTML = '<div style="padding: 6px; color: var(--gray-500); font-size: 0.75rem;">No tasks yet</div>';
+      if (indicator) indicator.classList.add('ok');
       return;
     }
+    if (indicator) indicator.classList.remove('ok');
     list.innerHTML = dailyTasks.map(task => `
       <div class="daily-task-item">
         <input type="checkbox" onchange="completeDailyTask('${task.id}')">
