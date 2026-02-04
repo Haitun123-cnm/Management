@@ -417,19 +417,6 @@
       margin-bottom: 8px;
     }
 
-    .client-view-toggle {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      padding: 6px 10px;
-      border: 1px solid var(--gray-200);
-      border-radius: 6px;
-      background: var(--white);
-      color: var(--gray-700);
-      cursor: pointer;
-    }
     
     .content-subtitle {
       color: var(--gray-600);
@@ -980,15 +967,8 @@
     <!-- Main Content -->
     <div class="main-content service-dept-mode active">
       <div class="content-header">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div>
-            <div class="content-title">Client Details</div>
-            <div class="content-subtitle">Manage client information and support needs</div>
-          </div>
-          <button class="client-view-toggle" id="client-view-toggle-service" style="display: none;" onclick="toggleClientViewMode()">
-            View: Service
-          </button>
-        </div>
+        <div class="content-title">Client Details</div>
+        <div class="content-subtitle">Manage client information and support needs</div>
       </div>
       
       <!-- Tabs -->
@@ -1320,15 +1300,8 @@
     <!-- Support Coordination Mode -->
     <div class="main-content support-coord-mode">
       <div class="content-header">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div>
-            <div class="content-title">Support Coordination - Client Details</div>
-            <div class="content-subtitle">Manage NDIS client coordination and support</div>
-          </div>
-          <button class="client-view-toggle" id="client-view-toggle-coord" style="display: none;" onclick="toggleClientViewMode()">
-            View: Support
-          </button>
-        </div>
+        <div class="content-title">Support Coordination - Client Details</div>
+        <div class="content-subtitle">Manage NDIS client coordination and support</div>
       </div>
       
       <!-- Support Coordination Tab Navigation -->
@@ -1998,48 +1971,9 @@
       const coordMode = document.querySelector('.support-coord-mode');
       const systemTitle = document.getElementById('system-title');
       
-      if (isSupportCoordMode) {
-        serviceMode.classList.remove('active');
-        coordMode.classList.add('active');
-        console.log('Switched to Support Coordination mode');
-        if (systemTitle) systemTitle.textContent = 'Support Coordination System';
-      } else {
-        serviceMode.classList.add('active');
-        coordMode.classList.remove('active');
-        console.log('Switched to Service Department mode');
-        if (systemTitle) systemTitle.textContent = 'Service Management System';
-      }
-      
-      updateClientViewToggle();
-    }
-
-    function updateClientViewToggle() {
-      const serviceToggle = document.getElementById('client-view-toggle-service');
-      const coordToggle = document.getElementById('client-view-toggle-coord');
-      const isBoth = currentClient && currentClient.clientType === 'both';
-      if (serviceToggle) {
-        serviceToggle.style.display = isBoth ? 'inline-flex' : 'none';
-        serviceToggle.textContent = `View: ${isSupportCoordMode ? 'Support' : 'Service'}`;
-      }
-      if (coordToggle) {
-        coordToggle.style.display = isBoth ? 'inline-flex' : 'none';
-        coordToggle.textContent = `View: ${isSupportCoordMode ? 'Support' : 'Service'}`;
-      }
-    }
-
-    function toggleClientViewMode() {
-      if (!currentClient || currentClient.clientType !== 'both') return;
-      currentClientViewMode = currentClientViewMode === 'coord' ? 'service' : 'coord';
-      isSupportCoordMode = currentClientViewMode === 'coord';
-      updateSystemModeContent();
-      if (isSupportCoordMode) {
-        loadCoordClientData();
-        renderCoordStakeholders();
-        renderCoordFamilyContacts();
-      } else {
-        loadClientData();
-        renderCoordinators();
-      }
+      serviceMode.classList.add('active');
+      coordMode.classList.remove('active');
+      if (systemTitle) systemTitle.textContent = 'Service Management System';
     }
     
     // GitHub Sync Functions
@@ -2507,14 +2441,8 @@
       const currentClients = getCurrentClientList();
       currentClient = { ...currentClients[index] };
       if (!currentClient.clientType) currentClient.clientType = 'service';
-      if (currentClient.clientType === 'coord') {
-        currentClientViewMode = 'coord';
-      } else if (currentClient.clientType === 'both') {
-        currentClientViewMode = currentClientViewMode || 'service';
-      } else {
-        currentClientViewMode = 'service';
-      }
-      isSupportCoordMode = currentClientViewMode === 'coord';
+      currentClientViewMode = 'service';
+      isSupportCoordMode = false;
       
       console.log('Selecting client:', currentClient);
       console.log('Client coordinators:', currentClient.coordinators);
@@ -2529,27 +2457,17 @@
       updateSystemModeContent();
       renderClientList();
       
-      // Load client data based on current type
-      if (currentClientViewMode === 'coord') {
-        loadCoordClientData();
-      } else {
-        loadClientData();
-      }
+      // Load client data (single view)
+      loadClientData();
       
       // Force render coordinators after a short delay to ensure DOM is ready
       setTimeout(() => {
         console.log('Delayed coordinators render for client:', currentClient.firstName, currentClient.lastName);
-      if (currentClientViewMode === 'coord') {
-          renderCoordStakeholders();
-          renderCoordFamilyContacts();
-        } else {
-          renderCoordinators();
-        }
+      renderCoordinators();
       }, 100);
       
       // Update button states
       updateButtonStates();
-      updateClientViewToggle();
     }
     
     function deleteClient(index) {
@@ -3783,8 +3701,8 @@
       currentClients.push(newClient);
       selectedClientIndex = currentClients.length - 1;
       currentClient = { ...newClient };
-      currentClientViewMode = clientType === 'coord' ? 'coord' : 'service';
-      isSupportCoordMode = currentClientViewMode === 'coord';
+      currentClientViewMode = 'service';
+      isSupportCoordMode = false;
       
       // Save all data (including GitHub sync)
       saveAllData();
@@ -3792,12 +3710,8 @@
       updateSystemModeContent();
       renderClientList();
       
-      // Load data based on client type
-      if (currentClientViewMode === 'coord') {
-        loadCoordClientData();
-      } else {
-        loadClientData();
-      }
+      // Load data (single view)
+      loadClientData();
       
       // Show confirmation
       showNotification('New client created successfully! You can now fill in the details.', 'success');
