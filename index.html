@@ -362,6 +362,34 @@
     .client-name {
       font-weight: 500;
       margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .client-type-tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--gray-100);
+      color: var(--gray-600);
+      white-space: nowrap;
+    }
+
+    .client-type-tag.service {
+      background: rgb(37 99 235 / 0.1);
+      color: var(--primary-blue);
+    }
+
+    .client-type-tag.coord {
+      background: rgb(16 185 129 / 0.12);
+      color: #059669;
+    }
+
+    .client-type-tag.both {
+      background: rgb(245 158 11 / 0.15);
+      color: #b45309;
     }
     
     .client-info {
@@ -387,6 +415,20 @@
       font-size: 1.5rem;
       font-weight: 600;
       margin-bottom: 8px;
+    }
+
+    .client-view-toggle {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--gray-700);
+      cursor: pointer;
     }
     
     .content-subtitle {
@@ -938,8 +980,15 @@
     <!-- Main Content -->
     <div class="main-content service-dept-mode active">
       <div class="content-header">
-        <div class="content-title">Client Details</div>
-        <div class="content-subtitle">Manage client information and support needs</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div>
+            <div class="content-title">Client Details</div>
+            <div class="content-subtitle">Manage client information and support needs</div>
+          </div>
+          <button class="client-view-toggle" id="client-view-toggle-service" style="display: none;" onclick="toggleClientViewMode()">
+            View: Service
+          </button>
+        </div>
       </div>
       
       <!-- Tabs -->
@@ -1271,8 +1320,15 @@
     <!-- Support Coordination Mode -->
     <div class="main-content support-coord-mode">
       <div class="content-header">
-        <div class="content-title">Support Coordination - Client Details</div>
-        <div class="content-subtitle">Manage NDIS client coordination and support</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div>
+            <div class="content-title">Support Coordination - Client Details</div>
+            <div class="content-subtitle">Manage NDIS client coordination and support</div>
+          </div>
+          <button class="client-view-toggle" id="client-view-toggle-coord" style="display: none;" onclick="toggleClientViewMode()">
+            View: Support
+          </button>
+        </div>
       </div>
       
       <!-- Support Coordination Tab Navigation -->
@@ -1423,8 +1479,8 @@
     let serviceClients = [];  // Service Department clients
     let coordClients = [];    // Support Coordination clients
     let selectedClientIndex = null;
-    let selectedClientType = null; // 'service' or 'coord'
-  let dailyTasks = [];
+    let currentClientViewMode = 'service'; // 'service' or 'coord'
+    let dailyTasks = [];
     
     // Modal functions
     function showModal(title, content) {
@@ -1535,16 +1591,16 @@
     
     // Helper function to get current client list based on mode
     function getClientListByType(type) {
-      return type === 'coord' ? coordClients : serviceClients;
+      return serviceClients;
     }
     
     function getCurrentClientList() {
-      return getClientListByType(selectedClientType || (isSupportCoordMode ? 'coord' : 'service'));
+      return serviceClients;
     }
     
     // Helper function to get current client list name for localStorage
     function getCurrentClientListKey() {
-      return (selectedClientType || (isSupportCoordMode ? 'coord' : 'service')) === 'coord' ? 'coordClients' : 'serviceClients';
+      return 'serviceClients';
     }
     
     // Load data from GitHub or localStorage
@@ -1565,6 +1621,14 @@
         if (githubData) {
           serviceClients = githubData.serviceClients || [];
           coordClients = githubData.coordClients || [];
+          if (coordClients.length) {
+            coordClients.forEach(client => {
+              if (!client.clientType) client.clientType = 'coord';
+              client.isSupportCoord = true;
+              serviceClients.push(client);
+            });
+            coordClients = [];
+          }
           console.log('✅ 从GitHub成功加载数据');
           console.log('📊 服务客户数量:', serviceClients.length);
           console.log('📊 协调客户数量:', coordClients.length);
@@ -1604,6 +1668,16 @@
           coordClients = [];
         }
       }
+
+      if (coordClients.length) {
+        coordClients.forEach(client => {
+          if (!client.clientType) client.clientType = 'coord';
+          client.isSupportCoord = true;
+          serviceClients.push(client);
+        });
+        coordClients = [];
+        localStorage.setItem('coordClients', JSON.stringify([]));
+      }
       
     }
     
@@ -1625,13 +1699,15 @@
         if (!client.coordinators) client.coordinators = [];
         if (!client.familyContacts) client.familyContacts = [];
         if (!client.caregivers) client.caregivers = [];
-      if (client.isSupportCoord === undefined) client.isSupportCoord = false;
+        if (!client.clientType) client.clientType = client.isSupportCoord ? 'coord' : 'service';
+        if (client.isSupportCoord === undefined) client.isSupportCoord = client.clientType === 'coord';
       });
       
       // Initialize arrays for existing coordination clients
       coordClients.forEach((client, index) => {
         if (!client.coordStakeholders) client.coordStakeholders = [];
         if (!client.coordFamilyContacts) client.coordFamilyContacts = [];
+        if (!client.clientType) client.clientType = 'coord';
         if (client.isSupportCoord === undefined) client.isSupportCoord = true;
       });
     }
@@ -1692,11 +1768,19 @@
                         const localTime = localStorage.getItem('lastSyncTime') ? 
                             new Date(localStorage.getItem('lastSyncTime')).getTime() : 0;
                         
-                        // If GitHub has newer data, load it
+        // If GitHub has newer data, load it
                         if (githubTime > localTime) {
                             console.log('📥 发现GitHub上有新数据，正在同步...');
                             serviceClients = githubData.serviceClients || serviceClients;
                             coordClients = githubData.coordClients || coordClients;
+          if (coordClients.length) {
+            coordClients.forEach(client => {
+              if (!client.clientType) client.clientType = 'coord';
+              client.isSupportCoord = true;
+              serviceClients.push(client);
+            });
+            coordClients = [];
+          }
                             normalizeClientData();
                             renderClientList();
                             localStorage.setItem('lastSyncTime', githubData.lastUpdated);
@@ -1834,6 +1918,7 @@
         coordinatorEmail: '',
         shortTermGoals: '',
         longTermGoals: '',
+        clientType: 'service',
         familyContacts: [],
         caregivers: [],
         coordinators: [],
@@ -1854,11 +1939,14 @@
     function renderClientList() {
       const clientList = document.getElementById('client-list');
       
-      const filterClients = (clients) => clients.filter(c => {
+      const filtered = serviceClients.filter(c => {
         let match = true;
         if (filterFunding !== 'all') {
           const filterFundingLower = filterFunding.toLowerCase();
-          const normalizedFunding = c.isSupportCoord ? 'ndis' : (c.fundingType || '').toLowerCase();
+          let normalizedFunding = (c.fundingType || '').toLowerCase();
+          if (c.clientType === 'coord' || c.clientType === 'both') {
+            normalizedFunding = normalizedFunding || 'ndis';
+          }
           match = normalizedFunding === filterFundingLower;
         }
         if (searchQuery) {
@@ -1867,10 +1955,7 @@
         return match;
       });
       
-      const filteredService = filterClients(serviceClients);
-      const filteredCoord = filterClients(coordClients);
-      
-      if (!filteredService.length && !filteredCoord.length) {
+      if (!filtered.length) {
         clientList.innerHTML = `
           <div style="padding: 24px; text-align: center; color: var(--gray-500);">
             No clients found. Add your first client to get started.
@@ -1879,40 +1964,32 @@
         return;
       }
       
-      const renderSection = (title, clients, type) => {
-        if (!clients.length) return '';
-        const items = clients.map((c) => {
-          const index = getClientListByType(type).indexOf(c);
-          const isActive = selectedClientType === type && selectedClientIndex === index;
-          const fundingLabel = c.isSupportCoord ? 'NDIS' : (c.fundingType || 'No Funding');
-          const badgeClass = fundingLabel === 'NDIS' ? 'badge-ndis' : fundingLabel === 'iCare' ? 'badge-icare' : 'badge-no-funding';
-          return `
-            <div class="client-item ${isActive ? 'active' : ''}" 
-                 onclick="selectClient(${index}, '${type}')">
-              <div class="client-name">${escapeHTML(c.firstName)} ${escapeHTML(c.lastName)}</div>
-              <div class="client-info">
-                <span class="badge ${badgeClass}">${fundingLabel}</span>
-                ${c.planStartDate ? `• ${formatDate(c.planStartDate)}` : ''}
-              </div>
-              <div class="client-item-actions">
-                <button class="btn btn-danger btn-sm" onclick="deleteClient(${index}, '${type}'); event.stopPropagation();" title="Delete client (or press Delete key when selected)">
-                  🗑️
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
+      clientList.innerHTML = filtered.map((c) => {
+        const actualIndex = serviceClients.indexOf(c);
+        const isActive = selectedClientIndex === actualIndex;
+        const fundingLabel = (c.clientType === 'coord' || c.clientType === 'both') ? (c.fundingType || 'NDIS') : (c.fundingType || 'No Funding');
+        const badgeClass = fundingLabel === 'NDIS' ? 'badge-ndis' : fundingLabel === 'iCare' ? 'badge-icare' : 'badge-no-funding';
+        const typeLabel = c.clientType === 'coord' ? 'Support' : c.clientType === 'both' ? 'Both' : 'Service';
+        const typeClass = c.clientType === 'coord' ? 'coord' : c.clientType === 'both' ? 'both' : 'service';
         return `
-          <div class="client-list-section-title">${title}</div>
-          ${items}
+          <div class="client-item ${isActive ? 'active' : ''}" 
+               onclick="selectClient(${actualIndex})">
+            <div class="client-name">
+              <span>${escapeHTML(c.firstName)} ${escapeHTML(c.lastName)}</span>
+              <span class="client-type-tag ${typeClass}">${typeLabel}</span>
+            </div>
+            <div class="client-info">
+              <span class="badge ${badgeClass}">${fundingLabel}</span>
+              ${c.planStartDate ? `• ${formatDate(c.planStartDate)}` : ''}
+            </div>
+            <div class="client-item-actions">
+              <button class="btn btn-danger btn-sm" onclick="deleteClient(${actualIndex}); event.stopPropagation();" title="Delete client (or press Delete key when selected)">
+                🗑️
+              </button>
+            </div>
+          </div>
         `;
-      };
-      
-      const serviceSection = renderSection('Service Clients', filteredService, 'service');
-      const coordSection = renderSection('Support Coordination Clients', filteredCoord, 'coord');
-      const separator = serviceSection && coordSection ? '<div class="client-list-separator"></div>' : '';
-      
-      clientList.innerHTML = `${serviceSection}${separator}${coordSection}`;
+      }).join('');
     }
     
     // System Mode Functions
@@ -1931,6 +2008,37 @@
         coordMode.classList.remove('active');
         console.log('Switched to Service Department mode');
         if (systemTitle) systemTitle.textContent = 'Service Management System';
+      }
+      
+      updateClientViewToggle();
+    }
+
+    function updateClientViewToggle() {
+      const serviceToggle = document.getElementById('client-view-toggle-service');
+      const coordToggle = document.getElementById('client-view-toggle-coord');
+      const isBoth = currentClient && currentClient.clientType === 'both';
+      if (serviceToggle) {
+        serviceToggle.style.display = isBoth ? 'inline-flex' : 'none';
+        serviceToggle.textContent = `View: ${isSupportCoordMode ? 'Support' : 'Service'}`;
+      }
+      if (coordToggle) {
+        coordToggle.style.display = isBoth ? 'inline-flex' : 'none';
+        coordToggle.textContent = `View: ${isSupportCoordMode ? 'Support' : 'Service'}`;
+      }
+    }
+
+    function toggleClientViewMode() {
+      if (!currentClient || currentClient.clientType !== 'both') return;
+      currentClientViewMode = currentClientViewMode === 'coord' ? 'service' : 'coord';
+      isSupportCoordMode = currentClientViewMode === 'coord';
+      updateSystemModeContent();
+      if (isSupportCoordMode) {
+        loadCoordClientData();
+        renderCoordStakeholders();
+        renderCoordFamilyContacts();
+      } else {
+        loadClientData();
+        renderCoordinators();
       }
     }
     
@@ -2160,8 +2268,9 @@
       try {
         console.log('🔄 Starting Support Coordination data save...');
         
-        // Save basic information with null checks
+      // Save basic information with null checks
         currentClient.isSupportCoord = true;
+        if (currentClient.clientType !== 'both') currentClient.clientType = 'coord';
         currentClient.firstName = document.getElementById('coordFirstName')?.value || '';
         currentClient.lastName = document.getElementById('coordLastName')?.value || '';
         currentClient.ndisNumber = document.getElementById('coordNdisNumber')?.value || '';
@@ -2393,13 +2502,19 @@
       }
     }
     
-    function selectClient(index, type = 'service') {
+    function selectClient(index) {
       selectedClientIndex = index;
-      selectedClientType = type;
-      const currentClients = getClientListByType(type);
+      const currentClients = getCurrentClientList();
       currentClient = { ...currentClients[index] };
-      currentClient.isSupportCoord = type === 'coord';
-      isSupportCoordMode = currentClient.isSupportCoord;
+      if (!currentClient.clientType) currentClient.clientType = 'service';
+      if (currentClient.clientType === 'coord') {
+        currentClientViewMode = 'coord';
+      } else if (currentClient.clientType === 'both') {
+        currentClientViewMode = currentClientViewMode || 'service';
+      } else {
+        currentClientViewMode = 'service';
+      }
+      isSupportCoordMode = currentClientViewMode === 'coord';
       
       console.log('Selecting client:', currentClient);
       console.log('Client coordinators:', currentClient.coordinators);
@@ -2415,7 +2530,7 @@
       renderClientList();
       
       // Load client data based on current type
-      if (currentClient.isSupportCoord) {
+      if (currentClientViewMode === 'coord') {
         loadCoordClientData();
       } else {
         loadClientData();
@@ -2424,7 +2539,7 @@
       // Force render coordinators after a short delay to ensure DOM is ready
       setTimeout(() => {
         console.log('Delayed coordinators render for client:', currentClient.firstName, currentClient.lastName);
-      if (currentClient.isSupportCoord) {
+      if (currentClientViewMode === 'coord') {
           renderCoordStakeholders();
           renderCoordFamilyContacts();
         } else {
@@ -2434,10 +2549,11 @@
       
       // Update button states
       updateButtonStates();
+      updateClientViewToggle();
     }
     
-    function deleteClient(index, type = 'service') {
-      const currentClients = getClientListByType(type);
+    function deleteClient(index) {
+      const currentClients = getCurrentClientList();
       if (index < 0 || index >= currentClients.length) {
         alert('Invalid client index');
         return;
@@ -2454,13 +2570,12 @@
         saveAllData();
         
         // Reset selection if the deleted client was selected
-        if (selectedClientType === type && selectedClientIndex === index) {
+        if (selectedClientIndex === index) {
           selectedClientIndex = null;
-          selectedClientType = null;
           currentClient = null;
           // Clear the form
           clearClientForm();
-        } else if (selectedClientType === type && selectedClientIndex > index) {
+        } else if (selectedClientIndex > index) {
           // Adjust the selected index if it was after the deleted client
           selectedClientIndex--;
         }
@@ -2624,6 +2739,7 @@
       
       // Save form data to currentClient
       currentClient.isSupportCoord = false;
+      if (currentClient.clientType !== 'both') currentClient.clientType = 'service';
       currentClient.firstName = document.getElementById('firstName').value;
       currentClient.lastName = document.getElementById('lastName').value;
       currentClient.dob = document.getElementById('dob').value;
@@ -3648,7 +3764,7 @@
     }
     
     // Create new client function
-    function createNewClient(isSupportCoord = false) {
+    function createNewClient(clientType = 'service') {
       // Check if there's an unsaved client first
       if (currentClient && selectedClientIndex !== null) {
         const hasUnsavedChanges = checkForUnsavedChanges();
@@ -3660,14 +3776,15 @@
         }
       }
       
-      const currentClients = getClientListByType(isSupportCoord ? 'coord' : 'service');
+      const currentClients = getCurrentClientList();
       const newClient = getEmptyClient();
-      newClient.isSupportCoord = isSupportCoord;
+      newClient.clientType = clientType;
+      newClient.isSupportCoord = clientType === 'coord';
       currentClients.push(newClient);
       selectedClientIndex = currentClients.length - 1;
-      selectedClientType = isSupportCoord ? 'coord' : 'service';
       currentClient = { ...newClient };
-      isSupportCoordMode = isSupportCoord;
+      currentClientViewMode = clientType === 'coord' ? 'coord' : 'service';
+      isSupportCoordMode = currentClientViewMode === 'coord';
       
       // Save all data (including GitHub sync)
       saveAllData();
@@ -3676,7 +3793,7 @@
       renderClientList();
       
       // Load data based on client type
-      if (isSupportCoord) {
+      if (currentClientViewMode === 'coord') {
         loadCoordClientData();
       } else {
         loadClientData();
@@ -3700,15 +3817,25 @@
           <div style="margin-bottom: 12px; color: #6b7280; font-size: 0.9rem;">
             创建新客户前，请选择客户类型。
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-            <input type="checkbox" id="new-client-support-coord">
-            <label for="new-client-support-coord" style="margin: 0;">Support Coordination 客户</label>
+          <div style="display: grid; gap: 8px; margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="radio" name="new-client-type" value="service" checked>
+              Service
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="radio" name="new-client-type" value="coord">
+              Support Coordination
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="radio" name="new-client-type" value="both">
+              Both
+            </label>
           </div>
           <div style="text-align: right;">
             <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; margin-right: 8px;">
               取消
             </button>
-            <button type="button" onclick="createNewClient(document.getElementById('new-client-support-coord').checked); closeModal();" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
+            <button type="button" onclick="const t=document.querySelector('input[name=\\'new-client-type\\']:checked').value; createNewClient(t); closeModal();" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
               创建
             </button>
           </div>
@@ -3869,7 +3996,7 @@
       // Delete key to delete selected client
       if (e.key === 'Delete' && selectedClientIndex !== null) {
         e.preventDefault();
-        deleteClient(selectedClientIndex, selectedClientType || 'service');
+        deleteClient(selectedClientIndex);
       }
       
       // Ctrl/Cmd + N to create new client
