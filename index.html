@@ -324,6 +324,85 @@
       background: var(--gray-200);
       margin: 10px 24px;
     }
+
+    .daily-task-widget {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .daily-task-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: var(--gray-700);
+      background: var(--white);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .daily-task-widget:hover .daily-task-toggle {
+      background: var(--gray-50);
+      border-color: var(--gray-300);
+    }
+
+    .daily-task-panel {
+      position: absolute;
+      top: 36px;
+      right: 0;
+      width: 260px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+      padding: 10px;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s ease, max-height 0.2s ease;
+      z-index: 1000;
+    }
+
+    .daily-task-widget:hover .daily-task-panel {
+      opacity: 1;
+      max-height: 300px;
+      pointer-events: auto;
+    }
+
+    .daily-task-input {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .daily-task-input input {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    .daily-task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .daily-task-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--gray-700);
+    }
     
     .client-item {
       padding: 12px 24px;
@@ -899,6 +978,16 @@
         <span>🔄</span>
         <span>Sync Now</span>
       </button>
+      <div class="daily-task-widget">
+        <div class="daily-task-toggle">✅ Today Tasks</div>
+        <div class="daily-task-panel">
+          <div class="daily-task-input">
+            <input type="text" id="daily-task-input" placeholder="Add a task..." maxlength="80" onkeydown="handleDailyTaskKeyPress(event)">
+            <button class="btn btn-secondary btn-sm" onclick="addDailyTask()">Add</button>
+          </div>
+          <div class="daily-task-list" id="daily-task-list"></div>
+        </div>
+      </div>
       <button class="btn btn-success" id="save-client-btn" onclick="saveClientDataWithConfirmation()">
         <span>💾</span>
         Save Client
@@ -1046,8 +1135,24 @@
                   <input type="text" class="form-input" id="icareCaseManager" placeholder="Case manager name">
                 </div>
                 <div class="form-group">
+                  <label class="form-label">iCare Case Manager Phone</label>
+                  <input type="tel" class="form-input" id="icareCaseManagerPhone" placeholder="Phone number">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">iCare Case Manager Email</label>
+                  <input type="email" class="form-input" id="icareCaseManagerEmail" placeholder="Email address">
+                </div>
+                <div class="form-group">
                   <label class="form-label">iCare Coordinator</label>
                   <input type="text" class="form-input" id="icareCoordinator" placeholder="Coordinator name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">iCare Coordinator Phone</label>
+                  <input type="tel" class="form-input" id="icareCoordinatorPhone" placeholder="Phone number">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">iCare Coordinator Email</label>
+                  <input type="email" class="form-input" id="icareCoordinatorEmail" placeholder="Email address">
                 </div>
               </div>
             </div>
@@ -1416,6 +1521,7 @@
     let coordClients = [];    // Support Coordination clients
     let selectedClientIndex = null;
     let selectedClientType = null; // 'service' or 'coord'
+  let dailyTasks = [];
     
     // Modal functions
     function showModal(title, content) {
@@ -1450,6 +1556,70 @@
         modal.remove();
       }
     }
+
+  function getTodayKey() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  function loadDailyTasks() {
+    try {
+      const storedDate = localStorage.getItem('dailyTasksDate');
+      const today = getTodayKey();
+      if (storedDate !== today) {
+        localStorage.setItem('dailyTasksDate', today);
+        localStorage.setItem('dailyTasks', JSON.stringify([]));
+      }
+      dailyTasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
+    } catch (e) {
+      dailyTasks = [];
+    }
+  }
+
+  function saveDailyTasks() {
+    try {
+      localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+    } catch (e) {
+      console.error('Error saving daily tasks:', e);
+    }
+  }
+
+  function renderDailyTasks() {
+    const list = document.getElementById('daily-task-list');
+    if (!list) return;
+    if (dailyTasks.length === 0) {
+      list.innerHTML = '<div style="padding: 6px; color: var(--gray-500); font-size: 0.75rem;">No tasks yet</div>';
+      return;
+    }
+    list.innerHTML = dailyTasks.map(task => `
+      <div class="daily-task-item">
+        <input type="checkbox" onchange="completeDailyTask('${task.id}')">
+        <span>${escapeHTML(task.text)}</span>
+      </div>
+    `).join('');
+  }
+
+  function addDailyTask() {
+    const input = document.getElementById('daily-task-input');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    dailyTasks.unshift({ id: String(Date.now()), text });
+    input.value = '';
+    saveDailyTasks();
+    renderDailyTasks();
+  }
+
+  function handleDailyTaskKeyPress(event) {
+    if (event.key === 'Enter') {
+      addDailyTask();
+    }
+  }
+
+  function completeDailyTask(id) {
+    dailyTasks = dailyTasks.filter(task => task.id !== id);
+    saveDailyTasks();
+    renderDailyTasks();
+  }
     let currentClient = null;
     let filterFunding = 'all';
     let searchQuery = '';
@@ -1765,7 +1935,11 @@
         ndisNumber: '',
         icareParticipant: '',
         icareCaseManager: '',
+        icareCaseManagerPhone: '',
+        icareCaseManagerEmail: '',
         icareCoordinator: '',
+        icareCoordinatorPhone: '',
+        icareCoordinatorEmail: '',
         planStartDate: '',
         planEndDate: '',
         dayProgramEnabled: false,
@@ -2517,7 +2691,8 @@
       const formFields = [
         'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'interpreter',
         'fundingType', 'ndisNumber', 'planStartDate', 'planEndDate',
-        'icareCaseManager', 'icareCoordinator',
+        'icareCaseManager', 'icareCaseManagerPhone', 'icareCaseManagerEmail',
+        'icareCoordinator', 'icareCoordinatorPhone', 'icareCoordinatorEmail',
         'dayProgramName', 'dayProgramDays', 'dayProgramContactName',
         'dayProgramContactPhone', 'dayProgramContactEmail',
         'primaryDisability', 'supportNeeds', 'shortTermGoals', 'longTermGoals',
@@ -2603,7 +2778,11 @@
       document.getElementById('fundingType').value = currentClient.fundingType || '';
       document.getElementById('ndisNumber').value = currentClient.ndisNumber || '';
       document.getElementById('icareCaseManager').value = currentClient.icareCaseManager || '';
+      document.getElementById('icareCaseManagerPhone').value = currentClient.icareCaseManagerPhone || '';
+      document.getElementById('icareCaseManagerEmail').value = currentClient.icareCaseManagerEmail || '';
       document.getElementById('icareCoordinator').value = currentClient.icareCoordinator || '';
+      document.getElementById('icareCoordinatorPhone').value = currentClient.icareCoordinatorPhone || '';
+      document.getElementById('icareCoordinatorEmail').value = currentClient.icareCoordinatorEmail || '';
       document.getElementById('dayProgramEnabled').checked = !!currentClient.dayProgramEnabled;
       document.getElementById('dayProgramName').value = currentClient.dayProgramName || '';
       document.getElementById('dayProgramDays').value = currentClient.dayProgramDays || '';
@@ -2666,7 +2845,11 @@
       currentClient.fundingType = document.getElementById('fundingType').value;
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
       currentClient.icareCaseManager = document.getElementById('icareCaseManager').value;
+      currentClient.icareCaseManagerPhone = document.getElementById('icareCaseManagerPhone').value;
+      currentClient.icareCaseManagerEmail = document.getElementById('icareCaseManagerEmail').value;
       currentClient.icareCoordinator = document.getElementById('icareCoordinator').value;
+      currentClient.icareCoordinatorPhone = document.getElementById('icareCoordinatorPhone').value;
+      currentClient.icareCoordinatorEmail = document.getElementById('icareCoordinatorEmail').value;
       currentClient.dayProgramEnabled = document.getElementById('dayProgramEnabled').checked;
       currentClient.dayProgramName = document.getElementById('dayProgramName').value;
       currentClient.dayProgramDays = document.getElementById('dayProgramDays').value;
@@ -3966,6 +4149,8 @@
     updateSystemModeContent();
     renderClientList();
     renderTodos();
+    loadDailyTasks();
+    renderDailyTasks();
     
     // Initialize edit mode (default to read-only)
     updateFieldEditability();
