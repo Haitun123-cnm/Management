@@ -1456,7 +1456,6 @@
     let serviceClients = [];  // Service Department clients
     let coordClients = [];    // Support Coordination clients
     let selectedClientIndex = null;
-    let currentClientViewMode = 'service'; // 'service' or 'coord'
     let dailyTasks = [];
     
     // Modal functions
@@ -1933,7 +1932,10 @@
         return match;
       });
       
-      if (!filtered.length) {
+      const serviceGroup = filtered.filter(c => c.clientType !== 'coord');
+      const coordGroup = filtered.filter(c => c.clientType !== 'service');
+      
+      if (!serviceGroup.length && !coordGroup.length) {
         clientList.innerHTML = `
           <div style="padding: 24px; text-align: center; color: var(--gray-500);">
             No clients found. Add your first client to get started.
@@ -1942,32 +1944,45 @@
         return;
       }
       
-      clientList.innerHTML = filtered.map((c) => {
-        const actualIndex = serviceClients.indexOf(c);
-        const isActive = selectedClientIndex === actualIndex;
-        const fundingLabel = (c.clientType === 'coord' || c.clientType === 'both') ? (c.fundingType || 'NDIS') : (c.fundingType || 'No Funding');
-        const badgeClass = fundingLabel === 'NDIS' ? 'badge-ndis' : fundingLabel === 'iCare' ? 'badge-icare' : 'badge-no-funding';
-        const typeLabel = c.clientType === 'coord' ? 'Support' : c.clientType === 'both' ? 'Both' : 'Service';
-        const typeClass = c.clientType === 'coord' ? 'coord' : c.clientType === 'both' ? 'both' : 'service';
+      const renderGroup = (title, clients) => {
+        if (!clients.length) return '';
+        const items = clients.map((c) => {
+          const actualIndex = serviceClients.indexOf(c);
+          const isActive = selectedClientIndex === actualIndex;
+          const fundingLabel = (c.clientType === 'coord' || c.clientType === 'both') ? (c.fundingType || 'NDIS') : (c.fundingType || 'No Funding');
+          const badgeClass = fundingLabel === 'NDIS' ? 'badge-ndis' : fundingLabel === 'iCare' ? 'badge-icare' : 'badge-no-funding';
+          const typeLabel = c.clientType === 'coord' ? 'Support' : c.clientType === 'both' ? 'Both' : 'Service';
+          const typeClass = c.clientType === 'coord' ? 'coord' : c.clientType === 'both' ? 'both' : 'service';
+          return `
+            <div class="client-item ${isActive ? 'active' : ''}" 
+                 onclick="selectClient(${actualIndex})">
+              <div class="client-name">
+                <span>${escapeHTML(c.firstName)} ${escapeHTML(c.lastName)}</span>
+                <span class="client-type-tag ${typeClass}">${typeLabel}</span>
+              </div>
+              <div class="client-info">
+                <span class="badge ${badgeClass}">${fundingLabel}</span>
+                ${c.planStartDate ? `• ${formatDate(c.planStartDate)}` : ''}
+              </div>
+              <div class="client-item-actions">
+                <button class="btn btn-danger btn-sm" onclick="deleteClient(${actualIndex}); event.stopPropagation();" title="Delete client (or press Delete key when selected)">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
         return `
-          <div class="client-item ${isActive ? 'active' : ''}" 
-               onclick="selectClient(${actualIndex})">
-            <div class="client-name">
-              <span>${escapeHTML(c.firstName)} ${escapeHTML(c.lastName)}</span>
-              <span class="client-type-tag ${typeClass}">${typeLabel}</span>
-            </div>
-            <div class="client-info">
-              <span class="badge ${badgeClass}">${fundingLabel}</span>
-              ${c.planStartDate ? `• ${formatDate(c.planStartDate)}` : ''}
-            </div>
-            <div class="client-item-actions">
-              <button class="btn btn-danger btn-sm" onclick="deleteClient(${actualIndex}); event.stopPropagation();" title="Delete client (or press Delete key when selected)">
-                🗑️
-              </button>
-            </div>
-          </div>
+          <div class="client-list-section-title">${title}</div>
+          ${items}
         `;
-      }).join('');
+      };
+      
+      const serviceSection = renderGroup('Service Clients', serviceGroup);
+      const coordSection = renderGroup('Support Coordination Clients', coordGroup);
+      const separator = serviceSection && coordSection ? '<div class="client-list-separator"></div>' : '';
+      
+      clientList.innerHTML = `${serviceSection}${separator}${coordSection}`;
     }
     
     // System Mode Functions
@@ -2446,7 +2461,6 @@
       const currentClients = getCurrentClientList();
       currentClient = { ...currentClients[index] };
       if (!currentClient.clientType) currentClient.clientType = 'service';
-      currentClientViewMode = 'service';
       isSupportCoordMode = false;
       
       console.log('Selecting client:', currentClient);
@@ -2650,11 +2664,23 @@
       const fundingType = currentClient.fundingType;
       const ndisGroup = document.getElementById('ndis-number-group');
       const icareDetails = document.getElementById('icare-details');
+      const fundingTypeSelect = document.getElementById('fundingType');
       
       // NDIS number field is always visible now
       ndisGroup.style.display = 'flex';
-      if (icareDetails) {
-        icareDetails.style.display = fundingType === 'iCare' ? 'grid' : 'none';
+      if (currentClient.clientType === 'coord') {
+        if (fundingTypeSelect) {
+          fundingTypeSelect.value = 'NDIS';
+          fundingTypeSelect.disabled = true;
+        }
+        if (icareDetails) icareDetails.style.display = 'none';
+      } else {
+        if (fundingTypeSelect) {
+          fundingTypeSelect.disabled = false;
+        }
+        if (icareDetails) {
+          icareDetails.style.display = fundingType === 'iCare' ? 'grid' : 'none';
+        }
       }
     }
     
@@ -2662,8 +2688,8 @@
       if (!currentClient) return;
       
       // Save form data to currentClient
-      currentClient.isSupportCoord = false;
-      if (currentClient.clientType !== 'both') currentClient.clientType = 'service';
+      if (!currentClient.clientType) currentClient.clientType = 'service';
+      currentClient.isSupportCoord = currentClient.clientType === 'coord';
       currentClient.firstName = document.getElementById('firstName').value;
       currentClient.lastName = document.getElementById('lastName').value;
       currentClient.dob = document.getElementById('dob').value;
@@ -2673,6 +2699,9 @@
       currentClient.participantAddress = document.getElementById('participantAddress').value;
       currentClient.interpreter = document.getElementById('interpreter').value;
       currentClient.fundingType = document.getElementById('fundingType').value;
+      if (currentClient.clientType === 'coord') {
+        currentClient.fundingType = 'NDIS';
+      }
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
       currentClient.icareCaseManager = document.getElementById('icareCaseManager').value;
       currentClient.icareCaseManagerPhone = document.getElementById('icareCaseManagerPhone').value;
@@ -3705,10 +3734,12 @@
       const newClient = getEmptyClient();
       newClient.clientType = clientType;
       newClient.isSupportCoord = clientType === 'coord';
+      if (clientType === 'coord') {
+        newClient.fundingType = 'NDIS';
+      }
       currentClients.push(newClient);
       selectedClientIndex = currentClients.length - 1;
       currentClient = { ...newClient };
-      currentClientViewMode = 'service';
       isSupportCoordMode = false;
       
       // Save all data (including GitHub sync)
@@ -3802,9 +3833,14 @@
     
     // Funding type change handler
     document.getElementById('fundingType').addEventListener('change', (e) => {
-      const fundingType = e.target.value;
       const ndisGroup = document.getElementById('ndis-number-group');
       const icareDetails = document.getElementById('icare-details');
+      
+      if (currentClient && currentClient.clientType === 'coord') {
+        e.target.value = 'NDIS';
+      }
+      
+      const fundingType = e.target.value;
       
       if (ndisGroup) {
         ndisGroup.style.display = 'flex';
