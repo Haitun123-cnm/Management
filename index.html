@@ -2036,7 +2036,7 @@
       });
       
       const serviceGroup = filtered.filter(c => c.clientType !== 'coord');
-      const coordGroup = filtered.filter(c => c.clientType !== 'service');
+      const coordGroup = filtered.filter(c => c.clientType === 'coord');
       
       if (!serviceGroup.length && !coordGroup.length) {
         clientList.innerHTML = `
@@ -2054,8 +2054,8 @@
           const isActive = selectedClientIndex === actualIndex;
           const fundingLabel = (c.clientType === 'coord' || c.clientType === 'both') ? (c.fundingType || 'NDIS') : (c.fundingType || 'No Funding');
           const badgeClass = fundingLabel === 'NDIS' ? 'badge-ndis' : fundingLabel === 'iCare' ? 'badge-icare' : 'badge-no-funding';
-          const typeLabel = c.clientType === 'coord' ? 'Support' : c.clientType === 'both' ? 'Both' : 'Service';
-          const typeClass = c.clientType === 'coord' ? 'coord' : c.clientType === 'both' ? 'both' : 'service';
+          const typeLabel = c.clientType === 'coord' ? 'Support' : 'Service';
+          const typeClass = c.clientType === 'coord' ? 'coord' : 'service';
           return `
             <div class="client-item ${isActive ? 'active' : ''}" 
                  onclick="selectClient(${actualIndex})">
@@ -3919,10 +3919,6 @@
             <label style="display: flex; align-items: center; gap: 8px;">
               <input type="radio" name="new-client-type" value="coord">
               Support Coordination
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input type="radio" name="new-client-type" value="both">
-              Both
             </label>
           </div>
           <div style="text-align: right;">
