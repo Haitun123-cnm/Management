@@ -2594,6 +2594,7 @@
       if (!currentClient.caregivers) currentClient.caregivers = [];
       if (!currentClient.coordStakeholders) currentClient.coordStakeholders = [];
       if (!currentClient.coordFamilyContacts) currentClient.coordFamilyContacts = [];
+      if (!currentClient.sessions) currentClient.sessions = [];
       
       updateSystemModeContent();
       renderClientList();
@@ -2605,6 +2606,7 @@
       setTimeout(() => {
         console.log('Delayed coordinators render for client:', currentClient.firstName, currentClient.lastName);
       renderCoordinators();
+      renderWeeklySessions();
       }, 100);
       
       // Update button states
@@ -2716,6 +2718,7 @@
       renderFamilyContacts();
       renderCaregivers();
       renderCoordinators();
+      renderWeeklySessions();
       renderUpcomingReminders();
       loadDocuments();
       
@@ -3199,6 +3202,170 @@
           </div>
         </div>
       `).join('');
+    }
+
+    function normalizeDateString(dateStr) {
+      if (!dateStr) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        const [d, m, y] = dateStr.split('/');
+        return `${y}-${m}-${d}`;
+      }
+      return dateStr;
+    }
+
+    function getSessionStatus(session) {
+      const today = new Date();
+      const start = new Date(normalizeDateString(session.startDate || ''));
+      const end = new Date(normalizeDateString(session.endDate || ''));
+      if (session.pauseStart && session.pauseEnd) {
+        const pauseStart = new Date(normalizeDateString(session.pauseStart));
+        const pauseEnd = new Date(normalizeDateString(session.pauseEnd));
+        if (!isNaN(pauseStart) && !isNaN(pauseEnd) && today >= pauseStart && today <= pauseEnd) {
+          return 'paused';
+        }
+      }
+      if (!isNaN(start) && today < start) return 'upcoming';
+      if (!isNaN(end) && today > end) return 'expired';
+      return 'active';
+    }
+
+    function renderWeeklySessions() {
+      const container = document.getElementById('weekly-session-cards');
+      if (!container) return;
+      if (!currentClient) {
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      if (!currentClient.sessions) currentClient.sessions = [];
+      if (currentClient.sessions.length === 0) {
+        container.innerHTML = '<div class="no-data">No sessions yet</div>';
+        return;
+      }
+      container.innerHTML = currentClient.sessions.map((session, index) => {
+        const status = getSessionStatus(session);
+        const dateRange = `${session.startDate || 'N/A'} → ${session.endDate || 'N/A'}`;
+        const timeRange = session.time ? session.time : 'Time not set';
+        const pauseRange = session.pauseStart && session.pauseEnd ? `Paused: ${session.pauseStart} → ${session.pauseEnd}` : '';
+        return `
+          <div class="session-card">
+            <div class="session-actions">
+              <button class="btn btn-warning btn-sm" onclick="showWeeklySessionForm(${index}, true); event.stopPropagation();">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="removeWeeklySession(${index}); event.stopPropagation();">Remove</button>
+            </div>
+            <div class="session-title">
+              <span class="session-status ${status}"></span>
+              ${escapeHTML(session.name || 'Session')}
+            </div>
+            <div class="session-meta">
+              <div>Day: ${escapeHTML(session.day || 'N/A')}</div>
+              <div>Time: ${escapeHTML(timeRange)}</div>
+              <div>Dates: ${escapeHTML(dateRange)}</div>
+              ${pauseRange ? `<div>${escapeHTML(pauseRange)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showWeeklySessionForm(sessionIndex = null, isEdit = false) {
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
+      }
+      if (!currentClient.sessions) currentClient.sessions = [];
+      const session = isEdit && sessionIndex !== null ? currentClient.sessions[sessionIndex] : null;
+      const html = `
+        <div style="padding: 20px; max-width: 520px;">
+          <h3>${isEdit ? 'Edit' : 'Add'} Weekly Session</h3>
+          <form id="weekly-session-form">
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Session Name *</label>
+              <input type="text" class="form-input" id="session-name" value="${session ? session.name : ''}" required>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Day</label>
+              <input type="text" class="form-input" id="session-day" placeholder="e.g., Monday" value="${session ? session.day || '' : ''}">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Time</label>
+              <input type="text" class="form-input" id="session-time" placeholder="e.g., 10:00-11:00" value="${session ? session.time || '' : ''}">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Start Date (DD/MM/YYYY)</label>
+              <input type="text" class="form-input" id="session-start" placeholder="20/02/2026" value="${session ? session.startDate || '' : ''}">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">End Date (DD/MM/YYYY)</label>
+              <input type="text" class="form-input" id="session-end" placeholder="20/04/2026" value="${session ? session.endDate || '' : ''}">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Pause Start (optional)</label>
+              <input type="text" class="form-input" id="session-pause-start" placeholder="e.g., 01/03/2026" value="${session ? session.pauseStart || '' : ''}">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label class="form-label">Pause End (optional)</label>
+              <input type="text" class="form-input" id="session-pause-end" placeholder="e.g., 07/03/2026" value="${session ? session.pauseEnd || '' : ''}">
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+              <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; margin-right: 8px;">
+                Cancel
+              </button>
+              <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
+                ${isEdit ? 'Update' : 'Add'}
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+      showModal(`${isEdit ? 'Edit' : 'Add'} Weekly Session`, html);
+      document.getElementById('weekly-session-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveWeeklySession(sessionIndex, isEdit);
+      });
+    }
+
+    function saveWeeklySession(sessionIndex, isEdit) {
+      const name = document.getElementById('session-name').value.trim();
+      if (!name) {
+        alert('Session name is required');
+        return;
+      }
+      const sessionData = {
+        name,
+        day: document.getElementById('session-day').value.trim(),
+        time: document.getElementById('session-time').value.trim(),
+        startDate: document.getElementById('session-start').value.trim(),
+        endDate: document.getElementById('session-end').value.trim(),
+        pauseStart: document.getElementById('session-pause-start').value.trim(),
+        pauseEnd: document.getElementById('session-pause-end').value.trim()
+      };
+      if (isEdit && sessionIndex !== null) {
+        currentClient.sessions[sessionIndex] = sessionData;
+      } else {
+        currentClient.sessions.push(sessionData);
+      }
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      renderWeeklySessions();
+      closeModal();
+      showNotification(`Weekly session ${isEdit ? 'updated' : 'added'} successfully`, 'success');
+    }
+
+    function removeWeeklySession(index) {
+      if (!currentClient.sessions || !currentClient.sessions[index]) return;
+      if (confirm('Remove this session?')) {
+        currentClient.sessions.splice(index, 1);
+        if (selectedClientIndex !== null) {
+          const currentClients = getCurrentClientList();
+          currentClients[selectedClientIndex] = { ...currentClient };
+          saveAllData();
+        }
+        renderWeeklySessions();
+      }
     }
     
     function addCaregiver() {
