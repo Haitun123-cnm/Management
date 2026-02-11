@@ -391,6 +391,74 @@
       background: rgb(245 158 11 / 0.15);
       color: #b45309;
     }
+
+    .session-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .session-card {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--white);
+      position: relative;
+    }
+
+    .session-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .session-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .session-status.active {
+      background: #10b981;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+    }
+
+    .session-status.expired {
+      background: #ef4444;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    }
+
+    .session-status.paused {
+      background: #f59e0b;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+    }
+
+    .session-status.upcoming {
+      background: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+
+    .session-meta {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      line-height: 1.4;
+    }
+
+    .session-actions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .session-actions .btn {
+      padding: 4px 6px;
+      font-size: 0.75rem;
+    }
     
     .client-info {
       font-size: 0.75rem;
@@ -1142,6 +1210,19 @@
               </div>
             </div>
           </div>
+
+          <div class="form-section">
+            <div class="section-header">Weekly Sessions (Service)</div>
+            <div class="section-content">
+              <div class="session-cards" id="weekly-session-cards">
+                <!-- Session cards will be rendered here -->
+              </div>
+              <div class="add-coordinator-card" id="add-weekly-session-card" onclick="showWeeklySessionForm()">
+                <span class="icon">+</span>
+                <div>Add Session</div>
+              </div>
+            </div>
+          </div>
           
                     <div class="form-section">
             <div class="section-header">Upcoming Schedules & Reminders</div>
@@ -1690,6 +1771,7 @@
         if (!client.coordinators) client.coordinators = [];
         if (!client.familyContacts) client.familyContacts = [];
         if (!client.caregivers) client.caregivers = [];
+      if (!client.sessions) client.sessions = [];
         if (!client.clientType) client.clientType = client.isSupportCoord ? 'coord' : 'service';
         if (client.isSupportCoord === undefined) client.isSupportCoord = client.clientType === 'coord';
         if (!client.ndisManagementType && ['Agency Managed', 'Plan Managed', 'Self Managed'].includes(client.fundingType)) {
@@ -1916,6 +1998,7 @@
         shortTermGoals: '',
         longTermGoals: '',
         clientType: 'service',
+        sessions: [],
         familyContacts: [],
         caregivers: [],
         coordinators: [],
@@ -2756,6 +2839,12 @@
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
       currentClient.ndisManagementType = document.getElementById('ndisManagementType').value;
       currentClient.planManager = document.getElementById('planManagerName').value;
+      if (currentClient.fundingType !== 'NDIS') {
+        currentClient.ndisManagementType = '';
+        currentClient.planManager = '';
+      } else if (currentClient.ndisManagementType !== 'Plan Managed') {
+        currentClient.planManager = '';
+      }
       currentClient.icareCaseManager = document.getElementById('icareCaseManager').value;
       currentClient.icareCaseManagerPhone = document.getElementById('icareCaseManagerPhone').value;
       currentClient.icareCaseManagerEmail = document.getElementById('icareCaseManagerEmail').value;
