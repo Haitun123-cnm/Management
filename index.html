@@ -3850,13 +3850,7 @@
     }
     
     document.getElementById('add-client-btn').addEventListener('click', () => {
-      // If no client is selected, create a new one
-      if (!currentClient || selectedClientIndex === null) {
-        showNewClientModal();
-      } else {
-        // If a client is already selected, just show a message
-        showNotification('A client is already selected. Fill in the details and save, or use "Create New Client" to start fresh.', 'info');
-      }
+      showNewClientModal();
     });
     
           // Add family contact button - use direct event listeners instead of delegation
