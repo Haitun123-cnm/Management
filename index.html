@@ -1065,6 +1065,21 @@
                   <input type="date" class="form-input" id="planEndDate">
                 </div>
               </div>
+              <div class="form-grid" id="ndis-management-details" style="display: none; margin-top: 12px;">
+                <div class="form-group">
+                  <label class="form-label">NDIS Management Type</label>
+                  <select class="form-select" id="ndisManagementType">
+                    <option value="">Select type</option>
+                    <option value="Agency Managed">Agency Managed</option>
+                    <option value="Plan Managed">Plan Managed</option>
+                    <option value="Self Managed">Self Managed</option>
+                  </select>
+                </div>
+                <div class="form-group" id="plan-manager-name-group" style="display: none;">
+                  <label class="form-label">Plan Manager</label>
+                  <input type="text" class="form-input" id="planManagerName" placeholder="Plan manager name">
+                </div>
+              </div>
               <div class="form-grid" id="icare-details" style="display: none; margin-top: 12px;">
                 <div class="form-group">
                   <label class="form-label">iCare Case Manager</label>
@@ -1677,6 +1692,10 @@
         if (!client.caregivers) client.caregivers = [];
         if (!client.clientType) client.clientType = client.isSupportCoord ? 'coord' : 'service';
         if (client.isSupportCoord === undefined) client.isSupportCoord = client.clientType === 'coord';
+        if (!client.ndisManagementType && ['Agency Managed', 'Plan Managed', 'Self Managed'].includes(client.fundingType)) {
+          client.ndisManagementType = client.fundingType;
+          client.fundingType = 'NDIS';
+        }
       });
       
       // Initialize arrays for existing coordination clients
@@ -1879,6 +1898,7 @@
         icareCoordinator: '',
         icareCoordinatorPhone: '',
         icareCoordinatorEmail: '',
+        ndisManagementType: '',
         planStartDate: '',
         planEndDate: '',
         dayProgramEnabled: false,
@@ -2188,7 +2208,7 @@
       document.getElementById('coordFirstName').value = currentClient.firstName || '';
       document.getElementById('coordLastName').value = currentClient.lastName || '';
       document.getElementById('coordNdisNumber').value = currentClient.ndisNumber || '';
-      document.getElementById('coordFundingType').value = currentClient.fundingType || '';
+      document.getElementById('coordFundingType').value = currentClient.ndisManagementType || currentClient.fundingType || '';
       document.getElementById('coordPlanManager').value = currentClient.planManager || '';
       document.getElementById('coordPlanManagerContact').value = currentClient.planManagerContact || '';
       document.getElementById('coordDayProgramEnabled').checked = !!currentClient.dayProgramEnabled;
@@ -2228,7 +2248,8 @@
         currentClient.firstName = document.getElementById('coordFirstName')?.value || '';
         currentClient.lastName = document.getElementById('coordLastName')?.value || '';
         currentClient.ndisNumber = document.getElementById('coordNdisNumber')?.value || '';
-        currentClient.fundingType = document.getElementById('coordFundingType')?.value || '';
+        currentClient.ndisManagementType = document.getElementById('coordFundingType')?.value || '';
+        currentClient.fundingType = 'NDIS';
         currentClient.planManager = document.getElementById('coordPlanManager')?.value || '';
         currentClient.planManagerContact = document.getElementById('coordPlanManagerContact')?.value || '';
         currentClient.dayProgramEnabled = document.getElementById('coordDayProgramEnabled')?.checked || false;
@@ -2283,6 +2304,24 @@
         planManagerSection.style.display = 'block';
       } else {
         planManagerSection.style.display = 'none';
+      }
+    }
+
+    function updateNdisManagementVisibility() {
+      const fundingType = document.getElementById('fundingType')?.value || '';
+      const ndisDetails = document.getElementById('ndis-management-details');
+      const planManagerGroup = document.getElementById('plan-manager-name-group');
+      const ndisManagementType = document.getElementById('ndisManagementType')?.value || '';
+      
+      if (!ndisDetails) return;
+      if (fundingType === 'NDIS') {
+        ndisDetails.style.display = 'grid';
+        if (planManagerGroup) {
+          planManagerGroup.style.display = ndisManagementType === 'Plan Managed' ? 'block' : 'none';
+        }
+      } else {
+        ndisDetails.style.display = 'none';
+        if (planManagerGroup) planManagerGroup.style.display = 'none';
       }
     }
     
@@ -2530,6 +2569,7 @@
       const formFields = [
         'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'participantDirectContact', 'participantAddress', 'interpreter',
         'fundingType', 'ndisNumber', 'planStartDate', 'planEndDate',
+        'ndisManagementType', 'planManagerName',
         'icareCaseManager', 'icareCaseManagerPhone', 'icareCaseManagerEmail',
         'icareCoordinator', 'icareCoordinatorPhone', 'icareCoordinatorEmail',
         'dayProgramName', 'dayProgramDays', 'dayProgramContactName',
@@ -2548,6 +2588,14 @@
       const icareDetails = document.getElementById('icare-details');
       if (icareDetails) {
         icareDetails.style.display = 'none';
+      }
+      const ndisDetails = document.getElementById('ndis-management-details');
+      if (ndisDetails) {
+        ndisDetails.style.display = 'none';
+      }
+      const planManagerGroup = document.getElementById('plan-manager-name-group');
+      if (planManagerGroup) {
+        planManagerGroup.style.display = 'none';
       }
       
       const dayProgramEnabled = document.getElementById('dayProgramEnabled');
@@ -2618,6 +2666,8 @@
       document.getElementById('interpreter').value = currentClient.interpreter || '';
       document.getElementById('fundingType').value = currentClient.fundingType || '';
       document.getElementById('ndisNumber').value = currentClient.ndisNumber || '';
+      document.getElementById('ndisManagementType').value = currentClient.ndisManagementType || '';
+      document.getElementById('planManagerName').value = currentClient.planManager || '';
       document.getElementById('icareCaseManager').value = currentClient.icareCaseManager || '';
       document.getElementById('icareCaseManagerPhone').value = currentClient.icareCaseManagerPhone || '';
       document.getElementById('icareCaseManagerEmail').value = currentClient.icareCaseManagerEmail || '';
@@ -2682,6 +2732,7 @@
           icareDetails.style.display = fundingType === 'iCare' ? 'grid' : 'none';
         }
       }
+      updateNdisManagementVisibility();
     }
     
     function saveClientData() {
@@ -2703,6 +2754,8 @@
         currentClient.fundingType = 'NDIS';
       }
       currentClient.ndisNumber = document.getElementById('ndisNumber').value;
+      currentClient.ndisManagementType = document.getElementById('ndisManagementType').value;
+      currentClient.planManager = document.getElementById('planManagerName').value;
       currentClient.icareCaseManager = document.getElementById('icareCaseManager').value;
       currentClient.icareCaseManagerPhone = document.getElementById('icareCaseManagerPhone').value;
       currentClient.icareCaseManagerEmail = document.getElementById('icareCaseManagerEmail').value;
@@ -3848,7 +3901,18 @@
       if (icareDetails) {
         icareDetails.style.display = fundingType === 'iCare' ? 'grid' : 'none';
       }
+      updateNdisManagementVisibility();
     });
+    
+    const ndisManagementTypeSelect = document.getElementById('ndisManagementType');
+    if (ndisManagementTypeSelect) {
+      ndisManagementTypeSelect.addEventListener('change', () => {
+        updateNdisManagementVisibility();
+        if (currentClient && selectedClientIndex !== null) {
+          saveClientData();
+        }
+      });
+    }
     
     // Check for unsaved changes
     function checkForUnsavedChanges() {
