@@ -1265,8 +1265,8 @@
                 <textarea class="form-textarea" id="primaryDisability" placeholder="Describe primary disability and support needs..."></textarea>
               </div>
               <div class="form-group">
-                <label class="form-label">Support Needs Assessment</label>
-                <textarea class="form-textarea" id="supportNeeds" placeholder="Detailed assessment of support needs..."></textarea>
+                <label class="form-label">Issues or things to be careful</label>
+                <textarea class="form-textarea" id="supportNeeds" placeholder="Issues raised after group meetings that require attention..."></textarea>
               </div>
 
             </div>
@@ -1289,15 +1289,14 @@
           </div>
           
           <div class="form-section">
-            <div class="section-header">Service Goals</div>
+            <div class="section-header">Medication List</div>
             <div class="section-content">
-              <div class="form-group">
-                <label class="form-label">Short-term Goals</label>
-                <textarea class="form-textarea" id="shortTermGoals" placeholder="Short-term service goals..."></textarea>
+              <div class="coordinator-cards" id="medication-cards">
+                <!-- Medication cards will be rendered here -->
               </div>
-              <div class="form-group">
-                <label class="form-label">Long-term Goals</label>
-                <textarea class="form-textarea" id="longTermGoals" placeholder="Long-term service goals..."></textarea>
+              <div class="add-coordinator-card" id="add-medication-card" onclick="addMedication()">
+                <span class="icon">+</span>
+                <div>Add Medication</div>
               </div>
             </div>
           </div>
@@ -2000,8 +1999,7 @@
         supportCoordinator: '',
         coordinatorPhone: '',
         coordinatorEmail: '',
-        shortTermGoals: '',
-        longTermGoals: '',
+        medications: [],
         clientType: 'service',
         sessions: [],
         familyContacts: [],
@@ -2664,7 +2662,7 @@
         'icareCoordinator', 'icareCoordinatorPhone', 'icareCoordinatorEmail',
         'dayProgramName', 'dayProgramDays', 'dayProgramContactName',
         'dayProgramContactPhone', 'dayProgramContactEmail',
-        'primaryDisability', 'supportNeeds', 'shortTermGoals', 'longTermGoals',
+        'primaryDisability', 'supportNeeds',
         'generalNotes', 'progressNotes', 'alerts'
       ];
       
@@ -2710,11 +2708,12 @@
       });
       updateCoordDayProgramVisibility();
       
-      // Clear family contacts and caregivers
+      // Clear family contacts, caregivers, and medications
       if (currentClient) {
         currentClient.familyContacts = [];
         currentClient.caregivers = [];
         currentClient.coordinators = [];
+        currentClient.medications = [];
         currentClient.reminders = [];
         currentClient.documents = {};
       }
@@ -2723,6 +2722,7 @@
       renderFamilyContacts();
       renderCaregivers();
       renderCoordinators();
+      renderMedications();
       renderWeeklySessions();
       renderUpcomingReminders();
       loadDocuments();
@@ -2735,10 +2735,9 @@
     function loadClientData() {
       if (!currentClient) return;
       
-      // Initialize coordinators array if it doesn't exist (for existing clients)
-      if (!currentClient.coordinators) {
-        currentClient.coordinators = [];
-      }
+      // Initialize coordinators and medications arrays if they don't exist (for existing clients)
+      if (!currentClient.coordinators) currentClient.coordinators = [];
+      if (!currentClient.medications) currentClient.medications = [];
       
       // Update content header with client name
       const clientName = `${currentClient.firstName} ${currentClient.lastName}`.trim() || 'Unnamed Client';
@@ -2781,8 +2780,7 @@
       document.getElementById('supportNeeds').value = currentClient.supportNeeds || '';
 
       // Note: supportCoordinator, coordinatorPhone, coordinatorEmail fields removed - now using coordinator cards
-      document.getElementById('shortTermGoals').value = currentClient.shortTermGoals || '';
-      document.getElementById('longTermGoals').value = currentClient.longTermGoals || '';
+      renderMedications();
       document.getElementById('generalNotes').value = currentClient.generalNotes || '';
       document.getElementById('progressNotes').value = currentClient.progressNotes || '';
       document.getElementById('alerts').value = currentClient.alerts || '';
@@ -2873,9 +2871,7 @@
       currentClient.primaryDisability = document.getElementById('primaryDisability').value;
       currentClient.supportNeeds = document.getElementById('supportNeeds').value;
 
-      // Note: supportCoordinator, coordinatorPhone, coordinatorEmail fields removed - now using coordinator cards
-      currentClient.shortTermGoals = document.getElementById('shortTermGoals').value;
-      currentClient.longTermGoals = document.getElementById('longTermGoals').value;
+      // Note: medications saved via add/edit/remove in renderMedications flow
       currentClient.generalNotes = document.getElementById('generalNotes').value;
       currentClient.progressNotes = document.getElementById('progressNotes').value;
       currentClient.alerts = document.getElementById('alerts').value;
@@ -3021,12 +3017,6 @@
                      style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                      placeholder="机构名称">
             </div>
-            <div style="margin-bottom: 15px;">
-              <label style="display: block; margin-bottom: 5px; font-weight: bold;">角色</label>
-              <input type="text" id="contact-role" value="${contact ? (contact.role || '') : ''}" 
-                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                     placeholder="角色/职位">
-            </div>
             ` : ''}
             
             <div style="margin-bottom: 15px;">
@@ -3073,9 +3063,7 @@
       
       const relationship = document.getElementById('contact-relationship').value.trim();
       const organizationEl = document.getElementById('contact-organization');
-      const roleEl = document.getElementById('contact-role');
       const organization = organizationEl ? organizationEl.value.trim() : '';
-      const role = roleEl ? roleEl.value.trim() : '';
       const phone = document.getElementById('contact-phone').value.trim();
       const email = document.getElementById('contact-email').value.trim();
       
@@ -3097,7 +3085,6 @@
       if (contactType === 'coordinator' || contactType === 'coord-stakeholder') {
         contactData.profession = relationship;
         contactData.organization = organization;
-        contactData.role = role;
       }
       
       if (contactType === 'family') {
@@ -3669,10 +3656,6 @@
               <span class="coordinator-detail-label">Organization:</span>
               <span class="coordinator-detail-value">${escapeHTML(coordinator.organization || 'Not provided')}</span>
             </div>
-            <div class="coordinator-detail-item">
-              <span class="coordinator-detail-label">Role:</span>
-              <span class="coordinator-detail-value">${escapeHTML(coordinator.role || 'Not specified')}</span>
-            </div>
           </div>
         </div>
       `).join('');
@@ -3730,7 +3713,160 @@
       });
     }
 
-    
+    // Medication functions
+    function renderMedications() {
+      const container = document.getElementById('medication-cards');
+      if (!container) return;
+      if (!currentClient) {
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      if (!currentClient.medications) currentClient.medications = [];
+      if (currentClient.medications.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = currentClient.medications.map((med, index) => `
+        <div class="coordinator-card" onclick="toggleMedicationDetails(${index})">
+          <div class="coordinator-name">${escapeHTML(med.name || 'Unnamed Medication')}</div>
+          <div class="coordinator-profession">${escapeHTML(med.dosage || '')} ${escapeHTML(med.frequency || '')}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Medication:</span>
+              <span class="coordinator-detail-value">${escapeHTML(med.name || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Dosage:</span>
+              <span class="coordinator-detail-value">${escapeHTML(med.dosage || 'Not specified')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Frequency:</span>
+              <span class="coordinator-detail-value">${escapeHTML(med.frequency || 'Not specified')}</span>
+            </div>
+            ${med.notes ? `
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Notes:</span>
+              <span class="coordinator-detail-value">${escapeHTML(med.notes)}</span>
+            </div>
+            ` : ''}
+            <div class="coordinator-actions">
+              <button class="btn btn-warning btn-sm" onclick="editMedication(${index}); event.stopPropagation();" title="Edit">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="removeMedication(${index}); event.stopPropagation();" title="Remove">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addMedication() {
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
+      }
+      if (!currentClient.medications) currentClient.medications = [];
+      showMedicationForm(null, false);
+    }
+
+    function editMedication(index) {
+      if (!currentClient.medications || !currentClient.medications[index]) return;
+      showMedicationForm(index, true);
+    }
+
+    function removeMedication(index) {
+      if (!currentClient.medications || !currentClient.medications[index]) return;
+      const med = currentClient.medications[index];
+      if (confirm(`Remove "${med.name || 'this medication'}" from the list?`)) {
+        currentClient.medications.splice(index, 1);
+        if (selectedClientIndex !== null) {
+          const currentClients = getCurrentClientList();
+          currentClients[selectedClientIndex] = { ...currentClient };
+          saveAllData();
+        }
+        renderMedications();
+        showNotification('Medication removed', 'success');
+      }
+    }
+
+    function toggleMedicationDetails(index) {
+      const cards = document.querySelectorAll('#medication-cards .coordinator-card');
+      cards.forEach((card, i) => {
+        card.classList.toggle('active', i === index);
+      });
+    }
+
+    function showMedicationForm(medicationIndex, isEdit) {
+      const med = isEdit && medicationIndex !== null && currentClient.medications[medicationIndex] ? currentClient.medications[medicationIndex] : null;
+      const html = `
+        <div style="padding: 20px; max-width: 500px;">
+          <h3>${isEdit ? 'Edit' : 'Add'} Medication</h3>
+          <form id="medication-form">
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Medication Name *</label>
+              <input type="text" id="med-name" value="${med ? escapeHTML(med.name || '') : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" 
+                     placeholder="e.g., Paracetamol, Metformin" required>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Dosage</label>
+              <input type="text" id="med-dosage" value="${med ? escapeHTML(med.dosage || '') : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                     placeholder="e.g., 500mg, 10ml">
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Frequency</label>
+              <input type="text" id="med-frequency" value="${med ? escapeHTML(med.frequency || '') : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                     placeholder="e.g., Twice daily, With meals, PRN">
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Notes</label>
+              <textarea id="med-notes" rows="2" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                        placeholder="Additional notes or instructions">${med && med.notes ? escapeHTML(med.notes) : ''}</textarea>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+              <button type="button" onclick="closeModal()" 
+                      style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Cancel</button>
+              <button type="submit" 
+                      style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">${isEdit ? 'Update' : 'Add'} Medication</button>
+            </div>
+          </form>
+        </div>
+      `;
+      showModal(`${isEdit ? 'Edit' : 'Add'} Medication`, html);
+      document.getElementById('medication-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveMedicationForm(medicationIndex, isEdit);
+      });
+    }
+
+    function saveMedicationForm(medicationIndex, isEdit) {
+      const name = document.getElementById('med-name').value.trim();
+      if (!name) {
+        alert('Medication name is required');
+        return;
+      }
+      const medicationData = {
+        name,
+        dosage: document.getElementById('med-dosage').value.trim(),
+        frequency: document.getElementById('med-frequency').value.trim(),
+        notes: document.getElementById('med-notes').value.trim()
+      };
+      if (!currentClient.medications) currentClient.medications = [];
+      if (isEdit && medicationIndex !== null) {
+        currentClient.medications[medicationIndex] = medicationData;
+      } else {
+        currentClient.medications.push(medicationData);
+      }
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      renderMedications();
+      closeModal();
+      showNotification(`Medication ${isEdit ? 'updated' : 'added'}`, 'success');
+    }
+
     // Reminder functions
     function renderUpcomingReminders() {
       const container = document.getElementById('upcoming-reminders');
@@ -4397,8 +4533,7 @@
         profession: 'Test Profession',
         phone: '123-456-7890',
         email: 'test@example.com',
-        organization: 'Test Organization',
-        role: 'Test Role'
+        organization: 'Test Organization'
       };
       
       currentClient.coordinators.push(testCoordinator);
