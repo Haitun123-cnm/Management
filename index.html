@@ -1092,6 +1092,10 @@
                   <input type="tel" class="form-input" id="participantDirectContact" placeholder="Participant phone number">
                 </div>
                 <div class="form-group">
+                  <label class="form-label">Participant Email</label>
+                  <input type="email" class="form-input" id="participantEmail" placeholder="Participant email">
+                </div>
+                <div class="form-group">
                   <label class="form-label">Address</label>
                   <input type="text" class="form-input" id="participantAddress" placeholder="Street, suburb, state, postcode">
                 </div>
@@ -1535,7 +1539,7 @@
             <div class="section-header">General Notes</div>
             <div class="section-content">
               <div class="form-group">
-                <label class="form-label">Notes</label>
+                <label class="form-label">Note s</label>
                 <textarea class="form-textarea" id="coordGeneralNotes" rows="10" placeholder="General notes about the client..."></textarea>
               </div>
             </div>
@@ -1969,6 +1973,7 @@
         gender: '',
         primaryLanguage: '',
         participantDirectContact: '',
+        participantEmail: '',
         participantAddress: '',
         interpreter: '',
         fundingType: '',
@@ -2652,7 +2657,7 @@
     function clearClientForm() {
       // Clear all form fields
       const formFields = [
-        'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'participantDirectContact', 'participantAddress', 'interpreter',
+        'firstName', 'lastName', 'dob', 'gender', 'primaryLanguage', 'participantDirectContact', 'participantEmail', 'participantAddress', 'interpreter',
         'fundingType', 'ndisNumber', 'planStartDate', 'planEndDate',
         'ndisManagementType', 'planManagerName',
         'icareCaseManager', 'icareCaseManagerPhone', 'icareCaseManagerEmail',
@@ -2748,6 +2753,7 @@
       document.getElementById('gender').value = currentClient.gender || '';
       document.getElementById('primaryLanguage').value = currentClient.primaryLanguage || '';
       document.getElementById('participantDirectContact').value = currentClient.participantDirectContact || '';
+      document.getElementById('participantEmail').value = currentClient.participantEmail || '';
       document.getElementById('participantAddress').value = currentClient.participantAddress || '';
       document.getElementById('interpreter').value = currentClient.interpreter || '';
       document.getElementById('fundingType').value = currentClient.fundingType || '';
@@ -2833,6 +2839,7 @@
       currentClient.gender = document.getElementById('gender').value;
       currentClient.primaryLanguage = document.getElementById('primaryLanguage').value;
       currentClient.participantDirectContact = document.getElementById('participantDirectContact').value;
+      currentClient.participantEmail = document.getElementById('participantEmail').value;
       currentClient.participantAddress = document.getElementById('participantAddress').value;
       currentClient.interpreter = document.getElementById('interpreter').value;
       currentClient.fundingType = document.getElementById('fundingType').value;
@@ -3007,6 +3014,21 @@
                      placeholder="${(contactType === 'coordinator' || contactType === 'coord-stakeholder') ? '职业 (如: OT, Physio, Plan Manager)' : '关系 (如: Mother, Father, Sister)'}">
             </div>
             
+            ${(contactType === 'coordinator' || contactType === 'coord-stakeholder') ? `
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">机构</label>
+              <input type="text" id="contact-organization" value="${contact ? (contact.organization || '') : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                     placeholder="机构名称">
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">角色</label>
+              <input type="text" id="contact-role" value="${contact ? (contact.role || '') : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                     placeholder="角色/职位">
+            </div>
+            ` : ''}
+            
             <div style="margin-bottom: 15px;">
               <label style="display: block; margin-bottom: 5px; font-weight: bold;">电话</label>
               <input type="tel" id="contact-phone" value="${contact ? contact.phone : ''}" 
@@ -3050,6 +3072,10 @@
       }
       
       const relationship = document.getElementById('contact-relationship').value.trim();
+      const organizationEl = document.getElementById('contact-organization');
+      const roleEl = document.getElementById('contact-role');
+      const organization = organizationEl ? organizationEl.value.trim() : '';
+      const role = roleEl ? roleEl.value.trim() : '';
       const phone = document.getElementById('contact-phone').value.trim();
       const email = document.getElementById('contact-email').value.trim();
       
@@ -3070,6 +3096,8 @@
       // Add profession field for coordinators/stakeholders
       if (contactType === 'coordinator' || contactType === 'coord-stakeholder') {
         contactData.profession = relationship;
+        contactData.organization = organization;
+        contactData.role = role;
       }
       
       if (contactType === 'family') {
