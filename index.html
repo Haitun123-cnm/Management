@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,27 +7,37 @@
   <link rel="icon" href="data:,">
   <style>
     :root {
-      --primary-blue: #2563eb;
-      --primary-dark: #1d4ed8;
-      --accent-orange: #f59e0b;
-      --success-green: #10b981;
-      --danger-red: #ef4444;
-      --warning-yellow: #f59e0b;
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-400: #9ca3af;
-      --gray-500: #6b7280;
-      --gray-600: #4b5563;
-      --gray-700: #374151;
-      --gray-800: #1f2937;
-      --gray-900: #111827;
+      --primary-blue: #1d6dd9;
+      --primary-dark: #1557b8;
+      --primary-tint: rgba(29, 109, 217, 0.08);
+      --accent-teal: #0d9488;
+      --accent-teal-tint: rgba(13, 148, 136, 0.1);
+      --accent-orange: #ea580c;
+      --accent-orange-tint: rgba(234, 88, 12, 0.1);
+      --accent-violet: #7c3aed;
+      --accent-violet-tint: rgba(124, 58, 237, 0.08);
+      --success-green: #059669;
+      --success-tint: rgba(5, 150, 105, 0.1);
+      --danger-red: #dc2626;
+      --danger-tint: rgba(220, 38, 38, 0.08);
+      --warning-amber: #d97706;
+      --warning-tint: rgba(217, 119, 6, 0.1);
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
       --white: #ffffff;
+      --surface: #f1f5f9;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
     }
     
     * {
@@ -38,7 +48,7 @@
     
     html, body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--gray-50);
+      background: var(--surface);
       color: var(--gray-900);
       min-height: 100vh;
     }
@@ -46,7 +56,7 @@
     /* Header */
     .header {
       background: var(--white);
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 3px solid var(--primary-blue);
       padding: 0 24px;
       height: 64px;
       display: flex;
@@ -81,8 +91,9 @@
     .field-readonly {
       background: var(--gray-50) !important;
       color: var(--gray-700) !important;
-      cursor: default !important;
-      pointer-events: none !important;
+      cursor: text !important;
+      user-select: text !important;
+      -webkit-user-select: text !important;
     }
     
     .field-readonly:focus {
@@ -131,14 +142,15 @@
     .sidebar {
       width: 320px;
       background: var(--white);
-      border-right: 1px solid var(--gray-200);
+      border-right: 2px solid var(--gray-200);
       display: flex;
       flex-direction: column;
     }
     
     .sidebar-header {
       padding: 20px 24px;
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 2px solid var(--gray-200);
+      background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
     }
     
     .search-box {
@@ -158,7 +170,7 @@
     
     .search-input:focus {
       border-color: var(--primary-blue);
-      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+      box-shadow: 0 0 0 3px var(--primary-tint);
     }
     
     .search-icon {
@@ -199,12 +211,19 @@
     }
 
     .client-list-section-title {
-      padding: 6px 24px;
+      padding: 8px 24px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--gray-500);
+      letter-spacing: 0.05em;
+      color: var(--gray-600);
+      background: var(--gray-50);
+      border-left: 3px solid var(--primary-blue);
+      margin-top: 8px;
+    }
+    
+    .client-list-section-title:first-child {
+      margin-top: 0;
     }
 
     .client-list-separator {
@@ -244,13 +263,13 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #ef4444;
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+      background: var(--danger-red);
+      box-shadow: 0 0 0 2px var(--danger-tint);
     }
 
     .daily-task-indicator.ok {
-      background: #22c55e;
-      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15);
+      background: var(--success-green);
+      box-shadow: 0 0 0 2px var(--success-tint);
     }
 
     .daily-task-widget:hover .daily-task-toggle {
@@ -325,9 +344,10 @@
     }
     
     .client-item.active {
-      background: var(--primary-blue);
+      background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-dark) 100%);
       color: var(--white);
       border-left-color: var(--accent-orange);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
     }
     
     .client-item-actions {
@@ -378,18 +398,21 @@
     }
 
     .client-type-tag.service {
-      background: rgb(37 99 235 / 0.1);
+      background: var(--primary-tint);
       color: var(--primary-blue);
+      font-weight: 600;
     }
 
     .client-type-tag.coord {
-      background: rgb(16 185 129 / 0.12);
-      color: #059669;
+      background: var(--accent-teal-tint);
+      color: var(--accent-teal);
+      font-weight: 600;
     }
 
     .client-type-tag.both {
-      background: rgb(245 158 11 / 0.15);
-      color: #b45309;
+      background: var(--accent-orange-tint);
+      color: var(--accent-orange);
+      font-weight: 600;
     }
 
     .session-cards {
@@ -422,24 +445,81 @@
     }
 
     .session-status.active {
-      background: #10b981;
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+      background: var(--success-green);
+      box-shadow: 0 0 0 2px var(--success-tint);
     }
 
     .session-status.expired {
-      background: #ef4444;
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+      background: var(--danger-red);
+      box-shadow: 0 0 0 2px var(--danger-tint);
     }
 
     .session-status.paused {
-      background: #f59e0b;
-      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+      background: var(--warning-amber);
+      box-shadow: 0 0 0 2px var(--warning-tint);
     }
 
     .session-status.upcoming {
-      background: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+      background: var(--primary-blue);
+      box-shadow: 0 0 0 2px var(--primary-tint);
     }
+
+    /* Weekly Schedule by day */
+    .weekly-day-row {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: var(--white);
+    }
+    .weekly-day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    .weekly-day-header:hover {
+      background: var(--gray-50);
+    }
+    .weekly-day-header .day-name { font-weight: 700; color: var(--primary-blue); min-width: 90px; }
+    .weekly-day-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .weekly-activity-tag {
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .weekly-activity-tag.day-program { background: var(--accent-teal-tint); color: var(--accent-teal); }
+    .weekly-activity-tag.gp { background: var(--primary-tint); color: var(--primary-blue); }
+    .weekly-activity-tag.service-session { background: var(--success-tint); color: var(--success-green); }
+    .weekly-activity-tag.other { background: var(--gray-200); color: var(--gray-700); }
+    .weekly-day-details {
+      display: none;
+      padding: 12px 16px;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    .weekly-day-row.expanded .weekly-day-details { display: block; }
+    .weekly-activity-detail {
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: var(--white);
+      border-radius: 6px;
+      border-left: 3px solid var(--gray-300);
+      font-size: 0.875rem;
+    }
+    .weekly-activity-detail .activity-type { font-weight: 600; color: var(--gray-800); margin-bottom: 4px; }
+    .weekly-activity-detail .activity-contact { color: var(--gray-600); font-size: 0.8rem; }
+    .weekly-activity-detail .activity-actions { margin-top: 8px; display: flex; gap: 8px; }
 
     .session-meta {
       font-size: 0.8rem;
@@ -470,13 +550,14 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      background: var(--gray-50);
+      background: linear-gradient(180deg, var(--gray-50) 0%, var(--surface) 100%);
     }
     
     .content-header {
       background: var(--white);
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 2px solid var(--gray-200);
       padding: 20px 32px;
+      border-left: 4px solid var(--primary-blue);
     }
     
     .content-title {
@@ -504,7 +585,7 @@
     /* Tabs */
     .tabs {
       background: var(--white);
-      border-bottom: 1px solid var(--gray-200);
+      border-bottom: 2px solid var(--gray-200);
       padding: 0 32px;
     }
     
@@ -515,16 +596,24 @@
     
     .tab-item {
       padding: 16px 24px;
-      border-bottom: 2px solid transparent;
+      border-bottom: 3px solid transparent;
       color: var(--gray-600);
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
+      margin-bottom: -2px;
+    }
+    
+    .tab-item:hover {
+      color: var(--gray-800);
+      background: var(--gray-50);
     }
     
     .tab-item.active {
       color: var(--primary-blue);
       border-bottom-color: var(--primary-blue);
+      background: var(--primary-tint);
+      font-weight: 600;
     }
     
     /* Tab Content */
@@ -544,18 +633,21 @@
     /* Forms */
     .form-section {
       background: var(--white);
-      border-radius: 8px;
+      border-radius: 10px;
       box-shadow: var(--shadow);
       margin-bottom: 24px;
       overflow: hidden;
+      border: 1px solid var(--gray-200);
     }
     
     .section-header {
-      background: var(--gray-50);
+      background: linear-gradient(90deg, var(--primary-tint) 0%, var(--gray-50) 100%);
       padding: 16px 24px;
       border-bottom: 1px solid var(--gray-200);
+      border-left: 4px solid var(--primary-blue);
       font-weight: 600;
       color: var(--gray-900);
+      font-size: 0.95rem;
     }
     
     .section-content {
@@ -675,46 +767,49 @@
     .badge {
       display: inline-flex;
       align-items: center;
-      padding: 2px 8px;
-      border-radius: 12px;
+      padding: 3px 10px;
+      border-radius: 14px;
       font-size: 0.75rem;
-      font-weight: 500;
+      font-weight: 600;
     }
     
     .badge-ndis {
-      background: rgb(37 99 235 / 0.1);
-      color: var(--primary-blue);
+      background: var(--primary-tint);
+      color: var(--primary-dark);
+      border: 1px solid rgba(29, 109, 217, 0.25);
     }
     
     /* NDIS badge on active client item */
     .client-item.active .badge-ndis {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.25);
       color: var(--white);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
     
     .badge-icare {
-      background: rgb(245 158 11 / 0.1);
-      color: var(--accent-orange);
+      background: var(--accent-orange-tint);
+      color: #c2410c;
+      border: 1px solid rgba(234, 88, 12, 0.25);
     }
     
     /* iCare badge on active client item */
     .client-item.active .badge-icare {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.25);
       color: var(--white);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
     
     .badge-no-funding {
-      background: rgb(107 114 128 / 0.1);
+      background: var(--gray-100);
       color: var(--gray-600);
+      border: 1px solid var(--gray-300);
     }
     
     /* No Funding badge on active client item */
     .client-item.active .badge-no-funding {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.25);
       color: var(--white);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
     
     /* Checklist */
@@ -748,7 +843,7 @@
       padding: 12px;
       margin-bottom: 8px;
       border: 1px solid var(--gray-200);
-      border-radius: 6px;
+      border-radius: 8px;
       background: var(--white);
       transition: all 0.2s ease;
     }
@@ -759,17 +854,17 @@
     
     .reminder-item.urgent {
       border-left: 4px solid var(--danger-red);
-      background: rgb(239 68 68 / 0.05);
+      background: var(--danger-tint);
     }
     
     .reminder-item.today {
-      border-left: 4px solid var(--warning-yellow);
-      background: rgb(245 158 11 / 0.05);
+      border-left: 4px solid var(--warning-amber);
+      background: var(--warning-tint);
     }
     
     .reminder-item.upcoming {
       border-left: 4px solid var(--primary-blue);
-      background: rgb(37 99 235 / 0.05);
+      background: var(--primary-tint);
     }
     
     .reminder-content {
@@ -806,17 +901,17 @@
     }
     
     .status-urgent {
-      background: rgb(239 68 68 / 0.1);
+      background: var(--danger-tint);
       color: var(--danger-red);
     }
     
     .status-today {
-      background: rgb(245 158 11 / 0.1);
-      color: var(--warning-yellow);
+      background: var(--warning-tint);
+      color: var(--warning-amber);
     }
     
     .status-upcoming {
-      background: rgb(37 99 235 / 0.1);
+      background: var(--primary-tint);
       color: var(--primary-blue);
     }
     
@@ -830,17 +925,19 @@
     
     .no-data {
       text-align: center;
-      color: #666;
+      color: var(--gray-500);
       font-style: italic;
       padding: 20px;
-      background: #f5f5f5;
+      background: var(--gray-100);
       border-radius: 8px;
       margin: 20px 0;
+      border: 1px dashed var(--gray-300);
     }
     
     .coordinator-card {
       background: var(--white);
       border: 1px solid var(--gray-200);
+      border-left: 3px solid var(--gray-200);
       border-radius: 8px;
       padding: 16px;
       cursor: pointer;
@@ -849,14 +946,16 @@
     }
     
     .coordinator-card:hover {
-      border-color: var(--primary-blue);
+      border-color: var(--gray-300);
+      border-left-color: var(--primary-blue);
       box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
     
     .coordinator-card.active {
-      border-color: var(--primary-blue);
-      background: rgb(37 99 235 / 0.05);
+      border-left-color: var(--primary-blue);
+      background: var(--primary-tint);
+      box-shadow: var(--shadow-sm);
     }
     
     .coordinator-name {
@@ -924,13 +1023,13 @@
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      color: var(--gray-600);
+      color: var(--gray-500);
     }
     
     .add-coordinator-card:hover {
-      border-color: var(--primary-blue);
-      color: var(--primary-blue);
-      background: rgb(37 99 235 / 0.05);
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+      background: var(--accent-teal-tint);
     }
     
     .add-coordinator-card .icon {
@@ -1182,48 +1281,15 @@
           </div>
 
           <div class="form-section">
-            <div class="section-header">Day Program Information</div>
+            <div class="section-header">Weekly Schedule</div>
             <div class="section-content">
-              <div class="form-group" style="margin-bottom: 12px;">
-                <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
-                  <input type="checkbox" id="dayProgramEnabled">
-                  Attends Day Program
-                </label>
+              <p style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 16px;">By day: add activities (e.g. Day Program, GP). Default view shows day + activity type; click a day to see details and contact info.</p>
+              <div id="weekly-schedule-by-day">
+                <!-- Rendered by renderWeeklyActivities() -->
               </div>
-              <div class="form-grid" id="day-program-details" style="display: none;">
-                <div class="form-group">
-                  <label class="form-label">Day Program Name</label>
-                  <input type="text" class="form-input" id="dayProgramName" placeholder="Enter program name">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Days Attending</label>
-                  <input type="text" class="form-input" id="dayProgramDays" placeholder="e.g., Mon, Wed, Fri">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Program Contact Name</label>
-                  <input type="text" class="form-input" id="dayProgramContactName" placeholder="Contact person">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Program Contact Phone</label>
-                  <input type="tel" class="form-input" id="dayProgramContactPhone" placeholder="Phone number">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Program Contact Email</label>
-                  <input type="email" class="form-input" id="dayProgramContactEmail" placeholder="Email address">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-section">
-            <div class="section-header">Weekly Sessions (Service)</div>
-            <div class="section-content">
-              <div class="session-cards" id="weekly-session-cards">
-                <!-- Session cards will be rendered here -->
-              </div>
-              <div class="add-coordinator-card" id="add-weekly-session-card" onclick="showWeeklySessionForm()">
+              <div class="add-coordinator-card" id="add-weekly-activity-card" onclick="addWeeklyActivity()" style="margin-top: 16px;">
                 <span class="icon">+</span>
-                <div>Add Session</div>
+                <div>Add Activity</div>
               </div>
             </div>
           </div>
@@ -1237,6 +1303,20 @@
               </div>
               <div id="upcoming-reminders">
                 <!-- Upcoming reminders will be rendered here -->
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <div class="section-header">Things to Check Later</div>
+            <div class="section-content">
+              <p style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 12px;">Quick notes for uncertain info (e.g. "Geoff might have appointment – need to confirm later")</p>
+              <div class="coordinator-cards" id="pending-items-cards">
+                <!-- Pending items will be rendered here -->
+              </div>
+              <div class="add-coordinator-card" id="add-pending-item-card" onclick="addPendingItem()">
+                <span class="icon">+</span>
+                <div>Add Thing to Check</div>
               </div>
             </div>
           </div>
@@ -1774,7 +1854,7 @@
         if (!client.coordinators) client.coordinators = [];
         if (!client.familyContacts) client.familyContacts = [];
         if (!client.caregivers) client.caregivers = [];
-      if (!client.sessions) client.sessions = [];
+        if (!client.weeklyActivities) client.weeklyActivities = [];
         if (!client.clientType) client.clientType = client.isSupportCoord ? 'coord' : 'service';
         if (client.isSupportCoord === undefined) client.isSupportCoord = client.clientType === 'coord';
         if (!client.ndisManagementType && ['Agency Managed', 'Plan Managed', 'Self Managed'].includes(client.fundingType)) {
@@ -1987,12 +2067,6 @@
         ndisManagementType: '',
         planStartDate: '',
         planEndDate: '',
-        dayProgramEnabled: false,
-        dayProgramName: '',
-        dayProgramDays: '',
-        dayProgramContactName: '',
-        dayProgramContactPhone: '',
-        dayProgramContactEmail: '',
         primaryDisability: '',
         supportNeeds: '',
         riskAssessment: '',
@@ -2001,12 +2075,13 @@
         coordinatorEmail: '',
         medications: [],
         clientType: 'service',
-        sessions: [],
+        weeklyActivities: [],
         familyContacts: [],
         caregivers: [],
         coordinators: [],
         documents: {},
         reminders: [],
+        pendingItems: [],
         generalNotes: '',
         progressNotes: '',
         alerts: '',
@@ -2597,7 +2672,7 @@
       if (!currentClient.caregivers) currentClient.caregivers = [];
       if (!currentClient.coordStakeholders) currentClient.coordStakeholders = [];
       if (!currentClient.coordFamilyContacts) currentClient.coordFamilyContacts = [];
-      if (!currentClient.sessions) currentClient.sessions = [];
+      if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
       
       updateSystemModeContent();
       renderClientList();
@@ -2609,7 +2684,7 @@
       setTimeout(() => {
         console.log('Delayed coordinators render for client:', currentClient.firstName, currentClient.lastName);
       renderCoordinators();
-      renderWeeklySessions();
+      renderWeeklyActivities();
       }, 100);
       
       // Update button states
@@ -2660,8 +2735,6 @@
         'ndisManagementType', 'planManagerName',
         'icareCaseManager', 'icareCaseManagerPhone', 'icareCaseManagerEmail',
         'icareCoordinator', 'icareCoordinatorPhone', 'icareCoordinatorEmail',
-        'dayProgramName', 'dayProgramDays', 'dayProgramContactName',
-        'dayProgramContactPhone', 'dayProgramContactEmail',
         'primaryDisability', 'supportNeeds',
         'generalNotes', 'progressNotes', 'alerts'
       ];
@@ -2686,12 +2759,6 @@
         planManagerGroup.style.display = 'none';
       }
       
-      const dayProgramEnabled = document.getElementById('dayProgramEnabled');
-      if (dayProgramEnabled) {
-        dayProgramEnabled.checked = false;
-      }
-      updateDayProgramVisibility();
-
       const coordDayProgramEnabled = document.getElementById('coordDayProgramEnabled');
       if (coordDayProgramEnabled) {
         coordDayProgramEnabled.checked = false;
@@ -2715,6 +2782,8 @@
         currentClient.coordinators = [];
         currentClient.medications = [];
         currentClient.reminders = [];
+        currentClient.pendingItems = [];
+        currentClient.weeklyActivities = [];
         currentClient.documents = {};
       }
       
@@ -2723,7 +2792,8 @@
       renderCaregivers();
       renderCoordinators();
       renderMedications();
-      renderWeeklySessions();
+      renderPendingItems();
+      renderWeeklyActivities();
       renderUpcomingReminders();
       loadDocuments();
       
@@ -2735,9 +2805,11 @@
     function loadClientData() {
       if (!currentClient) return;
       
-      // Initialize coordinators and medications arrays if they don't exist (for existing clients)
+      // Initialize coordinators, medications, pendingItems, weeklyActivities if they don't exist (for existing clients)
       if (!currentClient.coordinators) currentClient.coordinators = [];
       if (!currentClient.medications) currentClient.medications = [];
+      if (!currentClient.pendingItems) currentClient.pendingItems = [];
+      if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
       
       // Update content header with client name
       const clientName = `${currentClient.firstName} ${currentClient.lastName}`.trim() || 'Unnamed Client';
@@ -2765,13 +2837,8 @@
       document.getElementById('icareCoordinator').value = currentClient.icareCoordinator || '';
       document.getElementById('icareCoordinatorPhone').value = currentClient.icareCoordinatorPhone || '';
       document.getElementById('icareCoordinatorEmail').value = currentClient.icareCoordinatorEmail || '';
-      document.getElementById('dayProgramEnabled').checked = !!currentClient.dayProgramEnabled;
-      document.getElementById('dayProgramName').value = currentClient.dayProgramName || '';
-      document.getElementById('dayProgramDays').value = currentClient.dayProgramDays || '';
-      document.getElementById('dayProgramContactName').value = currentClient.dayProgramContactName || '';
-      document.getElementById('dayProgramContactPhone').value = currentClient.dayProgramContactPhone || '';
-      document.getElementById('dayProgramContactEmail').value = currentClient.dayProgramContactEmail || '';
-      updateDayProgramVisibility();
+      migrateToWeeklyActivitiesIfNeeded();
+      renderWeeklyActivities();
 
       console.log('Loading dates - planStartDate:', currentClient.planStartDate, 'planEndDate:', currentClient.planEndDate);
       document.getElementById('planStartDate').value = currentClient.planStartDate || '';
@@ -2797,8 +2864,9 @@
             // Load documents
       loadDocuments();
       
-      // Render upcoming reminders
+      // Render upcoming reminders and pending items
       renderUpcomingReminders();
+      renderPendingItems();
       
       // Set funding type visibility
       const fundingType = currentClient.fundingType;
@@ -2859,12 +2927,7 @@
       currentClient.icareCoordinator = document.getElementById('icareCoordinator').value;
       currentClient.icareCoordinatorPhone = document.getElementById('icareCoordinatorPhone').value;
       currentClient.icareCoordinatorEmail = document.getElementById('icareCoordinatorEmail').value;
-      currentClient.dayProgramEnabled = document.getElementById('dayProgramEnabled').checked;
-      currentClient.dayProgramName = document.getElementById('dayProgramName').value;
-      currentClient.dayProgramDays = document.getElementById('dayProgramDays').value;
-      currentClient.dayProgramContactName = document.getElementById('dayProgramContactName').value;
-      currentClient.dayProgramContactPhone = document.getElementById('dayProgramContactPhone').value;
-      currentClient.dayProgramContactEmail = document.getElementById('dayProgramContactEmail').value;
+      // weeklyActivities saved via add/edit/remove in Weekly Schedule
 
       currentClient.planStartDate = document.getElementById('planStartDate').value;
       currentClient.planEndDate = document.getElementById('planEndDate').value;
@@ -3229,158 +3292,205 @@
       return dateStr;
     }
 
-    function getSessionStatus(session) {
-      const today = new Date();
-      const start = new Date(normalizeDateString(session.startDate || ''));
-      const end = new Date(normalizeDateString(session.endDate || ''));
-      if (session.pauseStart && session.pauseEnd) {
-        const pauseStart = new Date(normalizeDateString(session.pauseStart));
-        const pauseEnd = new Date(normalizeDateString(session.pauseEnd));
-        if (!isNaN(pauseStart) && !isNaN(pauseEnd) && today >= pauseStart && today <= pauseEnd) {
-          return 'paused';
-        }
+    const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const ACTIVITY_TYPES = [
+      { value: 'Day Program', label: 'Day Program' },
+      { value: 'GP', label: 'GP' },
+      { value: 'Service Session', label: 'Service Session' },
+      { value: 'Other', label: 'Other' }
+    ];
+
+    function migrateToWeeklyActivitiesIfNeeded() {
+      if (!currentClient) return;
+      if (currentClient.weeklyActivities && currentClient.weeklyActivities.length > 0) return;
+      currentClient.weeklyActivities = [];
+      if (currentClient.dayProgramEnabled && currentClient.dayProgramName) {
+        const days = (currentClient.dayProgramDays || '').split(/[\s,]+/).filter(Boolean);
+        if (days.length === 0) days.push('Monday');
+        days.forEach(d => {
+          currentClient.weeklyActivities.push({
+            day: d.replace(/^(\w)/, (m) => m.toUpperCase()),
+            type: 'Day Program',
+            name: currentClient.dayProgramName || '',
+            time: '',
+            contactName: currentClient.dayProgramContactName || '',
+            contactPhone: currentClient.dayProgramContactPhone || '',
+            contactEmail: currentClient.dayProgramContactEmail || ''
+          });
+        });
       }
-      if (!isNaN(start) && today < start) return 'upcoming';
-      if (!isNaN(end) && today > end) return 'expired';
-      return 'active';
+      if (currentClient.sessions && currentClient.sessions.length > 0) {
+        currentClient.sessions.forEach(s => {
+          currentClient.weeklyActivities.push({
+            day: (s.day || 'Monday').replace(/^(\w)/, (m) => m.toUpperCase()),
+            type: 'Service Session',
+            name: s.name || '',
+            time: s.time || '',
+            contactName: '',
+            contactPhone: '',
+            contactEmail: ''
+          });
+        });
+      }
     }
 
-    function renderWeeklySessions() {
-      const container = document.getElementById('weekly-session-cards');
+    function renderWeeklyActivities() {
+      const container = document.getElementById('weekly-schedule-by-day');
       if (!container) return;
       if (!currentClient) {
         container.innerHTML = '<div class="no-data">No client selected</div>';
         return;
       }
-      if (!currentClient.sessions) currentClient.sessions = [];
-      if (currentClient.sessions.length === 0) {
-        container.innerHTML = '<div class="no-data">No sessions yet</div>';
+      if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
+      if (currentClient.weeklyActivities.length === 0) {
+        container.innerHTML = '<div class="no-data">No activities yet. Add an activity (e.g. Day Program, GP) for each day.</div>';
         return;
       }
-      container.innerHTML = currentClient.sessions.map((session, index) => {
-        const status = getSessionStatus(session);
-        const dateRange = `${session.startDate || 'N/A'} → ${session.endDate || 'N/A'}`;
-        const timeRange = session.time ? session.time : 'Time not set';
-        const pauseRange = session.pauseStart && session.pauseEnd ? `Paused: ${session.pauseStart} → ${session.pauseEnd}` : '';
-        return `
-          <div class="session-card">
-            <div class="session-actions">
-              <button class="btn btn-warning btn-sm" onclick="showWeeklySessionForm(${index}, true); event.stopPropagation();">Edit</button>
-              <button class="btn btn-danger btn-sm" onclick="removeWeeklySession(${index}); event.stopPropagation();">Remove</button>
+      const byDay = {};
+      WEEK_DAYS.forEach(d => { byDay[d] = []; });
+      currentClient.weeklyActivities.forEach((a, index) => {
+        const day = (a.day || 'Monday').replace(/^(\w)/, (m) => m.toUpperCase());
+        if (!byDay[day]) byDay[day] = [];
+        byDay[day].push({ ...a, _index: index });
+      });
+      let html = '';
+      WEEK_DAYS.forEach(day => {
+        const activities = byDay[day] || [];
+        if (activities.length === 0) return;
+        const typeClass = (t) => (t || 'other').toLowerCase().replace(/\s+/g, '-');
+        html += `
+          <div class="weekly-day-row" id="weekly-day-${day.replace(/\s/g,'')}" data-day="${day}">
+            <div class="weekly-day-header" onclick="toggleWeeklyDayDetails('${day.replace(/\s/g,'')}')">
+              <span class="day-name">${day}</span>
+              <span class="weekly-day-tags">
+                ${activities.map(a => `<span class="weekly-activity-tag ${typeClass(a.type)}">${escapeHTML(a.type || 'Other')}</span>`).join('')}
+              </span>
             </div>
-            <div class="session-title">
-              <span class="session-status ${status}"></span>
-              ${escapeHTML(session.name || 'Session')}
-            </div>
-            <div class="session-meta">
-              <div>Day: ${escapeHTML(session.day || 'N/A')}</div>
-              <div>Time: ${escapeHTML(timeRange)}</div>
-              <div>Dates: ${escapeHTML(dateRange)}</div>
-              ${pauseRange ? `<div>${escapeHTML(pauseRange)}</div>` : ''}
+            <div class="weekly-day-details">
+              ${activities.map(a => `
+                <div class="weekly-activity-detail">
+                  <div class="activity-type">${escapeHTML(a.type || 'Other')}${a.name ? ': ' + escapeHTML(a.name) : ''}</div>
+                  ${a.time ? `<div class="activity-contact">Time: ${escapeHTML(a.time)}</div>` : ''}
+                  ${(a.contactName || a.contactEmail) ? `<div class="activity-contact">Contact: ${escapeHTML(a.contactName || '')} ${a.contactEmail ? ' • ' + escapeHTML(a.contactEmail) : ''}</div>` : ''}
+                  <div class="activity-actions">
+                    <button class="btn btn-warning btn-sm" onclick="editWeeklyActivity(${a._index}); event.stopPropagation();">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="removeWeeklyActivity(${a._index}); event.stopPropagation();">Remove</button>
+                  </div>
+                </div>
+              `).join('')}
             </div>
           </div>
         `;
-      }).join('');
+      });
+      container.innerHTML = html || '<div class="no-data">No activities yet.</div>';
     }
 
-    function showWeeklySessionForm(sessionIndex = null, isEdit = false) {
-      if (!currentClient) {
-        alert('Please select a client first');
-        return;
+    function toggleWeeklyDayDetails(dayId) {
+      const row = document.getElementById('weekly-day-' + dayId);
+      if (row) row.classList.toggle('expanded');
+    }
+
+    function addWeeklyActivity() {
+      if (!currentClient) { alert('Please select a client first'); return; }
+      if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
+      showWeeklyActivityForm(null, false);
+    }
+
+    function editWeeklyActivity(index) {
+      if (!currentClient.weeklyActivities || !currentClient.weeklyActivities[index]) return;
+      showWeeklyActivityForm(index, true);
+    }
+
+    function removeWeeklyActivity(index) {
+      if (!currentClient.weeklyActivities || !currentClient.weeklyActivities[index]) return;
+      if (!confirm('Remove this activity?')) return;
+      currentClient.weeklyActivities.splice(index, 1);
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
       }
-      if (!currentClient.sessions) currentClient.sessions = [];
-      const session = isEdit && sessionIndex !== null ? currentClient.sessions[sessionIndex] : null;
+      renderWeeklyActivities();
+      showNotification('Activity removed', 'success');
+    }
+
+    function showWeeklyActivityForm(activityIndex, isEdit) {
+      const a = isEdit && activityIndex !== null && currentClient.weeklyActivities[activityIndex] ? currentClient.weeklyActivities[activityIndex] : null;
+      const dayOptions = WEEK_DAYS.map(d => `<option value="${d}" ${a && a.day === d ? 'selected' : ''}>${d}</option>`).join('');
+      const typeOptions = ACTIVITY_TYPES.map(t => `<option value="${t.value}" ${a && a.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('');
       const html = `
         <div style="padding: 20px; max-width: 520px;">
-          <h3>${isEdit ? 'Edit' : 'Add'} Weekly Session</h3>
-          <form id="weekly-session-form">
+          <h3>${isEdit ? 'Edit' : 'Add'} Activity</h3>
+          <form id="weekly-activity-form">
             <div style="margin-bottom: 12px;">
-              <label class="form-label">Session Name *</label>
-              <input type="text" class="form-input" id="session-name" value="${session ? session.name : ''}" required>
+              <label class="form-label">Day *</label>
+              <select class="form-input" id="activity-day" required>${dayOptions}</select>
             </div>
             <div style="margin-bottom: 12px;">
-              <label class="form-label">Day</label>
-              <input type="text" class="form-input" id="session-day" placeholder="e.g., Monday" value="${session ? session.day || '' : ''}">
+              <label class="form-label">Activity type *</label>
+              <select class="form-input" id="activity-type" required>${typeOptions}</select>
             </div>
             <div style="margin-bottom: 12px;">
-              <label class="form-label">Time</label>
-              <input type="text" class="form-input" id="session-time" placeholder="e.g., 10:00-11:00" value="${session ? session.time || '' : ''}">
+              <label class="form-label">Name (e.g. program or appointment name)</label>
+              <input type="text" class="form-input" id="activity-name" value="${a ? escapeHTML(a.name || '') : ''}" placeholder="e.g. Sunrise Day Program">
             </div>
             <div style="margin-bottom: 12px;">
-              <label class="form-label">Start Date (DD/MM/YYYY)</label>
-              <input type="text" class="form-input" id="session-start" placeholder="20/02/2026" value="${session ? session.startDate || '' : ''}">
+              <label class="form-label">Time (optional)</label>
+              <input type="text" class="form-input" id="activity-time" value="${a ? escapeHTML(a.time || '') : ''}" placeholder="e.g. 10:00–11:00">
             </div>
             <div style="margin-bottom: 12px;">
-              <label class="form-label">End Date (DD/MM/YYYY)</label>
-              <input type="text" class="form-input" id="session-end" placeholder="20/04/2026" value="${session ? session.endDate || '' : ''}">
+              <label class="form-label">Contact name</label>
+              <input type="text" class="form-input" id="activity-contact-name" value="${a ? escapeHTML(a.contactName || '') : ''}" placeholder="Contact person">
             </div>
             <div style="margin-bottom: 12px;">
-              <label class="form-label">Pause Start (optional)</label>
-              <input type="text" class="form-input" id="session-pause-start" placeholder="e.g., 01/03/2026" value="${session ? session.pauseStart || '' : ''}">
+              <label class="form-label">Contact phone</label>
+              <input type="tel" class="form-input" id="activity-contact-phone" value="${a ? escapeHTML(a.contactPhone || '') : ''}" placeholder="Phone">
             </div>
             <div style="margin-bottom: 12px;">
-              <label class="form-label">Pause End (optional)</label>
-              <input type="text" class="form-input" id="session-pause-end" placeholder="e.g., 07/03/2026" value="${session ? session.pauseEnd || '' : ''}">
+              <label class="form-label">Contact email</label>
+              <input type="email" class="form-input" id="activity-contact-email" value="${a ? escapeHTML(a.contactEmail || '') : ''}" placeholder="Email">
             </div>
             <div style="text-align: right; margin-top: 20px;">
-              <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; margin-right: 8px;">
-                Cancel
-              </button>
-              <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer;">
-                ${isEdit ? 'Update' : 'Add'}
-              </button>
+              <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; margin-right: 8px;">Cancel</button>
+              <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer;">${isEdit ? 'Update' : 'Add'}</button>
             </div>
           </form>
         </div>
       `;
-      showModal(`${isEdit ? 'Edit' : 'Add'} Weekly Session`, html);
-      document.getElementById('weekly-session-form').addEventListener('submit', (e) => {
+      showModal(`${isEdit ? 'Edit' : 'Add'} Activity`, html);
+      document.getElementById('weekly-activity-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        saveWeeklySession(sessionIndex, isEdit);
+        saveWeeklyActivityForm(activityIndex, isEdit);
       });
     }
 
-    function saveWeeklySession(sessionIndex, isEdit) {
-      const name = document.getElementById('session-name').value.trim();
-      if (!name) {
-        alert('Session name is required');
-        return;
-      }
-      const sessionData = {
-        name,
-        day: document.getElementById('session-day').value.trim(),
-        time: document.getElementById('session-time').value.trim(),
-        startDate: document.getElementById('session-start').value.trim(),
-        endDate: document.getElementById('session-end').value.trim(),
-        pauseStart: document.getElementById('session-pause-start').value.trim(),
-        pauseEnd: document.getElementById('session-pause-end').value.trim()
+    function saveWeeklyActivityForm(activityIndex, isEdit) {
+      const day = document.getElementById('activity-day').value;
+      const type = document.getElementById('activity-type').value;
+      if (!day || !type) { alert('Day and activity type are required'); return; }
+      const data = {
+        day,
+        type,
+        name: document.getElementById('activity-name').value.trim(),
+        time: document.getElementById('activity-time').value.trim(),
+        contactName: document.getElementById('activity-contact-name').value.trim(),
+        contactPhone: document.getElementById('activity-contact-phone').value.trim(),
+        contactEmail: document.getElementById('activity-contact-email').value.trim()
       };
-      if (isEdit && sessionIndex !== null) {
-        currentClient.sessions[sessionIndex] = sessionData;
+      if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
+      if (isEdit && activityIndex !== null) {
+        currentClient.weeklyActivities[activityIndex] = data;
       } else {
-        currentClient.sessions.push(sessionData);
+        currentClient.weeklyActivities.push(data);
       }
       if (selectedClientIndex !== null) {
         const currentClients = getCurrentClientList();
         currentClients[selectedClientIndex] = { ...currentClient };
         saveAllData();
       }
-      renderWeeklySessions();
+      renderWeeklyActivities();
       closeModal();
-      showNotification(`Weekly session ${isEdit ? 'updated' : 'added'} successfully`, 'success');
-    }
-
-    function removeWeeklySession(index) {
-      if (!currentClient.sessions || !currentClient.sessions[index]) return;
-      if (confirm('Remove this session?')) {
-        currentClient.sessions.splice(index, 1);
-        if (selectedClientIndex !== null) {
-          const currentClients = getCurrentClientList();
-          currentClients[selectedClientIndex] = { ...currentClient };
-          saveAllData();
-        }
-        renderWeeklySessions();
-      }
+      showNotification(`Activity ${isEdit ? 'updated' : 'added'}`, 'success');
     }
     
     function addCaregiver() {
@@ -3867,6 +3977,164 @@
       showNotification(`Medication ${isEdit ? 'updated' : 'added'}`, 'success');
     }
 
+    // Pending items (Things to Check Later) functions
+    function renderPendingItems() {
+      const container = document.getElementById('pending-items-cards');
+      if (!container) return;
+      if (!currentClient) {
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      if (!currentClient.pendingItems) currentClient.pendingItems = [];
+      if (currentClient.pendingItems.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = currentClient.pendingItems.map((item, index) => `
+        <div class="coordinator-card" style="${item.done ? 'opacity: 0.6;' : ''}" onclick="togglePendingItemDetails(${index})">
+          <div class="coordinator-name" style="${item.done ? 'text-decoration: line-through;' : ''}">${escapeHTML(item.title || 'Untitled')}</div>
+          <div class="coordinator-profession">${item.date ? 'Check: ' + escapeHTML(item.date) : ''}${item.note ? ' • ' + escapeHTML(item.note) : ''}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">What to check:</span>
+              <span class="coordinator-detail-value">${escapeHTML(item.title || '')}</span>
+            </div>
+            ${item.note ? `
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Note:</span>
+              <span class="coordinator-detail-value">${escapeHTML(item.note)}</span>
+            </div>
+            ` : ''}
+            ${item.date ? `
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Check by:</span>
+              <span class="coordinator-detail-value">${escapeHTML(item.date)}</span>
+            </div>
+            ` : ''}
+            <div class="coordinator-actions">
+              <button class="btn btn-sm" onclick="togglePendingItemDone(${index}); event.stopPropagation();" title="${item.done ? 'Mark pending' : 'Mark done'}">${item.done ? '↩ Undo' : '✓ Done'}</button>
+              <button class="btn btn-warning btn-sm" onclick="editPendingItem(${index}); event.stopPropagation();" title="Edit">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="removePendingItem(${index}); event.stopPropagation();" title="Remove">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addPendingItem() {
+      if (!currentClient) {
+        alert('Please select a client first');
+        return;
+      }
+      if (!currentClient.pendingItems) currentClient.pendingItems = [];
+      showPendingItemForm(null, false);
+    }
+
+    function editPendingItem(index) {
+      if (!currentClient.pendingItems || !currentClient.pendingItems[index]) return;
+      showPendingItemForm(index, true);
+    }
+
+    function removePendingItem(index) {
+      if (!currentClient.pendingItems || !currentClient.pendingItems[index]) return;
+      if (confirm('Remove this item?')) {
+        currentClient.pendingItems.splice(index, 1);
+        if (selectedClientIndex !== null) {
+          const currentClients = getCurrentClientList();
+          currentClients[selectedClientIndex] = { ...currentClient };
+          saveAllData();
+        }
+        renderPendingItems();
+        showNotification('Item removed', 'success');
+      }
+    }
+
+    function togglePendingItemDone(index) {
+      if (!currentClient.pendingItems || !currentClient.pendingItems[index]) return;
+      currentClient.pendingItems[index].done = !currentClient.pendingItems[index].done;
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      renderPendingItems();
+      showNotification(currentClient.pendingItems[index].done ? 'Marked as done' : 'Marked as pending', 'success');
+    }
+
+    function togglePendingItemDetails(index) {
+      const cards = document.querySelectorAll('#pending-items-cards .coordinator-card');
+      cards.forEach((card, i) => {
+        card.classList.toggle('active', i === index);
+      });
+    }
+
+    function showPendingItemForm(itemIndex, isEdit) {
+      const item = isEdit && itemIndex !== null && currentClient.pendingItems[itemIndex] ? currentClient.pendingItems[itemIndex] : null;
+      const html = `
+        <div style="padding: 20px; max-width: 500px;">
+          <h3>${isEdit ? 'Edit' : 'Add'} Thing to Check</h3>
+          <form id="pending-item-form">
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">What to check *</label>
+              <input type="text" id="pending-title" value="${item ? escapeHTML(item.title || '') : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" 
+                     placeholder="e.g., Geoff – might have appointment, need to confirm" required>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Optional note</label>
+              <input type="text" id="pending-note" value="${item && item.note ? escapeHTML(item.note) : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                     placeholder="Source, extra details...">
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Check by (optional date)</label>
+              <input type="date" id="pending-date" value="${item && item.date ? item.date : ''}" 
+                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+              <button type="button" onclick="closeModal()" 
+                      style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Cancel</button>
+              <button type="submit" 
+                      style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">${isEdit ? 'Update' : 'Add'}</button>
+            </div>
+          </form>
+        </div>
+      `;
+      showModal(`${isEdit ? 'Edit' : 'Add'} Thing to Check`, html);
+      document.getElementById('pending-item-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        savePendingItemForm(itemIndex, isEdit);
+      });
+    }
+
+    function savePendingItemForm(itemIndex, isEdit) {
+      const title = document.getElementById('pending-title').value.trim();
+      if (!title) {
+        alert('What to check is required');
+        return;
+      }
+      const itemData = {
+        title,
+        note: document.getElementById('pending-note').value.trim(),
+        date: document.getElementById('pending-date').value || '',
+        done: (isEdit && currentClient.pendingItems[itemIndex]) ? currentClient.pendingItems[itemIndex].done : false
+      };
+      if (!currentClient.pendingItems) currentClient.pendingItems = [];
+      if (isEdit && itemIndex !== null) {
+        currentClient.pendingItems[itemIndex] = itemData;
+      } else {
+        currentClient.pendingItems.push(itemData);
+      }
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      renderPendingItems();
+      closeModal();
+      showNotification(`Item ${isEdit ? 'updated' : 'added'}`, 'success');
+    }
+
     // Reminder functions
     function renderUpcomingReminders() {
       const container = document.getElementById('upcoming-reminders');
@@ -4170,16 +4438,6 @@
       });
     });
     
-    const dayProgramEnabledCheckbox = document.getElementById('dayProgramEnabled');
-    if (dayProgramEnabledCheckbox) {
-      dayProgramEnabledCheckbox.addEventListener('change', () => {
-        updateDayProgramVisibility();
-        if (currentClient && selectedClientIndex !== null) {
-          saveClientData();
-        }
-      });
-    }
-
     const coordDayProgramEnabledCheckbox = document.getElementById('coordDayProgramEnabled');
     if (coordDayProgramEnabledCheckbox) {
       coordDayProgramEnabledCheckbox.addEventListener('change', () => {
