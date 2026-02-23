@@ -474,34 +474,49 @@
     }
     .weekly-day-header {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 16px;
       cursor: pointer;
       transition: background 0.2s;
-      font-weight: 600;
+      font-weight: 500;
       color: var(--gray-800);
     }
     .weekly-day-header:hover {
       background: var(--gray-50);
     }
-    .weekly-day-header .day-name { font-weight: 700; color: var(--primary-blue); min-width: 90px; }
-    .weekly-day-tags {
+    .weekly-day-header .day-name { font-weight: 700; color: var(--primary-blue); min-width: 88px; flex-shrink: 0; }
+    .weekly-day-activities-inline {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .weekly-activity-inline {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+      align-items: baseline;
+      gap: 6px 12px;
+      font-size: 0.9rem;
     }
-    .weekly-activity-tag {
-      padding: 4px 10px;
-      border-radius: 14px;
-      font-size: 0.8rem;
+    .weekly-activity-inline .activity-where {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    .weekly-activity-inline .activity-type-badge {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
       font-weight: 500;
     }
-    .weekly-activity-tag.day-program { background: var(--accent-teal-tint); color: var(--accent-teal); }
-    .weekly-activity-tag.gp { background: var(--primary-tint); color: var(--primary-blue); }
-    .weekly-activity-tag.service-session { background: var(--success-tint); color: var(--success-green); }
-    .weekly-activity-tag.other { background: var(--gray-200); color: var(--gray-700); }
+    .weekly-activity-inline .activity-type-badge.day-program { background: var(--accent-teal-tint); color: var(--accent-teal); }
+    .weekly-activity-inline .activity-type-badge.gp { background: var(--primary-tint); color: var(--primary-blue); }
+    .weekly-activity-inline .activity-type-badge.service-session { background: var(--success-tint); color: var(--success-green); }
+    .weekly-activity-inline .activity-type-badge.other { background: var(--gray-200); color: var(--gray-700); }
+    .weekly-activity-inline .activity-contact-inline {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+    }
     .weekly-day-details {
       display: none;
       padding: 12px 16px;
@@ -3362,9 +3377,15 @@
           <div class="weekly-day-row" id="weekly-day-${day.replace(/\s/g,'')}" data-day="${day}">
             <div class="weekly-day-header" onclick="toggleWeeklyDayDetails('${day.replace(/\s/g,'')}')">
               <span class="day-name">${day}</span>
-              <span class="weekly-day-tags">
-                ${activities.map(a => `<span class="weekly-activity-tag ${typeClass(a.type)}">${escapeHTML(a.type || 'Other')}</span>`).join('')}
-              </span>
+              <div class="weekly-day-activities-inline">
+                ${activities.map(a => `
+                  <div class="weekly-activity-inline">
+                    <span class="activity-where">${escapeHTML(a.name || a.type || 'Activity')}</span>
+                    <span class="activity-type-badge ${typeClass(a.type)}">${escapeHTML(a.type || 'Other')}</span>
+                    ${(a.contactName || a.contactEmail) ? `<span class="activity-contact-inline">Contact: ${escapeHTML(a.contactName || '')}${a.contactEmail ? ' · ' + escapeHTML(a.contactEmail) : ''}</span>` : ''}
+                  </div>
+                `).join('')}
+              </div>
             </div>
             <div class="weekly-day-details">
               ${activities.map(a => `
