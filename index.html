@@ -475,7 +475,7 @@
     .weekly-day-header {
       display: flex;
       align-items: flex-start;
-      gap: 16px;
+      gap: 20px;
       padding: 14px 16px;
       cursor: pointer;
       transition: background 0.2s;
@@ -485,29 +485,44 @@
     .weekly-day-header:hover {
       background: var(--gray-50);
     }
-    .weekly-day-header .day-name { font-weight: 700; color: var(--primary-blue); min-width: 88px; flex-shrink: 0; }
+    .weekly-day-header .day-name {
+      font-weight: 700;
+      color: var(--primary-blue);
+      width: 100px;
+      flex-shrink: 0;
+    }
     .weekly-day-activities-inline {
       display: flex;
       flex-direction: column;
       gap: 10px;
       flex: 1;
+      min-width: 0;
     }
     .weekly-activity-inline {
       display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 6px 12px;
+      align-items: center;
+      gap: 12px;
       font-size: 0.9rem;
     }
     .weekly-activity-inline .activity-where {
       font-weight: 600;
       color: var(--gray-900);
+      min-width: 120px;
+      flex-shrink: 0;
+    }
+    .weekly-activity-inline .activity-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+      flex-wrap: wrap;
     }
     .weekly-activity-inline .activity-type-badge {
       padding: 2px 8px;
       border-radius: 10px;
       font-size: 0.75rem;
       font-weight: 500;
+      flex-shrink: 0;
     }
     .weekly-activity-inline .activity-type-badge.day-program { background: var(--accent-teal-tint); color: var(--accent-teal); }
     .weekly-activity-inline .activity-type-badge.gp { background: var(--primary-tint); color: var(--primary-blue); }
@@ -3381,8 +3396,10 @@
                 ${activities.map(a => `
                   <div class="weekly-activity-inline">
                     <span class="activity-where">${escapeHTML(a.name || a.type || 'Activity')}</span>
-                    <span class="activity-type-badge ${typeClass(a.type)}">${escapeHTML(a.type || 'Other')}</span>
-                    ${(a.contactName || a.contactEmail) ? `<span class="activity-contact-inline">Contact: ${escapeHTML(a.contactName || '')}${a.contactEmail ? ' · ' + escapeHTML(a.contactEmail) : ''}</span>` : ''}
+                    <span class="activity-right">
+                      <span class="activity-type-badge ${typeClass(a.type)}">${escapeHTML(a.type || 'Other')}</span>
+                      ${(a.contactName || a.contactEmail) ? `<span class="activity-contact-inline">Contact: ${escapeHTML(a.contactName || '')}${a.contactEmail ? ' · ' + escapeHTML(a.contactEmail) : ''}</span>` : ''}
+                    </span>
                   </div>
                 `).join('')}
               </div>
