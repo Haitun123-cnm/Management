@@ -70,6 +70,24 @@
       align-items: center;
       gap: 12px;
     }
+    .things-to-check-banner {
+      display: flex;
+      align-items: center;
+      padding: 8px 14px;
+      background: linear-gradient(90deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #92400e;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .things-to-check-banner:hover {
+      transform: scale(1.02);
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
+    }
 
     .header-title {
       font-size: 1.25rem;
@@ -240,13 +258,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--gray-200);
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
+      gap: 10px;
+      min-width: 160px;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
       color: var(--gray-800);
       background: var(--white);
       cursor: pointer;
@@ -279,14 +297,14 @@
 
     .daily-task-panel {
       position: absolute;
-      top: 42px;
+      top: 52px;
       left: 0;
-      width: 280px;
+      width: 360px;
       background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: 8px;
-      box-shadow: var(--shadow-sm);
-      padding: 10px;
+      border: 2px solid var(--gray-200);
+      border-radius: 10px;
+      box-shadow: var(--shadow-md);
+      padding: 16px;
       opacity: 0;
       max-height: 0;
       overflow: hidden;
@@ -295,9 +313,9 @@
       z-index: 1000;
     }
 
-    .daily-task-widget:hover .daily-task-panel {
+    .daily-task-panel.visible {
       opacity: 1;
-      max-height: 320px;
+      max-height: 420px;
       pointer-events: auto;
     }
 
@@ -309,25 +327,25 @@
 
     .daily-task-input input {
       flex: 1;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border: 1px solid var(--gray-300);
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
     }
 
     .daily-task-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      max-height: 220px;
+      gap: 10px;
+      max-height: 280px;
       overflow-y: auto;
     }
 
     .daily-task-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
+      gap: 10px;
+      font-size: 0.95rem;
       color: var(--gray-700);
     }
     
@@ -1100,7 +1118,10 @@
   <div class="header">
     <div class="header-left">
       <div class="header-title" id="system-title">Service Management System</div>
-      <div class="daily-task-widget">
+      <div id="things-to-check-banner" class="things-to-check-banner" style="display: none;" onclick="document.querySelector('[data-tab=\'basic\']')?.click(); document.getElementById('pending-items-cards')?.scrollIntoView({behavior:'smooth'})" title="Go to Things to Check Later">
+        <!-- Filled by updateThingsToCheckBanner() -->
+      </div>
+      <div class="daily-task-widget" id="daily-task-widget">
         <div class="daily-task-toggle">
           <span class="daily-task-toggle-left">
             <span id="daily-task-indicator" class="daily-task-indicator"></span>
@@ -1320,19 +1341,6 @@
               <div class="add-coordinator-card" id="add-weekly-activity-card" onclick="addWeeklyActivity()" style="margin-top: 16px;">
                 <span class="icon">+</span>
                 <div>Add Activity</div>
-              </div>
-            </div>
-          </div>
-          
-                    <div class="form-section">
-            <div class="section-header">Upcoming Schedules & Reminders</div>
-            <div class="section-content">
-              <div class="reminder-controls" style="margin-bottom: 16px;">
-                <button class="btn btn-primary btn-sm" id="add-reminder-btn">Add Reminder</button>
-                <button class="btn btn-secondary btn-sm" id="view-all-reminders-btn" style="margin-left: 8px;">View All</button>
-              </div>
-              <div id="upcoming-reminders">
-                <!-- Upcoming reminders will be rendered here -->
               </div>
             </div>
           </div>
@@ -2824,12 +2832,12 @@
       renderMedications();
       renderPendingItems();
       renderWeeklyActivities();
-      renderUpcomingReminders();
       loadDocuments();
       
       // Update content header
       document.querySelector('.content-title').textContent = 'Client Details';
       document.querySelector('.content-subtitle').textContent = 'Select a client or add a new one to get started';
+      updateThingsToCheckBanner();
     }
     
     function loadClientData() {
@@ -2894,9 +2902,8 @@
             // Load documents
       loadDocuments();
       
-      // Render upcoming reminders and pending items
-      renderUpcomingReminders();
       renderPendingItems();
+      updateThingsToCheckBanner();
       
       // Set funding type visibility
       const fundingType = currentClient.fundingType;
@@ -4084,6 +4091,7 @@
         }
         renderPendingItems();
         showNotification('Item removed', 'success');
+        updateThingsToCheckBanner();
       }
     }
 
@@ -4097,6 +4105,7 @@
       }
       renderPendingItems();
       showNotification(currentClient.pendingItems[index].done ? 'Marked as done' : 'Marked as pending', 'success');
+      updateThingsToCheckBanner();
     }
 
     function togglePendingItemDetails(index) {
@@ -4171,9 +4180,24 @@
       renderPendingItems();
       closeModal();
       showNotification(`Item ${isEdit ? 'updated' : 'added'}`, 'success');
+      updateThingsToCheckBanner();
     }
 
-    // Reminder functions
+    function updateThingsToCheckBanner() {
+      const banner = document.getElementById('things-to-check-banner');
+      if (!banner) return;
+      const count = currentClient && currentClient.pendingItems
+        ? currentClient.pendingItems.filter(p => !p.done).length
+        : 0;
+      if (count > 0) {
+        banner.textContent = `⚠️ ${count} thing${count !== 1 ? 's' : ''} to check later`;
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+    // Reminder functions (kept for data; UI section removed)
     function renderUpcomingReminders() {
       const container = document.getElementById('upcoming-reminders');
       if (!container) return;
@@ -4882,6 +4906,27 @@
     renderClientList();
     loadDailyTasks();
     renderDailyTasks();
+    (function initDailyTaskPanelDelay() {
+      const widget = document.getElementById('daily-task-widget');
+      const panel = widget?.querySelector('.daily-task-panel');
+      if (!widget || !panel) return;
+      let hideTimer = null;
+      const delayMs = 700;
+      function show() {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = null;
+        panel.classList.add('visible');
+      }
+      function scheduleHide() {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(function() {
+          panel.classList.remove('visible');
+          hideTimer = null;
+        }, delayMs);
+      }
+      widget.addEventListener('mouseenter', show);
+      widget.addEventListener('mouseleave', scheduleHide);
+    })();
     
     // Initialize edit mode (default to read-only)
     updateFieldEditability();
