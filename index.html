@@ -3383,12 +3383,24 @@
         container.innerHTML = '<div class="no-data">No activities yet. Add an activity (e.g. Day Program, GP) for each day.</div>';
         return;
       }
+      function getDaysForActivity(a) {
+        const from = (a.dayFrom || a.day || 'Monday').replace(/^(\w)/, (m) => m.toUpperCase());
+        const to = (a.dayTo || a.day || from).replace(/^(\w)/, (m) => m.toUpperCase());
+        const iFrom = WEEK_DAYS.indexOf(from);
+        const iTo = WEEK_DAYS.indexOf(to);
+        if (iFrom === -1 || iTo === -1) return [from];
+        const start = Math.min(iFrom, iTo);
+        const end = Math.max(iFrom, iTo);
+        return WEEK_DAYS.slice(start, end + 1);
+      }
       const byDay = {};
       WEEK_DAYS.forEach(d => { byDay[d] = []; });
       currentClient.weeklyActivities.forEach((a, index) => {
-        const day = (a.day || 'Monday').replace(/^(\w)/, (m) => m.toUpperCase());
-        if (!byDay[day]) byDay[day] = [];
-        byDay[day].push({ ...a, _index: index });
+        const days = getDaysForActivity(a);
+        days.forEach(day => {
+          if (!byDay[day]) byDay[day] = [];
+          byDay[day].push({ ...a, _index: index });
+        });
       });
       let html = '';
       WEEK_DAYS.forEach(day => {
@@ -3461,15 +3473,25 @@
 
     function showWeeklyActivityForm(activityIndex, isEdit) {
       const a = isEdit && activityIndex !== null && currentClient.weeklyActivities[activityIndex] ? currentClient.weeklyActivities[activityIndex] : null;
-      const dayOptions = WEEK_DAYS.map(d => `<option value="${d}" ${a && a.day === d ? 'selected' : ''}>${d}</option>`).join('');
+      const fromVal = a ? (a.dayFrom || a.day || 'Monday') : 'Monday';
+      const toVal = a ? (a.dayTo || a.day || fromVal) : 'Monday';
+      const dayOptions = WEEK_DAYS.map(d => `<option value="${d}">${d}</option>`).join('');
+      const fromOptions = WEEK_DAYS.map(d => `<option value="${d}" ${fromVal === d ? 'selected' : ''}>${d}</option>`).join('');
+      const toOptions = WEEK_DAYS.map(d => `<option value="${d}" ${toVal === d ? 'selected' : ''}>${d}</option>`).join('');
       const typeOptions = ACTIVITY_TYPES.map(t => `<option value="${t.value}" ${a && a.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('');
       const html = `
         <div style="padding: 20px; max-width: 520px;">
           <h3>${isEdit ? 'Edit' : 'Add'} Activity</h3>
           <form id="weekly-activity-form">
             <div style="margin-bottom: 12px;">
-              <label class="form-label">Day *</label>
-              <select class="form-input" id="activity-day" required>${dayOptions}</select>
+              <label class="form-label">Day(s) *</label>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 0.9rem;">From</span>
+                <select class="form-input" id="activity-day-from" required style="flex: 1; min-width: 100px;">${fromOptions}</select>
+                <span style="font-size: 0.9rem;">to</span>
+                <select class="form-input" id="activity-day-to" required style="flex: 1; min-width: 100px;">${toOptions}</select>
+              </div>
+              <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">e.g. Monday to Wednesday = 3 days/week</p>
             </div>
             <div style="margin-bottom: 12px;">
               <label class="form-label">Activity type *</label>
@@ -3510,11 +3532,13 @@
     }
 
     function saveWeeklyActivityForm(activityIndex, isEdit) {
-      const day = document.getElementById('activity-day').value;
+      const dayFrom = document.getElementById('activity-day-from').value;
+      const dayTo = document.getElementById('activity-day-to').value;
       const type = document.getElementById('activity-type').value;
-      if (!day || !type) { alert('Day and activity type are required'); return; }
+      if (!dayFrom || !dayTo || !type) { alert('Day(s) and activity type are required'); return; }
       const data = {
-        day,
+        dayFrom,
+        dayTo,
         type,
         name: document.getElementById('activity-name').value.trim(),
         time: document.getElementById('activity-time').value.trim(),
