@@ -1065,6 +1065,22 @@
       margin-bottom: 8px;
     }
     
+    /* Coord stakeholders: role/profession is the primary headline, name secondary */
+    .coord-stakeholder-card .coord-stakeholder-headline {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+      font-size: 1.25rem;
+      line-height: 1.3;
+    }
+    
+    .coord-stakeholder-card .coord-stakeholder-subline {
+      color: var(--gray-600);
+      font-size: 0.8125rem;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+    
     .coordinator-details {
       display: none;
       margin-top: 12px;
@@ -2008,8 +2024,7 @@
       }
     }
     
-    // Initialize data loading
-    loadAllData();
+    // Initial load is started at end of script (loadAllData().then(...)) so list renders after GitHub fetch completes
     
     // Auto-sync: Periodically check for updates from GitHub
     let autoSyncInterval = null;
@@ -2085,19 +2100,6 @@
                 autoSyncInterval = null;
             }
         };
-    }
-    
-    // Migration: Move old 'clients' data to 'serviceClients' if it exists
-    if (localStorage.getItem('clients') && serviceClients.length === 0) {
-      try {
-        const oldClients = JSON.parse(localStorage.getItem('clients')) || [];
-        serviceClients = oldClients;
-        localStorage.setItem('serviceClients', JSON.stringify(serviceClients));
-        localStorage.removeItem('clients'); // Remove old key
-        console.log('Migrated old clients data to serviceClients');
-      } catch (e) {
-        console.error('Error migrating old clients data:', e);
-      }
     }
     
     // Utility functions
@@ -2299,7 +2301,7 @@
         alert('GitHub sync disabled. Data will only be saved locally.');
       } else {
         // 启用GitHub同步 - 提示输入token
-        const token = prompt('输入你的GitHub Personal Access Token:\n\n你的token: ghp_Hn3Kyjrrd3wggXuNsGN7X7gouEt0x12g970j\n\n复制并粘贴上面的token:');
+        const token = prompt('输入你的 GitHub Personal Access Token（请与已同步数据的电脑使用同一 Token）：\n\n在 GitHub → Settings → Developer settings → Personal access tokens 创建，需勾选 repo 权限。');
         
         if (token && token.trim()) {
           // 清除任何现有的token
@@ -2621,9 +2623,9 @@
       }
       
       container.innerHTML = currentClient.coordStakeholders.map((stakeholder, index) => `
-        <div class="coordinator-card" onclick="toggleCoordStakeholderDetails(${index})">
-          <div class="coordinator-name">${escapeHTML(stakeholder.name || 'Unnamed Stakeholder')}</div>
-          <div class="coordinator-profession">${escapeHTML(stakeholder.profession || 'No profession specified')}</div>
+        <div class="coordinator-card coord-stakeholder-card" onclick="toggleCoordStakeholderDetails(${index})">
+          <div class="coord-stakeholder-headline">${escapeHTML(stakeholder.profession || 'No profession specified')}</div>
+          <div class="coord-stakeholder-subline">${escapeHTML(stakeholder.name || 'Unnamed Stakeholder')}</div>
           <div class="coordinator-details">
             <div class="coordinator-detail-item">
               <span class="coordinator-detail-label">Name:</span>
@@ -5207,10 +5209,23 @@
     
     window.debugFilter = debugFilter;
 
-    // Initialize
-    // Ensure Service Department mode is active by default
-    updateSystemModeContent();
-    renderClientList();
+    // Load clients from GitHub or localStorage, then migrate old keys and paint UI (avoids blank list when sync awaits network)
+    loadAllData().then(() => {
+      if (localStorage.getItem('clients') && serviceClients.length === 0) {
+        try {
+          const oldClients = JSON.parse(localStorage.getItem('clients')) || [];
+          serviceClients = oldClients;
+          localStorage.setItem('serviceClients', JSON.stringify(serviceClients));
+          localStorage.removeItem('clients');
+          normalizeClientData();
+          console.log('Migrated old clients data to serviceClients');
+        } catch (e) {
+          console.error('Error migrating old clients data:', e);
+        }
+      }
+      updateSystemModeContent();
+      renderClientList();
+    }).catch(err => console.error('loadAllData failed:', err));
     loadDailyTasks();
     renderDailyTasks();
     (function initDailyTaskPanelDelay() {

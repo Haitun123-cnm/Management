@@ -6,21 +6,21 @@ class SimpleGitHubSync {
         this.owner = 'Haitun123-cnm';
         this.repo = 'Management';
         this.dataFile = 'all-data.json';  // 使用更简单的文件名
-        this.token = null;
-        this.isEnabled = false;
+        // Read token immediately so loadAllData() works on first run (before DOMContentLoaded)
+        this.token = localStorage.getItem('github-token');
+        this.isEnabled = !!this.token;
     }
 
-    // 初始化
+    // 初始化（刷新 token，多标签页启用同步后可用）
     async init() {
         this.token = localStorage.getItem('github-token');
+        this.isEnabled = !!this.token;
         if (this.token) {
-            this.isEnabled = true;
             console.log('✅ GitHub sync enabled');
             return true;
-        } else {
-            console.log('❌ GitHub sync disabled - no token');
-            return false;
         }
+        console.log('❌ GitHub sync disabled - no token');
+        return false;
     }
 
     // 设置token
