@@ -4130,6 +4130,16 @@
       return eq.category || 'Equipment';
     }
 
+    function formatEquipmentLastService(isoDate) {
+      if (!isoDate || !String(isoDate).trim()) return '';
+      const s = String(isoDate).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const d = new Date(s + 'T12:00:00');
+        return isNaN(d.getTime()) ? s : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      }
+      return s;
+    }
+
     function renderEquipment() {
       const container = document.getElementById('equipment-cards');
       if (!container) return;
@@ -4142,10 +4152,14 @@
         container.innerHTML = '';
         return;
       }
-      container.innerHTML = currentClient.equipment.map((eq, index) => `
+      container.innerHTML = currentClient.equipment.map((eq, index) => {
+        const subLine = [eq.brand, eq.manufacturer].filter(Boolean).join(' · ') || 'Brand / manufacturer not set';
+        const lastSvc = formatEquipmentLastService(eq.lastServiceDate);
+        const subWithService = lastSvc ? `${escapeHTML(subLine)} · Last service: ${escapeHTML(lastSvc)}` : escapeHTML(subLine);
+        return `
         <div class="coordinator-card" onclick="toggleEquipmentDetails(${index})">
           <div class="coordinator-name">${escapeHTML(equipmentTypeLabel(eq))}</div>
-          <div class="coordinator-profession">${escapeHTML([eq.brand, eq.manufacturer].filter(Boolean).join(' · ') || 'Brand / manufacturer not set')}</div>
+          <div class="coordinator-profession">${subWithService}</div>
           <div class="coordinator-details">
             <div class="coordinator-detail-item">
               <span class="coordinator-detail-label">Type:</span>
@@ -4163,13 +4177,18 @@
               <span class="coordinator-detail-label">Phone:</span>
               <span class="coordinator-detail-value">${escapeHTML(eq.phone || 'Not provided')}</span>
             </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Last service:</span>
+              <span class="coordinator-detail-value">${lastSvc ? escapeHTML(lastSvc) : 'Not recorded'}</span>
+            </div>
             <div class="coordinator-actions">
               <button class="btn btn-warning btn-sm" onclick="editEquipment(${index}); event.stopPropagation();">Edit</button>
               <button class="btn btn-danger btn-sm" onclick="removeEquipment(${index}); event.stopPropagation();">Remove</button>
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function addEquipment() {
@@ -4239,6 +4258,12 @@
               <input type="tel" class="form-input" id="equipment-phone" style="width: 100%; padding: 8px;"
                      value="${eq ? escapeHTML(eq.phone || '') : ''}" placeholder="Contact number">
             </div>
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Last service date</label>
+              <input type="date" class="form-input" id="equipment-last-service" style="width: 100%; padding: 8px;"
+                     value="${eq && eq.lastServiceDate ? escapeHTML(eq.lastServiceDate) : ''}">
+              <p style="font-size: 0.75rem; color: #666; margin-top: 4px;">When this equipment was last serviced / reviewed</p>
+            </div>
             <div style="text-align: right; margin-top: 20px;">
               <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Cancel</button>
               <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">${isEdit ? 'Update' : 'Add'}</button>
@@ -4265,7 +4290,8 @@
         categoryOther,
         brand: document.getElementById('equipment-brand').value.trim(),
         manufacturer: document.getElementById('equipment-manufacturer').value.trim(),
-        phone: document.getElementById('equipment-phone').value.trim()
+        phone: document.getElementById('equipment-phone').value.trim(),
+        lastServiceDate: document.getElementById('equipment-last-service').value.trim() || ''
       };
       if (!currentClient.equipment) currentClient.equipment = [];
       if (isEdit && equipmentIndex !== null) {
