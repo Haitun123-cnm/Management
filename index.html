@@ -1389,6 +1389,20 @@
 
             </div>
           </div>
+          
+          <div class="form-section">
+            <div class="section-header">Equipment</div>
+            <div class="section-content">
+              <p style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 12px;">Wheelchairs, shower commodes, hoists, etc. — record brand, manufacturer, and contact phone.</p>
+              <div class="coordinator-cards" id="equipment-cards">
+                <!-- Equipment cards -->
+              </div>
+              <div class="add-coordinator-card" id="add-equipment-card" onclick="addEquipment()">
+                <span class="icon">+</span>
+                <div>Add Equipment</div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- Service Planning Tab -->
@@ -1893,6 +1907,7 @@
         if (!client.familyContacts) client.familyContacts = [];
         if (!client.caregivers) client.caregivers = [];
         if (!client.weeklyActivities) client.weeklyActivities = [];
+        if (!client.equipment) client.equipment = [];
         if (!client.clientType) client.clientType = client.isSupportCoord ? 'coord' : 'service';
         if (client.isSupportCoord === undefined) client.isSupportCoord = client.clientType === 'coord';
         if (!client.ndisManagementType && ['Agency Managed', 'Plan Managed', 'Self Managed'].includes(client.fundingType)) {
@@ -2112,6 +2127,7 @@
         coordinatorPhone: '',
         coordinatorEmail: '',
         medications: [],
+        equipment: [],
         clientType: 'service',
         weeklyActivities: [],
         familyContacts: [],
@@ -2711,6 +2727,7 @@
       if (!currentClient.coordStakeholders) currentClient.coordStakeholders = [];
       if (!currentClient.coordFamilyContacts) currentClient.coordFamilyContacts = [];
       if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
+      if (!currentClient.equipment) currentClient.equipment = [];
       
       updateSystemModeContent();
       renderClientList();
@@ -2723,6 +2740,7 @@
         console.log('Delayed coordinators render for client:', currentClient.firstName, currentClient.lastName);
       renderCoordinators();
       renderWeeklyActivities();
+      renderEquipment();
       }, 100);
       
       // Update button states
@@ -2822,6 +2840,7 @@
         currentClient.reminders = [];
         currentClient.pendingItems = [];
         currentClient.weeklyActivities = [];
+        currentClient.equipment = [];
         currentClient.documents = {};
       }
       
@@ -2832,6 +2851,7 @@
       renderMedications();
       renderPendingItems();
       renderWeeklyActivities();
+      renderEquipment();
       loadDocuments();
       
       // Update content header
@@ -2848,6 +2868,7 @@
       if (!currentClient.medications) currentClient.medications = [];
       if (!currentClient.pendingItems) currentClient.pendingItems = [];
       if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
+      if (!currentClient.equipment) currentClient.equipment = [];
       
       // Update content header with client name
       const clientName = `${currentClient.firstName} ${currentClient.lastName}`.trim() || 'Unnamed Client';
@@ -2886,6 +2907,7 @@
 
       // Note: supportCoordinator, coordinatorPhone, coordinatorEmail fields removed - now using coordinator cards
       renderMedications();
+      renderEquipment();
       document.getElementById('generalNotes').value = currentClient.generalNotes || '';
       document.getElementById('progressNotes').value = currentClient.progressNotes || '';
       document.getElementById('alerts').value = currentClient.alerts || '';
@@ -4044,6 +4066,165 @@
       renderMedications();
       closeModal();
       showNotification(`Medication ${isEdit ? 'updated' : 'added'}`, 'success');
+    }
+
+    function equipmentTypeLabel(eq) {
+      if (!eq) return '';
+      if (eq.category === 'Other' && (eq.categoryOther || '').trim()) return eq.categoryOther.trim();
+      return eq.category || 'Equipment';
+    }
+
+    function renderEquipment() {
+      const container = document.getElementById('equipment-cards');
+      if (!container) return;
+      if (!currentClient) {
+        container.innerHTML = '<div class="no-data">No client selected</div>';
+        return;
+      }
+      if (!currentClient.equipment) currentClient.equipment = [];
+      if (currentClient.equipment.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = currentClient.equipment.map((eq, index) => `
+        <div class="coordinator-card" onclick="toggleEquipmentDetails(${index})">
+          <div class="coordinator-name">${escapeHTML(equipmentTypeLabel(eq))}</div>
+          <div class="coordinator-profession">${escapeHTML([eq.brand, eq.manufacturer].filter(Boolean).join(' · ') || 'Brand / manufacturer not set')}</div>
+          <div class="coordinator-details">
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Type:</span>
+              <span class="coordinator-detail-value">${escapeHTML(equipmentTypeLabel(eq))}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Brand:</span>
+              <span class="coordinator-detail-value">${escapeHTML(eq.brand || 'Not specified')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Manufacturer:</span>
+              <span class="coordinator-detail-value">${escapeHTML(eq.manufacturer || 'Not specified')}</span>
+            </div>
+            <div class="coordinator-detail-item">
+              <span class="coordinator-detail-label">Phone:</span>
+              <span class="coordinator-detail-value">${escapeHTML(eq.phone || 'Not provided')}</span>
+            </div>
+            <div class="coordinator-actions">
+              <button class="btn btn-warning btn-sm" onclick="editEquipment(${index}); event.stopPropagation();">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="removeEquipment(${index}); event.stopPropagation();">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addEquipment() {
+      if (!currentClient) { alert('Please select a client first'); return; }
+      if (!currentClient.equipment) currentClient.equipment = [];
+      showEquipmentForm(null, false);
+    }
+
+    function editEquipment(index) {
+      if (!currentClient.equipment || !currentClient.equipment[index]) return;
+      showEquipmentForm(index, true);
+    }
+
+    function removeEquipment(index) {
+      if (!currentClient.equipment || !currentClient.equipment[index]) return;
+      const label = equipmentTypeLabel(currentClient.equipment[index]);
+      if (!confirm(`Remove "${label}" from equipment list?`)) return;
+      currentClient.equipment.splice(index, 1);
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      renderEquipment();
+      showNotification('Equipment removed', 'success');
+    }
+
+    function toggleEquipmentDetails(index) {
+      const cards = document.querySelectorAll('#equipment-cards .coordinator-card');
+      cards.forEach((card, i) => card.classList.toggle('active', i === index));
+    }
+
+    function showEquipmentForm(equipmentIndex, isEdit) {
+      const eq = isEdit && equipmentIndex !== null && currentClient.equipment[equipmentIndex]
+        ? currentClient.equipment[equipmentIndex] : null;
+      const cat = eq ? (eq.category || 'Wheelchair') : 'Wheelchair';
+      const html = `
+        <div style="padding: 20px; max-width: 520px;">
+          <h3>${isEdit ? 'Edit' : 'Add'} Equipment</h3>
+          <form id="equipment-form">
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Equipment type *</label>
+              <select class="form-input" id="equipment-category" style="width: 100%; padding: 8px;">
+                <option value="Wheelchair" ${cat === 'Wheelchair' ? 'selected' : ''}>Wheelchair</option>
+                <option value="Shower commode" ${cat === 'Shower commode' ? 'selected' : ''}>Shower commode</option>
+                <option value="Hoist / lift" ${cat === 'Hoist / lift' ? 'selected' : ''}>Hoist / lift</option>
+                <option value="Other" ${cat === 'Other' ? 'selected' : ''}>Other (specify below)</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Other (if type is Other)</label>
+              <input type="text" class="form-input" id="equipment-category-other" style="width: 100%; padding: 8px;"
+                     value="${eq && eq.categoryOther ? escapeHTML(eq.categoryOther) : ''}" placeholder="e.g. Standing frame, pressure cushion">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Brand</label>
+              <input type="text" class="form-input" id="equipment-brand" style="width: 100%; padding: 8px;"
+                     value="${eq ? escapeHTML(eq.brand || '') : ''}" placeholder="Brand name / model line">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Manufacturer</label>
+              <input type="text" class="form-input" id="equipment-manufacturer" style="width: 100%; padding: 8px;"
+                     value="${eq ? escapeHTML(eq.manufacturer || '') : ''}" placeholder="Company that makes the equipment">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Manufacturer / supplier phone</label>
+              <input type="tel" class="form-input" id="equipment-phone" style="width: 100%; padding: 8px;"
+                     value="${eq ? escapeHTML(eq.phone || '') : ''}" placeholder="Contact number">
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+              <button type="button" onclick="closeModal()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Cancel</button>
+              <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">${isEdit ? 'Update' : 'Add'}</button>
+            </div>
+          </form>
+        </div>
+      `;
+      showModal(`${isEdit ? 'Edit' : 'Add'} Equipment`, html);
+      document.getElementById('equipment-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveEquipmentForm(equipmentIndex, isEdit);
+      });
+    }
+
+    function saveEquipmentForm(equipmentIndex, isEdit) {
+      const category = document.getElementById('equipment-category').value;
+      const categoryOther = document.getElementById('equipment-category-other').value.trim();
+      if (category === 'Other' && !categoryOther) {
+        alert('Please describe the equipment under "Other"');
+        return;
+      }
+      const data = {
+        category,
+        categoryOther,
+        brand: document.getElementById('equipment-brand').value.trim(),
+        manufacturer: document.getElementById('equipment-manufacturer').value.trim(),
+        phone: document.getElementById('equipment-phone').value.trim()
+      };
+      if (!currentClient.equipment) currentClient.equipment = [];
+      if (isEdit && equipmentIndex !== null) {
+        currentClient.equipment[equipmentIndex] = data;
+      } else {
+        currentClient.equipment.push(data);
+      }
+      if (selectedClientIndex !== null) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      renderEquipment();
+      closeModal();
+      showNotification(`Equipment ${isEdit ? 'updated' : 'added'}`, 'success');
     }
 
     // Pending items (Things to Check Later) functions
