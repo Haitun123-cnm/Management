@@ -70,23 +70,69 @@
       align-items: center;
       gap: 12px;
     }
-    .things-to-check-banner {
+    .content-title-row {
       display: flex;
       align-items: center;
-      padding: 8px 14px;
-      background: linear-gradient(90deg, #fef3c7 0%, #fde68a 100%);
-      border: 1px solid #f59e0b;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #92400e;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
-      transition: transform 0.15s, box-shadow 0.15s;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    .things-to-check-banner:hover {
-      transform: scale(1.02);
-      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
+    .things-to-check-hover-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .things-to-check-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #92400e;
+      cursor: help;
+      box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+    }
+    .things-to-check-popover {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 6px);
+      min-width: 280px;
+      max-width: min(360px, 92vw);
+      padding: 12px 14px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      box-shadow: var(--shadow-md);
+      z-index: 2000;
+    }
+    .things-to-check-popover-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+    .things-to-check-list {
+      margin: 0 0 10px;
+      padding-left: 18px;
+      font-size: 0.875rem;
+      color: var(--gray-800);
+      line-height: 1.45;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .things-to-check-list li { margin-bottom: 6px; }
+    .things-to-check-hover-wrap:hover .things-to-check-popover,
+    .things-to-check-hover-wrap:focus-within .things-to-check-popover {
+      display: block;
     }
 
     .header-title {
@@ -1118,9 +1164,6 @@
   <div class="header">
     <div class="header-left">
       <div class="header-title" id="system-title">Service Management System</div>
-      <div id="things-to-check-banner" class="things-to-check-banner" style="display: none;" onclick="document.querySelector('[data-tab=\'basic\']')?.click(); document.getElementById('pending-items-cards')?.scrollIntoView({behavior:'smooth'})" title="Go to Things to Check Later">
-        <!-- Filled by updateThingsToCheckBanner() -->
-      </div>
       <div class="daily-task-widget" id="daily-task-widget">
         <div class="daily-task-toggle">
           <span class="daily-task-toggle-left">
@@ -1185,7 +1228,17 @@
     <!-- Main Content -->
     <div class="main-content service-dept-mode active">
       <div class="content-header">
-        <div class="content-title">Client Details</div>
+        <div class="content-title-row">
+          <div class="content-title" id="service-content-title">Client Details</div>
+          <div class="things-to-check-hover-wrap" id="things-to-check-hover-wrap" style="display: none;" tabindex="0">
+            <span class="things-to-check-chip" id="things-to-check-chip-label" title="Hover for details">!</span>
+            <div class="things-to-check-popover" id="things-to-check-popover">
+              <div class="things-to-check-popover-title">Things to check later</div>
+              <ul class="things-to-check-list" id="things-to-check-popover-list"></ul>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="goToThingsToCheckSection(); event.stopPropagation();">Open section</button>
+            </div>
+          </div>
+        </div>
         <div class="content-subtitle">Manage client information and support needs</div>
       </div>
       
@@ -2855,8 +2908,9 @@
       loadDocuments();
       
       // Update content header
-      document.querySelector('.content-title').textContent = 'Client Details';
-      document.querySelector('.content-subtitle').textContent = 'Select a client or add a new one to get started';
+      const serviceTitle = document.getElementById('service-content-title');
+      if (serviceTitle) serviceTitle.textContent = 'Client Details';
+      document.querySelector('.main-content.service-dept-mode .content-subtitle').textContent = 'Select a client or add a new one to get started';
       updateThingsToCheckBanner();
     }
     
@@ -2872,8 +2926,10 @@
       
       // Update content header with client name
       const clientName = `${currentClient.firstName} ${currentClient.lastName}`.trim() || 'Unnamed Client';
-      document.querySelector('.content-title').textContent = clientName;
-      document.querySelector('.content-subtitle').textContent = 'Manage client information and support needs';
+      const serviceTitle = document.getElementById('service-content-title');
+      if (serviceTitle) serviceTitle.textContent = clientName;
+      const serviceSub = document.querySelector('.main-content.service-dept-mode .content-subtitle');
+      if (serviceSub) serviceSub.textContent = 'Manage client information and support needs';
       
       // Load data into form fields
       document.getElementById('firstName').value = currentClient.firstName || '';
@@ -4388,18 +4444,38 @@
       updateThingsToCheckBanner();
     }
 
+    function goToThingsToCheckSection() {
+      const tab = document.querySelector('.main-content.service-dept-mode .tab-item[data-tab="basic"]')
+        || document.querySelector('.tab-item[data-tab="basic"]');
+      if (tab) tab.click();
+      setTimeout(() => {
+        const el = document.getElementById('pending-items-cards');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+
     function updateThingsToCheckBanner() {
-      const banner = document.getElementById('things-to-check-banner');
-      if (!banner) return;
-      const count = currentClient && currentClient.pendingItems
-        ? currentClient.pendingItems.filter(p => !p.done).length
-        : 0;
-      if (count > 0) {
-        banner.textContent = `⚠️ ${count} thing${count !== 1 ? 's' : ''} to check later`;
-        banner.style.display = 'flex';
-      } else {
-        banner.style.display = 'none';
+      const wrap = document.getElementById('things-to-check-hover-wrap');
+      const listEl = document.getElementById('things-to-check-popover-list');
+      const chip = document.getElementById('things-to-check-chip-label');
+      if (!wrap || !listEl || !chip) return;
+      const items = currentClient && currentClient.pendingItems
+        ? currentClient.pendingItems.filter(p => !p.done)
+        : [];
+      if (items.length === 0) {
+        wrap.style.display = 'none';
+        listEl.innerHTML = '';
+        return;
       }
+      wrap.style.display = 'inline-flex';
+      chip.textContent = String(items.length);
+      chip.title = `${items.length} to check — hover for list`;
+      listEl.innerHTML = items.map(item => {
+        const t = escapeHTML(item.title || '(No title)');
+        const n = item.note ? ' — ' + escapeHTML(item.note) : '';
+        const d = item.date ? ' <span style="color:var(--gray-500)">(by ' + escapeHTML(item.date) + ')</span>' : '';
+        return `<li>${t}${n}${d}</li>`;
+      }).join('');
     }
 
     // Reminder functions (kept for data; UI section removed)
