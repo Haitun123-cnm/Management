@@ -1148,6 +1148,75 @@
       display: block;
     }
 
+    .recurring-appt-help {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+    .recurring-appt-add {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 12px;
+      margin-top: 12px;
+      background: var(--gray-50);
+      border: 1px dashed var(--gray-300);
+      border-radius: 8px;
+    }
+    .recurring-appt-add .form-group { margin: 0; min-width: 120px; }
+    .recurring-appt-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .recurring-appt-row.urgent {
+      border-left: 4px solid var(--danger-red);
+      background: var(--danger-tint);
+    }
+    .recurring-appt-row.today {
+      border-left: 4px solid var(--warning-amber);
+      background: var(--warning-tint);
+    }
+    .recurring-appt-row.upcoming {
+      border-left: 4px solid var(--primary-blue);
+      background: var(--primary-tint);
+    }
+    .recurring-appt-label-input {
+      flex: 1 1 140px;
+      min-width: 120px;
+    }
+    .recurring-appt-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .appt-followup-widget .daily-task-toggle {
+      min-width: 132px;
+      font-size: 0.9rem;
+    }
+    .appt-followup-line {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .appt-followup-line:last-child { border-bottom: none; }
+    .appt-followup-line-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .sidebar {
@@ -1194,6 +1263,18 @@
             <button class="btn btn-secondary btn-sm" onclick="addDailyTask()">Add</button>
           </div>
           <div class="daily-task-list" id="daily-task-list"></div>
+        </div>
+      </div>
+      <div class="daily-task-widget appt-followup-widget" id="appt-followup-widget">
+        <div class="daily-task-toggle">
+          <span class="daily-task-toggle-left">
+            <span id="appt-followup-indicator" class="daily-task-indicator ok"></span>
+            Follow-ups
+          </span>
+          <span>📆</span>
+        </div>
+        <div class="daily-task-panel">
+          <div id="appt-followup-panel-inner" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
       </div>
     </div>
@@ -1597,6 +1678,45 @@
               </div>
             </div>
           </div>
+          <div class="form-section" id="recurring-appts-section">
+            <div class="section-header">Recurring appointments</div>
+            <div class="section-content">
+              <p class="recurring-appt-help">Track how often someone should see a provider (e.g. GP every 3 months, dietitian monthly). Set the next date you are working toward. Use <strong>Follow-ups</strong> in the header (next to Today Tasks) to see all clients due within two weeks.</p>
+              <div id="recurring-appts-list"></div>
+              <div class="recurring-appt-add">
+                <div class="form-group recurring-appt-label-input">
+                  <label class="form-label">Type</label>
+                  <input type="text" class="form-input" id="recurring-appt-new-label" placeholder="e.g. GP, Dietitian" maxlength="80">
+                </div>
+                <div class="form-group" style="min-width: 100px;">
+                  <label class="form-label">Every (months)</label>
+                  <select class="form-select" id="recurring-appt-new-interval">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                </div>
+                <div class="form-group" style="min-width: 150px;">
+                  <label class="form-label">Next due</label>
+                  <input type="date" class="form-input" id="recurring-appt-new-due">
+                </div>
+                <div class="form-group recurring-appt-label-input">
+                  <label class="form-label">Note (optional)</label>
+                  <input type="text" class="form-input" id="recurring-appt-new-note" placeholder="Clinic name, phone…" maxlength="120">
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addRecurringAppointmentRow()">Add</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1977,6 +2097,7 @@
         if (!client.caregivers) client.caregivers = [];
         if (!client.weeklyActivities) client.weeklyActivities = [];
         if (!client.equipment) client.equipment = [];
+        if (!client.recurringAppointments) client.recurringAppointments = [];
         if (!client.clientType) client.clientType = client.isSupportCoord ? 'coord' : 'service';
         if (client.isSupportCoord === undefined) client.isSupportCoord = client.clientType === 'coord';
         if (!client.ndisManagementType && ['Agency Managed', 'Plan Managed', 'Self Managed'].includes(client.fundingType)) {
@@ -2190,6 +2311,7 @@
         coordinators: [],
         documents: {},
         reminders: [],
+        recurringAppointments: [],
         pendingItems: [],
         generalNotes: '',
         progressNotes: '',
@@ -2783,6 +2905,7 @@
       if (!currentClient.coordFamilyContacts) currentClient.coordFamilyContacts = [];
       if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
       if (!currentClient.equipment) currentClient.equipment = [];
+      if (!currentClient.recurringAppointments) currentClient.recurringAppointments = [];
       
       updateSystemModeContent();
       renderClientList();
@@ -2832,6 +2955,7 @@
         
         // Re-render the client list
         renderClientList();
+        updateAppointmentHeaderWidget();
         
         // Show success message
         alert(`Client "${clientName}" has been deleted successfully.`);
@@ -2914,6 +3038,8 @@
       if (serviceTitle) serviceTitle.textContent = 'Client Details';
       document.querySelector('.main-content.service-dept-mode .content-subtitle').textContent = 'Select a client or add a new one to get started';
       updateThingsToCheckBanner();
+      renderRecurringAppointments();
+      updateAppointmentHeaderWidget();
     }
     
     function loadClientData() {
@@ -2925,6 +3051,7 @@
       if (!currentClient.pendingItems) currentClient.pendingItems = [];
       if (!currentClient.weeklyActivities) currentClient.weeklyActivities = [];
       if (!currentClient.equipment) currentClient.equipment = [];
+      if (!currentClient.recurringAppointments) currentClient.recurringAppointments = [];
       
       // Update content header with client name
       const clientName = `${currentClient.firstName} ${currentClient.lastName}`.trim() || 'Unnamed Client';
@@ -2984,6 +3111,8 @@
       
       renderPendingItems();
       updateThingsToCheckBanner();
+      renderRecurringAppointments();
+      updateAppointmentHeaderWidget();
       
       // Set funding type visibility
       const fundingType = currentClient.fundingType;
@@ -4506,6 +4635,241 @@
       }).join('');
     }
 
+    function addMonthsToYmd(ymd, monthsToAdd) {
+      const parts = ymd.split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1 + Number(monthsToAdd), parts[2]);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function daysUntilRecurringDue(ymd) {
+      if (!ymd || typeof ymd !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
+      const today = getTodayKey();
+      const a = new Date(today + 'T12:00:00').getTime();
+      const b = new Date(ymd + 'T12:00:00').getTime();
+      if (isNaN(b)) return null;
+      return Math.round((b - a) / 86400000);
+    }
+
+    function persistRecurringAppointmentsAndRefresh() {
+      if (selectedClientIndex !== null && currentClient) {
+        const currentClients = getCurrentClientList();
+        currentClients[selectedClientIndex] = { ...currentClient };
+        saveAllData();
+      }
+      renderRecurringAppointments();
+      updateAppointmentHeaderWidget();
+    }
+
+    function renderRecurringAppointments() {
+      const list = document.getElementById('recurring-appts-list');
+      if (!list) return;
+      if (!currentClient) {
+        list.innerHTML = '<div class="no-data">Select a client to manage recurring appointments.</div>';
+        return;
+      }
+      if (!currentClient.recurringAppointments) currentClient.recurringAppointments = [];
+      if (currentClient.recurringAppointments.length === 0) {
+        list.innerHTML = '<div class="no-data" style="margin-bottom: 0;">No recurring items yet — add one below.</div>';
+        return;
+      }
+      const intervalOpts = Array.from({ length: 12 }, (_, i) => i + 1);
+      list.innerHTML = currentClient.recurringAppointments.map(item => {
+        const days = daysUntilRecurringDue(item.nextDue);
+        let rowClass = 'upcoming';
+        if (days !== null && days < 0) rowClass = 'urgent';
+        else if (days === 0 || days === 1) rowClass = 'today';
+        else if (days !== null && days <= 7) rowClass = 'today';
+        let status = '';
+        if (days === null || !item.nextDue) status = 'Set a date';
+        else if (days < 0) status = `${Math.abs(days)}d overdue`;
+        else if (days === 0) status = 'Today';
+        else if (days === 1) status = 'Tomorrow';
+        else status = `In ${days} days`;
+        const iv = Math.min(12, Math.max(1, parseInt(item.intervalMonths, 10) || 3));
+        const intervalHtml = intervalOpts.map(v =>
+          `<option value="${v}"${iv === v ? ' selected' : ''}>${v}</option>`
+        ).join('');
+        return `
+          <div class="recurring-appt-row ${rowClass}">
+            <div class="form-group recurring-appt-label-input" style="margin:0;">
+              <label class="form-label">Type</label>
+              <input type="text" class="form-input" value="${escapeHTML(item.label || '')}" maxlength="80"
+                onchange="recurringApptLabelChange('${item.id}', this.value)">
+            </div>
+            <div class="form-group" style="margin:0;min-width:100px;">
+              <label class="form-label">Every (mo)</label>
+              <select class="form-select" onchange="recurringApptIntervalChange('${item.id}', this.value)">${intervalHtml}</select>
+            </div>
+            <div class="form-group" style="margin:0;min-width:150px;">
+              <label class="form-label">Next due</label>
+              <input type="date" class="form-input" value="${escapeHTML(item.nextDue || '')}" data-id="${escapeHTML(item.id)}"
+                onchange="recurringApptDueChange(this.dataset.id, this.value)">
+            </div>
+            <div class="recurring-appt-actions">
+              <span class="reminder-status ${days !== null && days < 0 ? 'status-urgent' : (days !== null && days <= 1 ? 'status-today' : 'status-upcoming')}" style="align-self:center;">${escapeHTML(status)}</span>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="markRecurringAppointmentVisited('${item.id}')" title="After a visit, schedule the next due date from today">Visited</button>
+              <button type="button" class="btn btn-danger btn-sm" onclick="removeRecurringAppointmentRow('${item.id}')">Remove</button>
+            </div>
+            <div class="form-group" style="margin:0;width:100%;">
+              <label class="form-label">Note</label>
+              <input type="text" class="form-input" value="${escapeHTML(item.note || '')}" maxlength="120" placeholder="Clinic, phone…"
+                onchange="recurringApptNoteChange('${item.id}', this.value)">
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addRecurringAppointmentRow() {
+      if (!currentClient) {
+        showNotification('Select a client first', 'warning');
+        return;
+      }
+      const labelEl = document.getElementById('recurring-appt-new-label');
+      const intervalEl = document.getElementById('recurring-appt-new-interval');
+      const dueEl = document.getElementById('recurring-appt-new-due');
+      const noteEl = document.getElementById('recurring-appt-new-note');
+      const label = (labelEl?.value || '').trim();
+      if (!label) {
+        showNotification('Please enter a type (e.g. GP)', 'warning');
+        return;
+      }
+      const intervalMonths = Math.max(1, Math.min(24, parseInt(intervalEl?.value, 10) || 3));
+      const nextDue = (dueEl?.value || '').trim();
+      if (!nextDue) {
+        showNotification('Please choose a next due date', 'warning');
+        return;
+      }
+      if (!currentClient.recurringAppointments) currentClient.recurringAppointments = [];
+      currentClient.recurringAppointments.push({
+        id: String(Date.now()),
+        label,
+        intervalMonths,
+        nextDue,
+        note: (noteEl?.value || '').trim()
+      });
+      if (labelEl) labelEl.value = '';
+      if (noteEl) noteEl.value = '';
+      persistRecurringAppointmentsAndRefresh();
+      showNotification('Recurring appointment added', 'success');
+    }
+
+    function recurringApptLabelChange(id, value) {
+      const item = currentClient?.recurringAppointments?.find(x => x.id === id);
+      if (!item) return;
+      item.label = value.trim();
+      persistRecurringAppointmentsAndRefresh();
+    }
+
+    function recurringApptNoteChange(id, value) {
+      const item = currentClient?.recurringAppointments?.find(x => x.id === id);
+      if (!item) return;
+      item.note = value.trim();
+      persistRecurringAppointmentsAndRefresh();
+    }
+
+    function recurringApptIntervalChange(id, value) {
+      const item = currentClient?.recurringAppointments?.find(x => x.id === id);
+      if (!item) return;
+      item.intervalMonths = Math.max(1, Math.min(24, parseInt(value, 10) || 1));
+      persistRecurringAppointmentsAndRefresh();
+    }
+
+    function recurringApptDueChange(id, value) {
+      const item = currentClient?.recurringAppointments?.find(x => x.id === id);
+      if (!item) return;
+      item.nextDue = value;
+      persistRecurringAppointmentsAndRefresh();
+    }
+
+    function markRecurringAppointmentVisited(id) {
+      const item = currentClient?.recurringAppointments?.find(x => x.id === id);
+      if (!item) return;
+      const base = getTodayKey();
+      const n = Number(item.intervalMonths) || 3;
+      item.nextDue = addMonthsToYmd(base, n);
+      persistRecurringAppointmentsAndRefresh();
+      showNotification('Next due date updated from today', 'success');
+    }
+
+    function removeRecurringAppointmentRow(id) {
+      if (!currentClient?.recurringAppointments) return;
+      if (!confirm('Remove this recurring appointment?')) return;
+      currentClient.recurringAppointments = currentClient.recurringAppointments.filter(x => x.id !== id);
+      persistRecurringAppointmentsAndRefresh();
+    }
+
+    function getGlobalFollowUpSummaries() {
+      const out = [];
+      for (let i = 0; i < serviceClients.length; i++) {
+        const c = serviceClients[i];
+        const arr = c.recurringAppointments;
+        if (!arr || !arr.length) continue;
+        const name = (`${c.firstName || ''} ${c.lastName || ''}`).trim() || 'Unnamed';
+        for (const it of arr) {
+          if (!it.nextDue) continue;
+          const days = daysUntilRecurringDue(it.nextDue);
+          if (days === null) continue;
+          if (days <= 14) {
+            out.push({
+              clientIndex: i,
+              clientName: name,
+              label: it.label || 'Appointment',
+              nextDue: it.nextDue,
+              days
+            });
+          }
+        }
+      }
+      out.sort((a, b) => a.days - b.days);
+      return out;
+    }
+
+    function updateAppointmentHeaderWidget() {
+      const indicator = document.getElementById('appt-followup-indicator');
+      const inner = document.getElementById('appt-followup-panel-inner');
+      if (!indicator || !inner) return;
+      const list = getGlobalFollowUpSummaries();
+      const needAttention = list.some(x => x.days <= 7);
+      if (needAttention) indicator.classList.remove('ok');
+      else indicator.classList.add('ok');
+      if (list.length === 0) {
+        inner.innerHTML = '<div style="padding:8px;color:var(--gray-500);font-size:0.85rem;">No recurring follow-ups due in the next two weeks.</div>';
+        return;
+      }
+      inner.innerHTML = list.map(row => {
+        const status = row.days < 0 ? 'Overdue' : row.days === 0 ? 'Today' : row.days === 1 ? 'Tomorrow' : `In ${row.days} days`;
+        const statusStyle = row.days < 0 ? 'var(--danger-red)' : row.days <= 1 ? 'var(--warning-amber)' : 'var(--gray-600)';
+        return `
+          <div class="appt-followup-line">
+            <div class="appt-followup-line-top">
+              <div>
+                <strong>${escapeHTML(row.clientName)}</strong> — ${escapeHTML(row.label)}<br>
+                <span style="color:var(--gray-500);">Due ${escapeHTML(row.nextDue)}</span>
+                <span style="color:${statusStyle};font-weight:600;margin-left:6px;">${escapeHTML(status)}</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openFollowUpSection(${row.clientIndex})">Open</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openFollowUpSection(clientIndex) {
+      selectClient(clientIndex);
+      setTimeout(() => {
+        const tab = document.querySelector('.main-content.service-dept-mode .tab-item[data-tab="notes"]');
+        if (tab) tab.click();
+        setTimeout(() => {
+          const el = document.getElementById('recurring-appts-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+      }, 80);
+    }
+
     // Reminder functions (kept for data; UI section removed)
     function renderUpcomingReminders() {
       const container = document.getElementById('upcoming-reminders');
@@ -5225,6 +5589,7 @@
       }
       updateSystemModeContent();
       renderClientList();
+      updateAppointmentHeaderWidget();
     }).catch(err => console.error('loadAllData failed:', err));
     loadDailyTasks();
     renderDailyTasks();
@@ -5238,6 +5603,28 @@
         if (hideTimer) clearTimeout(hideTimer);
         hideTimer = null;
         panel.classList.add('visible');
+      }
+      function scheduleHide() {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(function() {
+          panel.classList.remove('visible');
+          hideTimer = null;
+        }, delayMs);
+      }
+      widget.addEventListener('mouseenter', show);
+      widget.addEventListener('mouseleave', scheduleHide);
+    })();
+    (function initApptFollowupPanelHover() {
+      const widget = document.getElementById('appt-followup-widget');
+      const panel = widget?.querySelector('.daily-task-panel');
+      if (!widget || !panel) return;
+      let hideTimer = null;
+      const delayMs = 700;
+      function show() {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = null;
+        panel.classList.add('visible');
+        updateAppointmentHeaderWidget();
       }
       function scheduleHide() {
         if (hideTimer) clearTimeout(hideTimer);
